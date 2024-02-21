@@ -3,11 +3,13 @@ use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 
-
 #[macro_use]
 extern crate rocket;
 
+mod database;
 mod index;
+mod models;
+mod schema;
 
 #[launch]
 fn rocket() -> Rocket<Build> {
@@ -16,6 +18,7 @@ fn rocket() -> Rocket<Build> {
 
 pub fn create_server() -> Rocket<Build> {
     let mut building_rocket = rocket::build()
+        .attach(database::Database::fairing())
         .mount(
             "/swagger",
             make_swagger_ui(&SwaggerUIConfig {
