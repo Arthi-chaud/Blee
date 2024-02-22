@@ -8,6 +8,7 @@ use rocket::serde::uuid::Uuid;
 pub struct Image {
     pub id: Uuid,
     pub blurhash: String,
+    pub aspect_ratio: f64,
     pub colors: Vec<Option<String>>,
     pub type_: ImageType
 }

@@ -2,17 +2,79 @@
 
 pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "chapter-types"))]
+    pub struct ChapterTypes;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "extra-types"))]
+    pub struct ExtraTypes;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "image-types"))]
     pub struct ImageTypes;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "movie-types"))]
+    pub struct MovieTypes;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "video-qualities"))]
+    pub struct VideoQualities;
 }
 
 diesel::table! {
     artists (id) {
         id -> Uuid,
         name -> Varchar,
-        aspect_ratio -> Float8,
         description -> Nullable<Text>,
         slug -> Varchar,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::ChapterTypes;
+
+    chapters (id) {
+        id -> Uuid,
+        name -> Text,
+        thumbnail_id -> Nullable<Uuid>,
+        movie_id -> Uuid,
+        index -> Int2,
+        start_time -> Int2,
+        end_time -> Int2,
+        #[sql_name = "type"]
+        type_ -> Array<Nullable<ChapterTypes>>,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::ExtraTypes;
+
+    extras (id) {
+        id -> Uuid,
+        name -> Text,
+        thumbnail_id -> Nullable<Uuid>,
+        package_id -> Uuid,
+        artist_id -> Uuid,
+        file_id -> Uuid,
+        disc_index -> Int2,
+        track_index -> Int2,
+        #[sql_name = "type"]
+        type_ -> Array<Nullable<ExtraTypes>>,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::VideoQualities;
+
+    files (id) {
+        id -> Uuid,
+        size -> Int8,
+        quality -> VideoQualities,
+        scrubber -> Uuid,
     }
 }
 
@@ -23,13 +85,62 @@ diesel::table! {
     images (id) {
         id -> Uuid,
         blurhash -> Varchar,
-        colors -> Array<Nullable<Varchar>>,
+        colors -> Array<Nullable<Text>>,
+        aspect_ratio -> Float8,
         #[sql_name = "type"]
         type_ -> ImageTypes,
     }
 }
 
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::MovieTypes;
+
+    movies (id) {
+        id -> Uuid,
+        name -> Text,
+        poster_id -> Nullable<Uuid>,
+        package_id -> Uuid,
+        artist_id -> Uuid,
+        file_id -> Uuid,
+        disc_index -> Int2,
+        track_index -> Int2,
+        #[sql_name = "type"]
+        type_ -> Array<Nullable<MovieTypes>>,
+    }
+}
+
+diesel::table! {
+    packages (id) {
+        id -> Uuid,
+        description -> Nullable<Text>,
+        #[sql_name = "release-year"]
+        release_year -> Nullable<Date>,
+        artist_id -> Nullable<Uuid>,
+        poster_id -> Nullable<Uuid>,
+        banner_id -> Nullable<Uuid>,
+    }
+}
+
+diesel::joinable!(chapters -> images (thumbnail_id));
+diesel::joinable!(chapters -> movies (movie_id));
+diesel::joinable!(extras -> artists (artist_id));
+diesel::joinable!(extras -> files (file_id));
+diesel::joinable!(extras -> images (thumbnail_id));
+diesel::joinable!(extras -> packages (package_id));
+diesel::joinable!(files -> images (scrubber));
+diesel::joinable!(movies -> artists (artist_id));
+diesel::joinable!(movies -> files (file_id));
+diesel::joinable!(movies -> images (poster_id));
+diesel::joinable!(movies -> packages (package_id));
+diesel::joinable!(packages -> artists (artist_id));
+
 diesel::allow_tables_to_appear_in_same_query!(
     artists,
+    chapters,
+    extras,
+    files,
     images,
+    movies,
+    packages,
 );
