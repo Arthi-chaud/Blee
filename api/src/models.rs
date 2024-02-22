@@ -1,25 +1,6 @@
-use diesel::prelude::*;
-use rocket::serde::uuid::Uuid;
+pub mod artist;
 
-#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq)]
-#[diesel(table_name = crate::schema::artists)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-/// An Artist
-pub struct Artist {
-    pub id: Uuid,
-    pub name: String,
-    pub slug: String,
-}
-
-// /// An Image
-// pub struct Image {
-//     pub id: Uuid,
-//     pub image_type: ImageType,
-//     pub width: u16,
-//     pub height: u16,
-//     pub blurhash: String,
-//     pub colors: [String],
-// }
+pub mod image;
 
 // /// A Media File
 // pub struct File {

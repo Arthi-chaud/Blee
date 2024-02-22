@@ -36,7 +36,8 @@ $$ LANGUAGE SQL STRICT IMMUTABLE;
 CREATE TABLE "artists" (
     "id" uuid DEFAULT gen_random_uuid(),
     "name" VARCHAR NOT NULL,
-	"description" TEXT,
+    "aspect_ratio" FLOAT NOT NULL,
+	  "description" TEXT,
     "slug" VARCHAR GENERATED ALWAYS AS (slugify(name)) STORED UNIQUE NOT NULL,
-	PRIMARY KEY (id)
+	  PRIMARY KEY (id)
 );

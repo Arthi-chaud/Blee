@@ -1,5 +1,5 @@
 use crate::database::Database;
-use crate::models::Artist;
+use crate::models::artist::*;
 use rocket::{get, serde::json::Json};
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::okapi::schemars;
