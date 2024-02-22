@@ -73,8 +73,9 @@ diesel::table! {
     files (id) {
         id -> Uuid,
         size -> Int8,
+        path -> Text,
         quality -> VideoQualities,
-        scrubber -> Uuid,
+        scrubber_id -> Uuid,
     }
 }
 
@@ -128,7 +129,7 @@ diesel::joinable!(extras -> artists (artist_id));
 diesel::joinable!(extras -> files (file_id));
 diesel::joinable!(extras -> images (thumbnail_id));
 diesel::joinable!(extras -> packages (package_id));
-diesel::joinable!(files -> images (scrubber));
+diesel::joinable!(files -> images (scrubber_id));
 diesel::joinable!(movies -> artists (artist_id));
 diesel::joinable!(movies -> files (file_id));
 diesel::joinable!(movies -> images (poster_id));

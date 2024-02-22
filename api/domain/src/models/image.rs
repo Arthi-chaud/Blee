@@ -14,6 +14,7 @@ pub struct Image {
 }
 
 #[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::ImageTypes"]
 pub enum ImageType {
     Poster, Banner, Thumbnail

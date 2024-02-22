@@ -87,8 +87,9 @@ CREATE TABLE images (
 CREATE TABLE files (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"size" bigserial NOT NULL,
+	"path" TEXT NOT NULL,
 	"quality" "video-qualities" NOT NULL,
-	"scrubber" uuid NOT NULL REFERENCES images (id),
+	"scrubber_id" uuid NOT NULL REFERENCES images (id),
 	PRIMARY KEY (id)
 );
 
