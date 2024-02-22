@@ -1,0 +1,19 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+domain = { path = "../domain" }
+application = { path = "../application" }
+infrastructure = { path = "../infrastructure" }
+shared = { path = "../shared" }
+
+rocket = { version = "0.5.0", features = ["uuid"] }
+serde = "1.0"
+rocket_okapi = { version = "0.8.0", features = [
+	"swagger",
+	"uuid",
+] }

@@ -1,21 +1,8 @@
-[package]
-name = "blee-api"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-rocket = { version = "0.5.0", features = ["uuid"] }
-rocket_sync_db_pools = { version = "0.1.0", features = [
-	"diesel_postgres_pool",
-] }
-
-serde = "1.0"
-diesel = { version = "2.1.0", features = ["postgres", "uuid"] }
-dotenvy = "0.15.7"
-diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
-rocket_okapi = { version = "0.8.0", features = [
-	"swagger",
-	"uuid",
-] }
+[workspace]
+members = [
+  "api",
+  "domain",
+  "infrastructure",
+  "application",
+  "shared",
+]

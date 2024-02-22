@@ -27,6 +27,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "api"
+version = "0.1.0"
+dependencies = [
+ "application",
+ "domain",
+ "infrastructure",
+ "rocket",
+ "rocket_okapi",
+ "serde",
+ "shared",
+]
+
+[[package]]
+name = "application"
+version = "0.1.0"
+
+[[package]]
 name = "async-stream"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -112,19 +129,6 @@ name = "bitflags"
 version = "2.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed570934406eb16438a4e976b1b4500774099c13b8cb96eec99f620f05090ddf"
-
-[[package]]
-name = "blee-api"
-version = "0.1.0"
-dependencies = [
- "diesel",
- "diesel-derive-enum",
- "dotenvy",
- "rocket",
- "rocket_okapi",
- "rocket_sync_db_pools",
- "serde",
-]
 
 [[package]]
 name = "bytemuck"
@@ -293,10 +297,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "dotenvy"
-version = "0.15.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
+name = "domain"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel-derive-enum",
+ "rocket",
+ "serde",
+]
 
 [[package]]
 name = "dyn-clone"
@@ -589,6 +597,15 @@ dependencies = [
  "equivalent",
  "hashbrown 0.14.3",
  "serde",
+]
+
+[[package]]
+name = "infrastructure"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "rocket_okapi",
+ "rocket_sync_db_pools",
 ]
 
 [[package]]
@@ -1286,6 +1303,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
 dependencies = [
  "lazy_static",
+]
+
+[[package]]
+name = "shared"
+version = "0.1.0"
+dependencies = [
+ "rocket",
+ "rocket_okapi",
+ "serde",
 ]
 
 [[package]]

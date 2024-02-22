@@ -1,6 +1,5 @@
 use rocket_sync_db_pools::{database, diesel};
-use rocket_okapi::request::{OpenApiFromRequest, RequestHeaderInput};
-use rocket_okapi::gen::OpenApiGenerator;
+use rocket_okapi::{gen::OpenApiGenerator, request::*};
 
 #[database("db")]
 pub struct Database(diesel::PgConnection);
