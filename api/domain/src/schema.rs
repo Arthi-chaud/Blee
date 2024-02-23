@@ -1,23 +1,23 @@
 // @generated automatically by Diesel CLI.
 
 pub mod sql_types {
-    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, std::fmt::Debug, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "chapter-types"))]
     pub struct ChapterTypes;
 
-    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, std::fmt::Debug, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "extra-types"))]
     pub struct ExtraTypes;
 
-    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, std::fmt::Debug, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "image-types"))]
     pub struct ImageTypes;
 
-    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, std::fmt::Debug, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "movie-types"))]
     pub struct MovieTypes;
 
-    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, std::fmt::Debug, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "video-qualities"))]
     pub struct VideoQualities;
 }
@@ -59,8 +59,8 @@ diesel::table! {
         package_id -> Uuid,
         artist_id -> Uuid,
         file_id -> Uuid,
-        disc_index -> Int2,
-        track_index -> Int2,
+        disc_index -> Nullable<Int2>,
+        track_index -> Nullable<Int2>,
         #[sql_name = "type"]
         type_ -> Array<Nullable<ExtraTypes>>,
     }
@@ -114,6 +114,7 @@ diesel::table! {
 diesel::table! {
     packages (id) {
         id -> Uuid,
+        name -> Text,
         description -> Nullable<Text>,
         #[sql_name = "release-year"]
         release_year -> Nullable<Date>,

@@ -9,4 +9,5 @@ pub struct Artist {
     pub id: Uuid,
     pub name: String,
     pub slug: String,
+    pub description: Option<String>,
 }

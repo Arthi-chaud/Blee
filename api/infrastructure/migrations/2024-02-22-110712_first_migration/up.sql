@@ -95,6 +95,7 @@ CREATE TABLE files (
 
 CREATE TABLE packages (
 	"id" uuid DEFAULT gen_random_uuid(),
+	"name" TEXT NOT NULL,
 	"description" TEXT,
 	"release-year" DATE,
 	"artist_id" uuid REFERENCES artists (id),
@@ -110,8 +111,8 @@ CREATE TABLE extras (
 	"package_id" uuid NOT NULL REFERENCES packages (id),
 	"artist_id" uuid NOT NULL REFERENCES artists (id),
 	"file_id" uuid NOT NULL REFERENCES files (id),
-	"disc_index" smallserial,
-	"track_index" smallserial,
+	"disc_index" smallint,
+	"track_index" smallint,
 	"type" "extra-types" [] NOT NULL,
 	PRIMARY KEY (id)
 );

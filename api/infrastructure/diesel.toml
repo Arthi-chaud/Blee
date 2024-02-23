@@ -3,7 +3,7 @@
 
 [print_schema]
 file = "../domain/src/schema.rs"
-custom_type_derives = ["diesel::query_builder::QueryId"]
+custom_type_derives = ["diesel::query_builder::QueryId", "std::fmt::Debug"]
 
 [migrations_directory]
 dir = "./migrations"
