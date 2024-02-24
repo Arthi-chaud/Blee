@@ -1,3 +1,4 @@
+use chrono::naive::NaiveDateTime;
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 
@@ -10,4 +11,5 @@ pub struct Artist {
     pub name: String,
     pub slug: String,
     pub description: Option<String>,
+    pub registered_at: NaiveDateTime,
 }

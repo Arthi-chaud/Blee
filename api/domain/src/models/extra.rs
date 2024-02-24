@@ -2,6 +2,7 @@ use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use crate::models::package::Package;
 use crate::models::artist::Artist;
+use chrono::naive::NaiveDateTime;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::extras)]
@@ -19,6 +20,7 @@ pub struct Extra {
 	pub disc_index: Option<i16>,
 	pub track_index: Option<i16>,
 	pub type_: Vec<Option<ExtraType>>,
+	pub registered_at: NaiveDateTime,
 }
 
 #[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]

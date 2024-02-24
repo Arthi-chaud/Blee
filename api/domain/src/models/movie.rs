@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use crate::models::package::Package;
@@ -17,6 +18,7 @@ pub struct Movie {
 	pub disc_index: i16,
 	pub track_index: i16,
 	pub type_: Vec<Option<MovieType>>,
+	pub registered_at: NaiveDateTime,
 }
 
 

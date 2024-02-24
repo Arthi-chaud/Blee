@@ -28,6 +28,7 @@ diesel::table! {
         name -> Varchar,
         description -> Nullable<Text>,
         slug -> Varchar,
+        registered_at -> Timestamp,
     }
 }
 
@@ -56,6 +57,7 @@ diesel::table! {
         id -> Uuid,
         name -> Text,
         thumbnail_id -> Nullable<Uuid>,
+        registered_at -> Timestamp,
         package_id -> Uuid,
         artist_id -> Uuid,
         file_id -> Uuid,
@@ -101,6 +103,7 @@ diesel::table! {
         id -> Uuid,
         name -> Text,
         poster_id -> Nullable<Uuid>,
+        registered_at -> Timestamp,
         package_id -> Uuid,
         artist_id -> Uuid,
         file_id -> Uuid,
@@ -118,6 +121,7 @@ diesel::table! {
         description -> Nullable<Text>,
         #[sql_name = "release-year"]
         release_year -> Nullable<Date>,
+        registered_at -> Timestamp,
         artist_id -> Nullable<Uuid>,
         poster_id -> Nullable<Uuid>,
         banner_id -> Nullable<Uuid>,

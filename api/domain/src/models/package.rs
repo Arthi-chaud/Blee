@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{NaiveDateTime, NaiveDate};
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use crate::models::artist::Artist;
@@ -16,4 +16,5 @@ pub struct Package {
 	pub artist_id: Option<Uuid>,
 	pub poster_id: Option<Uuid>,
 	pub banner_id: Option<Uuid>,
+	pub registered_at: NaiveDateTime,
 }
