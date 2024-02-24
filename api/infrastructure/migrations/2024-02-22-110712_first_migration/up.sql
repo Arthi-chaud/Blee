@@ -67,21 +67,22 @@ CREATE TYPE "video-qualities" AS ENUM (
 );
 
 
-CREATE TABLE artists (
-	"id" uuid DEFAULT gen_random_uuid(),
-	"name" VARCHAR NOT NULL,
-	"description" TEXT,
-	"slug" VARCHAR GENERATED ALWAYS AS (slugify(name)) STORED UNIQUE NOT NULL,
-	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (id)
-);
-
 CREATE TABLE images (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"blurhash" VARCHAR NOT NULL,
 	"colors" TEXT [] NOT NULL,
 	"aspect_ratio" FLOAT NOT NULL,
 	"type" "image-types" NOT NULL,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE artists (
+	"id" uuid DEFAULT gen_random_uuid(),
+	"name" VARCHAR NOT NULL,
+	"description" TEXT,
+	"slug" VARCHAR GENERATED ALWAYS AS (slugify(name)) STORED UNIQUE NOT NULL,
+	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	"poster_id" uuid REFERENCES images (id),
 	PRIMARY KEY (id)
 );
 

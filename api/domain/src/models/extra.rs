@@ -2,6 +2,8 @@ use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use crate::models::package::Package;
 use crate::models::artist::Artist;
+use crate::models::file::File;
+use crate::models::image::Image;
 use chrono::naive::NaiveDateTime;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
@@ -9,6 +11,8 @@ use chrono::naive::NaiveDateTime;
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(belongs_to(Package))]
 #[diesel(belongs_to(Artist))]
+#[diesel(belongs_to(File))]
+#[diesel(belongs_to(Image, foreign_key = thumbnail_id))]
 /// An Extra Video file
 pub struct Extra {
     pub id: Uuid,

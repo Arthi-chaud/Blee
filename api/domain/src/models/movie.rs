@@ -2,11 +2,17 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use crate::models::package::Package;
+use crate::models::artist::Artist;
+use crate::models::image::Image;
+use crate::models::file::File;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::movies)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(belongs_to(Package))]
+#[diesel(belongs_to(Artist))]
+#[diesel(belongs_to(Image, foreign_key = poster_id))]
+#[diesel(belongs_to(File))]
 /// A Movie
 pub struct Movie {
     pub id: Uuid,

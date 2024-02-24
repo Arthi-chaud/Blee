@@ -1,10 +1,12 @@
 use chrono::naive::NaiveDateTime;
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
+use crate::models::image::Image;
 
-#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq)]
+#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Associations)]
 #[diesel(table_name = crate::schema::artists)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
+#[diesel(belongs_to(Image, foreign_key = poster_id))]
 /// An Artist
 pub struct Artist {
     pub id: Uuid,
@@ -12,4 +14,5 @@ pub struct Artist {
     pub slug: String,
     pub description: Option<String>,
     pub registered_at: NaiveDateTime,
+    pub poster_id: Option<Uuid>,
 }

@@ -11,6 +11,6 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 
 #[openapi(tag = "Index")]
 #[get("/")]
-async fn index(db: Database) -> Json<IndexResponse> {
+async fn index(_db: Database) -> Json<IndexResponse> {
     Json(IndexResponse { message: "Hello World".to_owned() })
 }

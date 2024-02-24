@@ -29,6 +29,7 @@ diesel::table! {
         description -> Nullable<Text>,
         slug -> Varchar,
         registered_at -> Timestamp,
+        poster_id -> Nullable<Uuid>,
     }
 }
 
@@ -128,6 +129,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(artists -> images (poster_id));
 diesel::joinable!(chapters -> images (thumbnail_id));
 diesel::joinable!(chapters -> movies (movie_id));
 diesel::joinable!(extras -> artists (artist_id));

@@ -8,8 +8,8 @@ DROP TABLE movies;
 DROP TABLE packages;
 
 DROP TABLE files;
-DROP TABLE images;
 DROP TABLE artists;
+DROP TABLE images;
 
 DROP TYPE "chapter-types";
 DROP TYPE "movie-types";
