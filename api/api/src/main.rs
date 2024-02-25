@@ -6,6 +6,7 @@ use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 
 mod swagger;
 mod controllers;
+mod dto;
 
 #[macro_use]
 extern crate rocket;
@@ -32,6 +33,7 @@ pub fn create_server() -> Rocket<Build> {
         building_rocket, "/".to_owned(), openapi_settings,
         "/swagger" => (vec![], custom_openapi_spec()),
         "/index" => controllers::index::get_routes_and_docs(&openapi_settings),
+        "/extras" => controllers::extras::get_routes_and_docs(&openapi_settings),
     };
 
     building_rocket

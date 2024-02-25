@@ -346,6 +346,7 @@ dependencies = [
  "diesel",
  "diesel-derive-enum",
  "rocket",
+ "rocket_okapi",
  "serde",
 ]
 

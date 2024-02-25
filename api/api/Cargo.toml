@@ -11,8 +11,8 @@ application = { path = "../application" }
 infrastructure = { path = "../infrastructure" }
 shared = { path = "../shared" }
 
-rocket = { version = "0.5.0", features = ["uuid"] }
-serde = "1.0"
+rocket = { version = "0.5.0", features = ["uuid", "json"] }
+serde = { version = "1.0", features = ["derive"] }
 rocket_okapi = { version = "0.8.0", features = [
 	"swagger",
 	"uuid",

@@ -1,10 +1,13 @@
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
+use serde::Deserialize;
 use crate::models::package::Package;
 use crate::models::artist::Artist;
 use crate::models::file::File;
 use crate::models::image::Image;
 use chrono::naive::NaiveDateTime;
+use rocket_okapi::okapi::schemars;
+use rocket_okapi::okapi::schemars::JsonSchema;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::extras)]
@@ -27,7 +30,7 @@ pub struct Extra {
 	pub registered_at: NaiveDateTime,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize)]
 #[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::ExtraTypes"]
 pub enum ExtraType {
