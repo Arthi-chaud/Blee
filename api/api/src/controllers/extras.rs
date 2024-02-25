@@ -13,8 +13,8 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 /// Create a new extra
 #[openapi(tag = "Extras")]
 #[post("/", format = "json", data = "<data>")]
-async fn new_extra(_db: Database, data: Json<NewExtra<'_>>) -> Json<IndexResponse> {
+async fn new_extra(_db: Database, data: Json<NewExtra>) -> Json<IndexResponse> {
     Json(IndexResponse {
-        message: data.0.artist_name.to_string(),
+        message: String::from("A"),
     })
 }

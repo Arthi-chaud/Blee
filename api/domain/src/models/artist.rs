@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use crate::models::image::Image;
 
-#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Associations)]
+#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Associations, Insertable)]
 #[diesel(table_name = crate::schema::artists)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(belongs_to(Image, foreign_key = poster_id))]

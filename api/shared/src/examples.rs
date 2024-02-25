@@ -8,6 +8,10 @@ pub fn example_artist_name() -> &'static str {
     "My Artist"
 }
 
+pub fn example_uuid() -> &'static str {
+    "550e8400-e29b-41d4-a716-446655440000"
+}
+
 pub fn example_index() -> i16 {
     1
 }

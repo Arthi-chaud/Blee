@@ -17,3 +17,4 @@ rocket_okapi = { version = "0.8.0", features = [
 	"swagger",
 	"uuid",
 ] }
+diesel = { version = "2.1.0" }

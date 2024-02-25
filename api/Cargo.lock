@@ -46,6 +46,7 @@ name = "api"
 version = "0.1.0"
 dependencies = [
  "application",
+ "diesel",
  "domain",
  "infrastructure",
  "rocket",
@@ -57,6 +58,12 @@ dependencies = [
 [[package]]
 name = "application"
 version = "0.1.0"
+dependencies = [
+ "diesel",
+ "domain",
+ "infrastructure",
+ "shared",
+]
 
 [[package]]
 name = "async-stream"
@@ -1304,6 +1311,7 @@ dependencies = [
  "serde",
  "serde_json",
  "uuid 0.8.2",
+ "uuid 1.7.0",
 ]
 
 [[package]]
@@ -1396,6 +1404,7 @@ version = "0.1.0"
 dependencies = [
  "rocket",
  "rocket_okapi",
+ "schemars",
  "serde",
 ]
 
