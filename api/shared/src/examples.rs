@@ -22,6 +22,15 @@ pub fn example_index() -> i16 {
     1
 }
 
+
+pub fn example_size() -> i64 {
+    100000000
+}
+
+pub fn example_video_quality() -> &'static str {
+    "480p"
+}
+
 pub fn example_file_path() -> &'static str {
     "/video/My Artist/My Video Collection/1-01 My Extra.mp4"
 }

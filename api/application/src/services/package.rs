@@ -4,7 +4,7 @@ use diesel::{prelude::*, ExpressionMethods, PgConnection};
 use domain::models::{artist::Artist, package::Package};
 
 pub fn create_or_find<'s>(
-    artist: Option<&Artist>,
+    artist: Option<Artist>,
     package_name: &'s str,
     release_date: Option<chrono::NaiveDate>,
     connection: &mut PgConnection,
@@ -19,7 +19,7 @@ pub fn create_or_find<'s>(
         artist_id: Option<Uuid>,
     }
 
-    let artist_name = artist
+    let artist_name = artist.clone()
         .map_or(String::from("Various Artist"), |a| a.name.clone());
     let package_slug = slugify(format!("{} {}", artist_name, package_name));
     let creation_dto = NewPackage {

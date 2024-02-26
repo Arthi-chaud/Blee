@@ -20,17 +20,18 @@ use rocket_okapi::okapi::schemars::JsonSchema;
 pub struct Extra {
     pub id: Uuid,
 	pub name: String,
+	pub slug: String,
 	pub thumbnail_id: Option<Uuid>,
+	pub registered_at: NaiveDateTime,
 	pub package_id: Uuid,
 	pub artist_id: Uuid,
 	pub file_id: Uuid,
 	pub disc_index: Option<i16>,
 	pub track_index: Option<i16>,
 	pub type_: Vec<Option<ExtraType>>,
-	pub registered_at: NaiveDateTime,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize)]
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize, Clone)]
 #[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::ExtraTypes"]
 pub enum ExtraType {

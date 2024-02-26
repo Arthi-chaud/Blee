@@ -56,7 +56,7 @@ diesel::table! {
 
     extras (id) {
         id -> Uuid,
-        name -> Text,
+        name -> Varchar,
         slug -> Varchar,
         thumbnail_id -> Nullable<Uuid>,
         registered_at -> Timestamp,

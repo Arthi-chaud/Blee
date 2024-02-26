@@ -17,7 +17,7 @@ pub struct ExtraCreationResponse {
 	#[schemars(example = "example_uuid")]
 	pub artist_id: Uuid,
 	#[schemars(example = "example_uuid")]
-	pub package_artist_id: Uuid,
+	pub package_artist_id: Option<Uuid>,
 	#[schemars(example = "example_uuid")]
 	pub package_id: Uuid,
 	#[schemars(example = "example_uuid")]

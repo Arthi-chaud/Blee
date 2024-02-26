@@ -110,7 +110,7 @@ CREATE TABLE packages (
 
 CREATE TABLE extras (
 	"id" uuid DEFAULT gen_random_uuid(),
-	"name" TEXT NOT NULL,
+	"name" VARCHAR NOT NULL,
 	"slug" VARCHAR NOT NULL,
 	"thumbnail_id" uuid REFERENCES images (id),
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
