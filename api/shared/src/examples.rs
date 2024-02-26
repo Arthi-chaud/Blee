@@ -1,7 +1,13 @@
 // This files compiles all the exmaple values for DTOs for the Swagger
 
+use chrono::NaiveDate;
+
 pub fn example_package_name() -> &'static str {
     "My Video Collection"
+}
+
+pub fn example_package_release_date() -> chrono::NaiveDate {
+    NaiveDate::parse_from_str("2000-01-01", "%Y-%m-%d").unwrap()
 }
 
 pub fn example_artist_name() -> &'static str {
