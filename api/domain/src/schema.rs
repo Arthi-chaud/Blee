@@ -57,6 +57,7 @@ diesel::table! {
     extras (id) {
         id -> Uuid,
         name -> Text,
+        slug -> Varchar,
         thumbnail_id -> Nullable<Uuid>,
         registered_at -> Timestamp,
         package_id -> Uuid,
@@ -103,6 +104,7 @@ diesel::table! {
     movies (id) {
         id -> Uuid,
         name -> Text,
+        slug -> Varchar,
         poster_id -> Nullable<Uuid>,
         registered_at -> Timestamp,
         package_id -> Uuid,
@@ -119,6 +121,7 @@ diesel::table! {
     packages (id) {
         id -> Uuid,
         name -> Text,
+        slug -> Varchar,
         description -> Nullable<Text>,
         #[sql_name = "release-year"]
         release_year -> Nullable<Date>,

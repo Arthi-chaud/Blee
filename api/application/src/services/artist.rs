@@ -8,15 +8,16 @@ pub fn create_or_find<'s>(
     connection: &mut PgConnection,
 ) -> Result<Artist, diesel::result::Error> {
     use domain::schema::artists::dsl::*;
+    let artist_slug = slugify(artist_name.to_owned());
 
-    let _ = diesel::insert_into(artists)
-        .values((name.eq(artist_name), slug.eq(artist_name)))
+    diesel::insert_into(artists)
+        .values((name.eq(artist_name), slug.eq(&artist_slug)))
         .on_conflict(slug)
         .do_nothing()
-        .execute(connection);
+        .execute(connection)?;
 
     artists
-        .filter(slug.eq(slugify(artist_name.to_owned())))
+        .filter(slug.eq(&artist_slug))
         .select(Artist::as_select())
         .first(connection)
 }
