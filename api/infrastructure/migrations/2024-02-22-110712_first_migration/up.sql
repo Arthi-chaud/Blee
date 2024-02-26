@@ -80,7 +80,7 @@ CREATE TABLE artists (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" VARCHAR NOT NULL,
 	"description" TEXT,
-	"slug" VARCHAR GENERATED ALWAYS AS (slugify(name)) STORED UNIQUE NOT NULL,
+	"slug" VARCHAR UNIQUE NOT NULL,
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"poster_id" uuid REFERENCES images (id),
 	PRIMARY KEY (id)
@@ -89,7 +89,7 @@ CREATE TABLE artists (
 CREATE TABLE files (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"size" bigserial NOT NULL,
-	"path" TEXT NOT NULL,
+	"path" TEXT UNIQUE NOT NULL,
 	"quality" "video-qualities" NOT NULL,
 	"scrubber_id" uuid NOT NULL REFERENCES images (id),
 	PRIMARY KEY (id)
@@ -98,6 +98,7 @@ CREATE TABLE files (
 CREATE TABLE packages (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" TEXT NOT NULL,
+	"slug" VARCHAR UNIQUE NOT NULL,
 	"description" TEXT,
 	"release-year" DATE,
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -110,6 +111,7 @@ CREATE TABLE packages (
 CREATE TABLE extras (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" TEXT NOT NULL,
+	"slug" VARCHAR NOT NULL,
 	"thumbnail_id" uuid REFERENCES images (id),
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"package_id" uuid NOT NULL REFERENCES packages (id),
@@ -124,6 +126,7 @@ CREATE TABLE extras (
 CREATE TABLE movies (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" TEXT NOT NULL,
+	"slug" VARCHAR UNIQUE NOT NULL,
 	"poster_id" uuid REFERENCES images (id),
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"package_id" uuid NOT NULL REFERENCES packages (id),
