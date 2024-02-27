@@ -10,10 +10,10 @@ use shared::examples::*;
 pub struct NewFile {
 	/// The aboslute path of the file
 	#[schemars(example = "example_file_path")]
-    pub path: String,
+	pub path: String,
 	/// The size (in bytes) of the file
 	#[schemars(example = "example_size")]
-    pub size: i64,
+	pub size: i64,
 	#[schemars(example = "example_video_quality")]
 	pub quality: VideoQuality,
 }

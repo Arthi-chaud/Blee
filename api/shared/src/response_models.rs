@@ -1,17 +1,16 @@
+use crate::examples::*;
 use rocket::serde::uuid::Uuid;
-use serde::{Serialize, Deserialize};
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use crate::examples::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct IndexResponse {
-    pub message: String,
+	pub message: String,
 }
 
-
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, JsonSchema, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct ExtraCreationResponse {
 	#[schemars(example = "example_uuid")]

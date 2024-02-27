@@ -1,8 +1,8 @@
-use chrono::{NaiveDateTime, NaiveDate};
-use diesel::prelude::*;
-use rocket::serde::uuid::Uuid;
 use crate::models::artist::Artist;
 use crate::models::image::Image;
+use chrono::{NaiveDate, NaiveDateTime};
+use diesel::prelude::*;
+use rocket::serde::uuid::Uuid;
 
 #[derive(Queryable, Identifiable, Selectable, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::packages)]
@@ -12,7 +12,7 @@ use crate::models::image::Image;
 //TODO: add relation with banner
 /// A Package
 pub struct Package {
-    pub id: Uuid,
+	pub id: Uuid,
 	pub name: String,
 	pub description: Option<String>,
 	pub release_year: Option<NaiveDate>,

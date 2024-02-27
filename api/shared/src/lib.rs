@@ -1,2 +1,2 @@
-pub mod response_models;
 pub mod examples;
+pub mod response_models;

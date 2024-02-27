@@ -79,7 +79,7 @@ diesel::table! {
         size -> Int8,
         path -> Text,
         quality -> VideoQualities,
-        scrubber_id -> Uuid,
+        scrubber_id -> Nullable<Uuid>,
     }
 }
 

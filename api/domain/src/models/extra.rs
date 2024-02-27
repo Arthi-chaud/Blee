@@ -1,13 +1,13 @@
-use diesel::prelude::*;
-use rocket::serde::uuid::Uuid;
-use serde::Deserialize;
-use crate::models::package::Package;
 use crate::models::artist::Artist;
 use crate::models::file::File;
 use crate::models::image::Image;
+use crate::models::package::Package;
 use chrono::naive::NaiveDateTime;
+use diesel::prelude::*;
+use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
+use serde::Deserialize;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::extras)]
@@ -18,7 +18,7 @@ use rocket_okapi::okapi::schemars::JsonSchema;
 #[diesel(belongs_to(Image, foreign_key = thumbnail_id))]
 /// An Extra Video file
 pub struct Extra {
-    pub id: Uuid,
+	pub id: Uuid,
 	pub name: String,
 	pub slug: String,
 	pub thumbnail_id: Option<Uuid>,
@@ -35,12 +35,12 @@ pub struct Extra {
 #[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::ExtraTypes"]
 pub enum ExtraType {
-    Trailer,
+	Trailer,
 	Interview,
 	BehindTheScenes,
 	MusicVideo,
 	AlternateView,
 	Backdrops,
 	Performance,
-	Other
+	Other,
 }

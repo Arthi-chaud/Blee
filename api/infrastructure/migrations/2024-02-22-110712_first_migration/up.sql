@@ -91,7 +91,7 @@ CREATE TABLE files (
 	"size" bigserial NOT NULL,
 	"path" TEXT UNIQUE NOT NULL,
 	"quality" "video-qualities" NOT NULL,
-	"scrubber_id" uuid NOT NULL REFERENCES images (id),
+	"scrubber_id" uuid REFERENCES images (id),
 	PRIMARY KEY (id)
 );
 

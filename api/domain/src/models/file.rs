@@ -8,9 +8,9 @@ use super::video_quality::VideoQuality;
 #[diesel(check_for_backend(diesel::pg::Pg))]
 /// A File
 pub struct File {
-    pub id: Uuid,
-    pub size: i64,
-    pub path: String,
-    pub quality: VideoQuality,
-    pub scrubber_id: Uuid,
+	pub id: Uuid,
+	pub size: i64,
+	pub path: String,
+	pub quality: VideoQuality,
+	pub scrubber_id: Option<Uuid>,
 }
