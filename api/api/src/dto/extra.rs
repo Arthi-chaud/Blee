@@ -2,7 +2,7 @@ use domain::models::extra::ExtraType;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
 use serde::Deserialize;
-use shared::examples::*;
+use crate::swagger_examples::*;
 
 use super::file::NewFile;
 

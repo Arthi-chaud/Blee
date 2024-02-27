@@ -5,6 +5,4 @@ members = [
   "api",
   "domain",
   "infrastructure",
-  "application",
-  "shared",
 ]

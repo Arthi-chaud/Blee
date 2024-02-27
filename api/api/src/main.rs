@@ -7,7 +7,10 @@ use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 mod controllers;
 mod dto;
 mod error_handling;
+mod responses;
+mod services;
 mod swagger;
+mod swagger_examples;
 
 #[macro_use]
 extern crate rocket;
