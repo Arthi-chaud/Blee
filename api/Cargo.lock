@@ -54,6 +54,7 @@ dependencies = [
  "rocket_okapi",
  "schemars",
  "serde",
+ "serde_json",
  "shared",
 ]
 

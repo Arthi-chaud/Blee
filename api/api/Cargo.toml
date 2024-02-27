@@ -17,6 +17,7 @@ rocket_okapi = { version = "0.8.0", features = [
 	"swagger",
 	"uuid",
 ] }
+serde_json = "1.0"
 schemars = { version = "0.8", features = ["chrono"] }
 diesel = { version = "2.1.0" }
 chrono =  { version = "0.4.34", features = ["serde"] }
