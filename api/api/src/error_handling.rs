@@ -96,12 +96,10 @@ impl OpenApiResponderInner for ApiError {
 	}
 }
 
-
-
 #[catch(404)]
 pub fn not_found() -> Json<ErrorResponse<'static>> {
-    Json(ErrorResponse {
+	Json(ErrorResponse {
 		status_code: Status::NotFound,
-		message: "Route not found."
+		message: "Route not found.",
 	})
 }

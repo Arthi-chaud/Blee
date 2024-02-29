@@ -43,6 +43,7 @@ pub fn create_server() -> Rocket<Build> {
 		"/index" => controllers::index::get_routes_and_docs(&openapi_settings),
 		"/extras" => controllers::extras::get_routes_and_docs(&openapi_settings),
 		"/movies" => controllers::movies::get_routes_and_docs(&openapi_settings),
+		"/artists" => controllers::artists::get_routes_and_docs(&openapi_settings),
 	};
 
 	building_rocket
