@@ -1,3 +1,4 @@
+use crate::error_handling::not_found;
 use crate::swagger::custom_openapi_spec;
 use infrastructure::Database;
 use rocket::{Build, Rocket};
@@ -21,13 +22,16 @@ fn rocket() -> Rocket<Build> {
 }
 
 pub fn create_server() -> Rocket<Build> {
-	let mut building_rocket = rocket::build().attach(Database::fairing()).mount(
-		"/swagger",
-		make_swagger_ui(&SwaggerUIConfig {
-			url: "./openapi.json".to_owned(),
-			..Default::default()
-		}),
-	);
+	let mut building_rocket = rocket::build()
+		.attach(Database::fairing())
+		.register("/", catchers![not_found])
+		.mount(
+			"/swagger",
+			make_swagger_ui(&SwaggerUIConfig {
+				url: "./openapi.json".to_owned(),
+				..Default::default()
+			}),
+		);
 
 	let openapi_settings = OpenApiSettings {
 		json_path: "/swagger/openapi.json".to_owned(),
