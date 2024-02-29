@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, JsonSchema, Debug)]
 #[serde(crate = "rocket::serde")]
-pub struct ExtraCreationResponse {
+pub struct MovieCreationResponse {
 	#[schemars(example = "example_uuid")]
 	pub artist_id: Uuid,
 	#[schemars(example = "example_uuid")]
@@ -14,5 +14,6 @@ pub struct ExtraCreationResponse {
 	#[schemars(example = "example_uuid")]
 	pub package_id: Uuid,
 	#[schemars(example = "example_uuid")]
-	pub extra_id: Uuid,
+	pub movie_id: Uuid,
+	pub chapters_id: Vec<Uuid>,
 }

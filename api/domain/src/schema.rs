@@ -42,11 +42,9 @@ diesel::table! {
         name -> Text,
         thumbnail_id -> Nullable<Uuid>,
         movie_id -> Uuid,
-        index -> Int2,
         start_time -> Int2,
         end_time -> Int2,
-        #[sql_name = "type"]
-        type_ -> Array<Nullable<ChapterTypes>>,
+        types -> Array<Nullable<ChapterTypes>>,
     }
 }
 
@@ -110,10 +108,8 @@ diesel::table! {
         package_id -> Uuid,
         artist_id -> Uuid,
         file_id -> Uuid,
-        disc_index -> Int2,
-        track_index -> Int2,
         #[sql_name = "type"]
-        type_ -> Array<Nullable<MovieTypes>>,
+        type_ -> MovieTypes,
     }
 }
 

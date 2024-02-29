@@ -5,6 +5,9 @@ use crate::models::package::Package;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
+use rocket_okapi::okapi::schemars;
+use rocket_okapi::okapi::schemars::JsonSchema;
+use serde::Deserialize;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::movies)]
@@ -17,17 +20,16 @@ use rocket::serde::uuid::Uuid;
 pub struct Movie {
 	pub id: Uuid,
 	pub name: String,
+	pub slug: String,
 	pub poster_id: Option<Uuid>,
+	pub registered_at: NaiveDateTime,
 	pub package_id: Uuid,
 	pub artist_id: Uuid,
 	pub file_id: Uuid,
-	pub disc_index: i16,
-	pub track_index: i16,
-	pub type_: Vec<Option<MovieType>>,
-	pub registered_at: NaiveDateTime,
+	pub type_: MovieType,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize, Clone, Copy)]
 #[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::MovieTypes"]
 pub enum MovieType {

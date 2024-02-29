@@ -14,6 +14,10 @@ pub fn example_artist_name() -> &'static str {
 	"My Artist"
 }
 
+pub fn example_chapter_name() -> &'static str {
+	"I Love New York..."
+}
+
 pub fn example_uuid() -> &'static str {
 	"550e8400-e29b-41d4-a716-446655440000"
 }
@@ -36,4 +40,8 @@ pub fn example_file_path() -> &'static str {
 
 pub fn example_extra_name() -> &'static str {
 	"My Extra"
+}
+
+pub fn example_movie_type() -> &'static str {
+	"Concert"
 }

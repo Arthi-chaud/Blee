@@ -1,8 +1,8 @@
+use crate::swagger_examples::*;
 use domain::models::video_quality::VideoQuality;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
 use serde::Deserialize;
-use crate::swagger_examples::*;
 
 /// DTO to create a new File
 #[derive(Deserialize, JsonSchema, Clone)]

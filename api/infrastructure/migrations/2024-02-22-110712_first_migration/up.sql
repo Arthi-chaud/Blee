@@ -132,9 +132,7 @@ CREATE TABLE movies (
 	"package_id" uuid NOT NULL REFERENCES packages (id),
 	"artist_id" uuid NOT NULL REFERENCES artists (id),
 	"file_id" uuid NOT NULL REFERENCES files (id),
-	"disc_index" smallserial,
-	"track_index" smallserial,
-	"type" "movie-types" [] NOT NULL,
+	"type" "movie-types" NOT NULL,
 	PRIMARY KEY (id)
 );
 
@@ -143,9 +141,10 @@ CREATE TABLE chapters (
 	"name" TEXT NOT NULL,
 	"thumbnail_id" uuid REFERENCES images (id),
 	"movie_id" uuid NOT NULL REFERENCES movies (id),
-	"index" smallserial NOT NULL,
 	"start_time" smallserial NOT NULL,
 	"end_time" smallserial NOT NULL,
-	"type" "chapter-types" [] NOT NULL,
+	"types" "chapter-types" [] NOT NULL,
 	PRIMARY KEY (id)
 );
+
+CREATE UNIQUE INDEX "chapters_timestamps_movie_key" ON "chapters"("start_time", "end_time", "movie_id");

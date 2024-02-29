@@ -1,6 +1,6 @@
-use crate::dto::extra::NewExtra;
+use crate::dto::movie::NewMovie;
 use crate::error_handling::{ApiError, ApiResult};
-use crate::responses::extra_creation::ExtraCreationResponse;
+use crate::responses::movie_creation::MovieCreationResponse;
 use crate::services;
 use diesel::Connection;
 use domain::models::artist::Artist;
@@ -11,15 +11,15 @@ use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: new_extra]
+	openapi_get_routes_spec![settings: new_movie]
 }
 
-/// Create a new extra
-#[openapi(tag = "Extras")]
+/// Create a new movie with its chapters
+#[openapi(tag = "Movies")]
 #[post("/", format = "json", data = "<data>")]
-async fn new_extra(_db: Database, data: Json<NewExtra>) -> ApiResult<ExtraCreationResponse> {
+async fn new_movie(_db: Database, data: Json<NewMovie>) -> ApiResult<MovieCreationResponse> {
 	_db.run(move |conn| {
-		conn.transaction::<ExtraCreationResponse, diesel::result::Error, _>(
+		conn.transaction::<MovieCreationResponse, diesel::result::Error, _>(
 			move |connection| -> _ {
 				let file = services::file::create_or_find(
 					&data.file.path,
@@ -36,7 +36,7 @@ async fn new_extra(_db: Database, data: Json<NewExtra>) -> ApiResult<ExtraCreati
 						)?))
 					},
 				)?;
-				let extra_artist = services::artist::create_or_find(&data.artist_name, connection)?;
+				let movie_artist = services::artist::create_or_find(&data.artist_name, connection)?;
 				let package = services::package::create_or_find(
 					package_artist.clone(),
 					&data.package_name,
@@ -44,22 +44,24 @@ async fn new_extra(_db: Database, data: Json<NewExtra>) -> ApiResult<ExtraCreati
 					connection,
 				)?;
 
-				let extra = services::extra::create(
-					&data.extra_name,
-					data.disc_index,
-					data.track_index,
-					&data.types,
+				let movie = services::movie::create(
+					&data.movie_name,
+					data.movie_type,
+					&movie_artist,
 					&package.id,
-					&extra_artist.id,
 					&file.id,
 					connection,
 				)?;
 
-				Ok(ExtraCreationResponse {
-					artist_id: extra_artist.id,
+				let chapter_results =
+					services::chapter::create_many(&data.chapters, &movie.id, connection)?;
+
+				Ok(MovieCreationResponse {
+					artist_id: movie_artist.id,
 					package_artist_id: package_artist.map(|a| a.id),
 					package_id: package.id,
-					extra_id: extra.id,
+					movie_id: movie.id,
+					chapters_id: chapter_results.iter().map(|c| c.id).collect(),
 				})
 			},
 		)
