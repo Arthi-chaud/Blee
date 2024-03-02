@@ -17,6 +17,7 @@ use serde::Serialize;
 #[derive(Debug)]
 pub enum ApiError {
 	DieselError(DieselError),
+	ImageProcessingError,
 }
 
 #[derive(Serialize)]
@@ -30,6 +31,10 @@ pub type ApiResult<T> = Result<Json<T>, ApiError>;
 impl<'r> Responder<'r, 'static> for ApiError {
 	fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
 		let response_body: ErrorResponse = match self {
+			ApiError::ImageProcessingError => ErrorResponse {
+				status_code: Status::BadRequest,
+				message: "Could not process received image.",
+			},
 			ApiError::DieselError(DieselError::NotFound) => ErrorResponse {
 				status_code: Status::NotFound,
 				message: "Resource not found.",

@@ -1,10 +1,16 @@
+use crate::config::Config;
 use crate::error_handling::not_found;
 use crate::swagger::custom_openapi_spec;
 use infrastructure::Database;
+use rocket::fairing::AdHoc;
+use rocket::figment::providers::Serialized;
+use rocket::figment::Figment;
 use rocket::{Build, Rocket};
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
+use std::env;
 
+mod config;
 mod controllers;
 mod dto;
 mod error_handling;
@@ -12,6 +18,7 @@ mod responses;
 mod services;
 mod swagger;
 mod swagger_examples;
+mod utils;
 
 #[macro_use]
 extern crate rocket;
@@ -22,8 +29,13 @@ fn rocket() -> Rocket<Build> {
 }
 
 pub fn create_server() -> Rocket<Build> {
-	let mut building_rocket = rocket::build()
+	let data_dir = env::var("DATA_DIR").expect("env variable `DATA_DIR` not set.");
+	let figment = Figment::from(rocket::Config::figment()).merge(Serialized::defaults(Config {
+		data_folder: data_dir,
+	}));
+	let mut building_rocket = rocket::custom(figment)
 		.attach(Database::fairing())
+		.attach(AdHoc::config::<Config>())
 		.register("/", catchers![not_found])
 		.mount(
 			"/swagger",

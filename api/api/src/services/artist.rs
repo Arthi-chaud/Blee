@@ -1,8 +1,12 @@
 use diesel::prelude::*;
+use diesel::update;
 use diesel::PgConnection;
 use domain::models::artist::Artist;
+use domain::models::image::Image;
 use rocket::serde::uuid::Uuid;
 use slug::slugify;
+
+use crate::responses::artist::ArtistResponse;
 
 pub fn create_or_find<'s>(
 	artist_name: &'s str,
@@ -26,30 +30,40 @@ pub fn create_or_find<'s>(
 pub fn find<'s>(
 	slug_or_uuid: &'s str,
 	connection: &mut PgConnection,
-) -> Result<Artist, diesel::result::Error> {
+) -> Result<ArtistResponse, diesel::result::Error> {
 	use domain::schema::artists::dsl::*;
+	use domain::schema::images::dsl::images;
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
 
-	match uuid_parse_result {
+	let (artist, image) = match uuid_parse_result {
 		Ok(uuid) => artists
+			.left_join(images)
 			.filter(id.eq(uuid))
-			.select(Artist::as_select())
+			.select((Artist::as_select(), Option::<Image>::as_select()))
 			.first(connection),
 		_ => artists
+			.left_join(images)
 			.filter(slug.eq(slug_or_uuid))
-			.select(Artist::as_select())
+			.select((Artist::as_select(), Option::<Image>::as_select()))
 			.first(connection),
-	}
+	}?;
+
+	Ok(ArtistResponse {
+		artist,
+		poster: image,
+	})
 }
 
-pub fn find_by_uuid<'s>(
-	uuid: &Uuid,
+pub fn set_poster<'s>(
+	poster_uuid: &Uuid,
+	artist_uuid: &Uuid,
 	connection: &mut PgConnection,
-) -> Result<Artist, diesel::result::Error> {
+) -> Result<(), diesel::result::Error> {
 	use domain::schema::artists::dsl::*;
 
-	artists
-		.filter(id.eq(uuid))
-		.select(Artist::as_select())
-		.first(connection)
+	update(artists)
+		.filter(id.eq(artist_uuid))
+		.set(poster_id.eq(poster_uuid))
+		.execute(connection)
+		.map(|_| ())
 }

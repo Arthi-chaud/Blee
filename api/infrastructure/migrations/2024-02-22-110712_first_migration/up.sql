@@ -82,7 +82,7 @@ CREATE TABLE artists (
 	"description" TEXT,
 	"slug" VARCHAR UNIQUE NOT NULL,
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"poster_id" uuid REFERENCES images (id),
+	"poster_id" uuid REFERENCES images (id) on delete set null,
 	PRIMARY KEY (id)
 );
 
@@ -91,7 +91,7 @@ CREATE TABLE files (
 	"size" bigserial NOT NULL,
 	"path" TEXT UNIQUE NOT NULL,
 	"quality" "video-qualities" NOT NULL,
-	"scrubber_id" uuid REFERENCES images (id),
+	"scrubber_id" uuid REFERENCES images (id) on delete set null,
 	PRIMARY KEY (id)
 );
 
@@ -103,8 +103,8 @@ CREATE TABLE packages (
 	"release-year" DATE,
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"artist_id" uuid REFERENCES artists (id),
-	"poster_id" uuid REFERENCES images (id),
-	"banner_id" uuid REFERENCES images (id),
+	"poster_id" uuid REFERENCES images (id) on delete set null,
+	"banner_id" uuid REFERENCES images (id) on delete set null,
 	PRIMARY KEY (id)
 );
 
@@ -112,7 +112,7 @@ CREATE TABLE extras (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" VARCHAR NOT NULL,
 	"slug" VARCHAR NOT NULL,
-	"thumbnail_id" uuid REFERENCES images (id),
+	"thumbnail_id" uuid REFERENCES images (id) on delete set null,
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"package_id" uuid NOT NULL REFERENCES packages (id),
 	"artist_id" uuid NOT NULL REFERENCES artists (id),
@@ -127,7 +127,7 @@ CREATE TABLE movies (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" TEXT NOT NULL,
 	"slug" VARCHAR UNIQUE NOT NULL,
-	"poster_id" uuid REFERENCES images (id),
+	"poster_id" uuid REFERENCES images (id) on delete set null,
 	"registered_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"package_id" uuid NOT NULL REFERENCES packages (id),
 	"artist_id" uuid NOT NULL REFERENCES artists (id),
@@ -139,7 +139,7 @@ CREATE TABLE movies (
 CREATE TABLE chapters (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" TEXT NOT NULL,
-	"thumbnail_id" uuid REFERENCES images (id),
+	"thumbnail_id" uuid REFERENCES images (id) on delete set null,
 	"movie_id" uuid NOT NULL REFERENCES movies (id),
 	"start_time" smallserial NOT NULL,
 	"end_time" smallserial NOT NULL,

@@ -11,12 +11,15 @@ infrastructure = { path = "../infrastructure" }
 
 rocket = { version = "0.5.0", features = ["uuid", "json"] }
 serde = { version = "1.0", features = ["derive"] }
-rocket_okapi = { version = "0.8.0", features = [
-	"swagger",
-	"uuid",
-] }
+rocket_okapi = { version = "0.8.0", features = ["swagger", "uuid"] }
 serde_json = "1.0"
 schemars = { version = "0.8", features = ["chrono", "uuid1"] }
 diesel = { version = "2.1.0" }
-chrono =  { version = "0.4.34", features = ["serde"] }
+chrono = { version = "0.4.34", features = ["serde"] }
 slug = "0.1.5"
+blurhash = "0.2.1"
+image = "0.24.9"
+color-thief = "0.2"
+colors-transform = "0.2.11"
+webp = "0.2"
+tempfile = "3.10.1"
