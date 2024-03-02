@@ -1,3 +1,4 @@
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rocket_okapi::{gen::OpenApiGenerator, request::*};
 use rocket_sync_db_pools::{database, diesel};
 
@@ -13,4 +14,17 @@ impl<'r> OpenApiFromRequest<'r> for Database {
 	) -> rocket_okapi::Result<RequestHeaderInput> {
 		Ok(RequestHeaderInput::None)
 	}
+}
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+
+pub fn apply_migrations(connection: &mut impl MigrationHarness<diesel::pg::Pg>) {
+    match connection.run_pending_migrations(MIGRATIONS) {
+        Ok(_) => {
+            println!("Migrations successfully completed");
+        },
+        Err(e) => {
+            panic!("error running pending migrations {}", e)
+        },
+    };
 }

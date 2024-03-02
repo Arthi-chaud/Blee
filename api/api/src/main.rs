@@ -1,7 +1,7 @@
 use crate::config::Config;
 use crate::error_handling::not_found;
 use crate::swagger::custom_openapi_spec;
-use infrastructure::Database;
+use infrastructure::{apply_migrations, Database};
 use rocket::fairing::AdHoc;
 use rocket::figment::providers::Serialized;
 use rocket::figment::Figment;
@@ -28,14 +28,25 @@ fn rocket() -> Rocket<Build> {
 	create_server()
 }
 
+async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
+	let _ = Database::get_one(&rocket)
+		.await
+		.expect("Get DB Handle from Rocket")
+		.run(|conn| apply_migrations(conn))
+		.await;
+
+	rocket
+}
+
 pub fn create_server() -> Rocket<Build> {
-	let data_dir = env::var("DATA_DIR").expect("env variable `DATA_DIR` not set.");
+	let data_dir = env::var("CONFIG_DIR").expect("env variable `CONFIG_DIR` not set.");
 	let figment = Figment::from(rocket::Config::figment()).merge(Serialized::defaults(Config {
 		data_folder: data_dir,
 	}));
 	let mut building_rocket = rocket::custom(figment)
 		.attach(Database::fairing())
 		.attach(AdHoc::config::<Config>())
+		.attach(AdHoc::on_ignite("Run migrations", run_migrations))
 		.register("/", catchers![not_found])
 		.mount(
 			"/swagger",
