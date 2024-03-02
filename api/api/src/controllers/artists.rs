@@ -43,7 +43,7 @@ async fn post_artist_image(
 			let new_poster = services::image::create(&bytes, ImageType::Poster, conn, &c)?;
 
 			if let Some(image) = artist.poster {
-				services::image::delete(&image.id, conn, &c).unwrap();
+				let _ = services::image::delete(&image.id, conn, &c);
 			}
 			services::artist::set_poster(&new_poster.id, &artist.artist.id, conn)
 				.map_err(|e| ApiError::from(e))?;

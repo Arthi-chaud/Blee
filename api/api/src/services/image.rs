@@ -12,7 +12,7 @@ use rocket::serde::uuid::Uuid;
 use std::fs;
 use std::io::Cursor;
 use std::io::Write;
-use std::path::MAIN_SEPARATOR;
+use std::path::Path;
 use webp::Encoder;
 
 use crate::config::Config;
@@ -79,22 +79,12 @@ pub fn create<'s>(
 		.get_result::<Image>(connection)
 		.map_err(|e| ApiError::DieselError(e))?;
 
-	let image_dir = format!(
-		"{}{}{}",
-		config.data_folder,
-		MAIN_SEPARATOR,
-		image_row.id.to_string()
-	);
+	let image_dir = Path::new(&config.data_folder).join(image_row.id.to_string());
 	fs::create_dir_all(image_dir.clone()).map_err(|_| ApiError::ImageProcessingError)?;
 	let mut file = fs::OpenOptions::new()
 		.create(true)
 		.write(true)
-		.open(format!(
-			"{}{}{}",
-			image_dir.clone(),
-			MAIN_SEPARATOR,
-			"image.webp"
-		))
+		.open(image_dir.join("image.webp"))
 		.map_err(|_| ApiError::ImageProcessingError)?;
 
 	file.write_all(&webp_image.as_bytes())
@@ -114,12 +104,16 @@ pub fn delete<'s>(
 		.filter(id.eq(image_uuid))
 		.execute(connection)?;
 
-	let image_dir = format!(
-		"{}{}{}",
-		config.data_folder,
-		MAIN_SEPARATOR,
-		image_uuid.to_string()
-	);
-	fs::remove_dir_all(image_dir).map_err(|_| ApiError::ImageProcessingError)?;
+	let image_dir = Path::new(&config.data_folder).join(image_uuid.to_string());
+	let _ = fs::remove_dir_all(image_dir);
 	Ok(())
+}
+
+pub fn get(
+	image_uuid: &Uuid,
+	connection: &mut PgConnection,
+) -> Result<Image, diesel::result::Error> {
+	use domain::schema::images::dsl::*;
+
+	images.find(image_uuid).first(connection)
 }

@@ -18,6 +18,7 @@ use serde::Serialize;
 pub enum ApiError {
 	DieselError(DieselError),
 	ImageProcessingError,
+	ImageServingError,
 }
 
 #[derive(Serialize)]
@@ -34,6 +35,10 @@ impl<'r> Responder<'r, 'static> for ApiError {
 			ApiError::ImageProcessingError => ErrorResponse {
 				status_code: Status::BadRequest,
 				message: "Could not process received image.",
+			},
+			ApiError::ImageServingError => ErrorResponse {
+				status_code: Status::NotFound,
+				message: "Could not serve requested image.",
 			},
 			ApiError::DieselError(DieselError::NotFound) => ErrorResponse {
 				status_code: Status::NotFound,
