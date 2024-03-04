@@ -1,6 +1,7 @@
 use crate::config::Config;
 use crate::error_handling::not_found;
 use crate::swagger::custom_openapi_spec;
+use crate::controllers::index::index;
 use infrastructure::{apply_migrations, Database};
 use rocket::fairing::AdHoc;
 use rocket::figment::providers::Serialized;
@@ -54,6 +55,9 @@ pub fn create_server() -> Rocket<Build> {
 				url: "./openapi.json".to_owned(),
 				..Default::default()
 			}),
+		)
+		.mount(
+			"/", routes![index]
 		);
 
 	let openapi_settings = OpenApiSettings {
@@ -65,7 +69,6 @@ pub fn create_server() -> Rocket<Build> {
 		"/artists" => controllers::artists::get_routes_and_docs(&openapi_settings),
 		"/extras" => controllers::extras::get_routes_and_docs(&openapi_settings),
 		"/images" => controllers::images::get_routes_and_docs(&openapi_settings),
-		"/index" => controllers::index::get_routes_and_docs(&openapi_settings),
 		"/movies" => controllers::movies::get_routes_and_docs(&openapi_settings),
 		"/swagger" => (vec![], custom_openapi_spec()),
 	};
