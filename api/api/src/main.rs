@@ -1,7 +1,7 @@
 use crate::config::Config;
+use crate::controllers::index::index;
 use crate::error_handling::not_found;
 use crate::swagger::custom_openapi_spec;
-use crate::controllers::index::index;
 use infrastructure::{apply_migrations, Database};
 use rocket::fairing::AdHoc;
 use rocket::figment::providers::Serialized;
@@ -56,9 +56,7 @@ pub fn create_server() -> Rocket<Build> {
 				..Default::default()
 			}),
 		)
-		.mount(
-			"/", routes![index]
-		);
+		.mount("/", routes![index]);
 
 	let openapi_settings = OpenApiSettings {
 		json_path: "/swagger/openapi.json".to_owned(),

@@ -19,12 +19,12 @@ impl<'r> OpenApiFromRequest<'r> for Database {
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
 pub fn apply_migrations(connection: &mut impl MigrationHarness<diesel::pg::Pg>) {
-    match connection.run_pending_migrations(MIGRATIONS) {
-        Ok(_) => {
-            println!("Migrations successfully completed");
-        },
-        Err(e) => {
-            panic!("error running pending migrations {}", e)
-        },
-    };
+	match connection.run_pending_migrations(MIGRATIONS) {
+		Ok(_) => {
+			println!("Migrations successfully completed");
+		}
+		Err(e) => {
+			panic!("error running pending migrations {}", e)
+		}
+	};
 }
