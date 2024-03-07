@@ -7,7 +7,7 @@ use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::movies)]
@@ -29,7 +29,9 @@ pub struct Movie {
 	pub type_: MovieType,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize, Clone, Copy)]
+#[derive(
+	diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Serialize, Deserialize, Clone, Copy,
+)]
 #[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::MovieTypes"]
 pub enum MovieType {

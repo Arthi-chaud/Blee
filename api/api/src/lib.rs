@@ -11,15 +11,15 @@ use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 use std::env;
 
-mod config;
+pub mod config;
 mod controllers;
-mod dto;
+pub mod dto;
 mod error_handling;
-mod responses;
-mod services;
+pub mod responses;
+pub mod services;
 mod swagger;
 mod swagger_examples;
-mod utils;
+pub mod utils;
 
 #[macro_use]
 extern crate rocket;

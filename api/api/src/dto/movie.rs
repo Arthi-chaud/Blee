@@ -2,13 +2,13 @@ use crate::swagger_examples::*;
 use domain::models::movie::MovieType;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::chapter::NewChapter;
 use super::file::NewFile;
 
 /// DTO to create a new Movie
-#[derive(Deserialize, JsonSchema)]
+#[derive(Deserialize, JsonSchema, Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct NewMovie {
 	#[schemars(example = "example_artist_name")]

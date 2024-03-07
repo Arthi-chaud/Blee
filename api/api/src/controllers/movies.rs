@@ -1,10 +1,11 @@
 use crate::dto::movie::NewMovie;
-use crate::error_handling::{ApiError, ApiResult};
+use crate::error_handling::{ApiError, ApiRawResult};
 use crate::responses::movie_creation::MovieCreationResponse;
 use crate::services;
 use diesel::Connection;
 use domain::models::artist::Artist;
 use infrastructure::Database;
+use rocket::response::status;
 use rocket::{post, serde::json::Json};
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
@@ -17,7 +18,10 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 /// Create a new movie with its chapters
 #[openapi(tag = "Movies")]
 #[post("/", format = "json", data = "<data>")]
-async fn new_movie(_db: Database, data: Json<NewMovie>) -> ApiResult<MovieCreationResponse> {
+async fn new_movie(
+	_db: Database,
+	data: Json<NewMovie>,
+) -> ApiRawResult<status::Created<Json<MovieCreationResponse>>> {
 	_db.run(move |conn| {
 		conn.transaction::<MovieCreationResponse, diesel::result::Error, _>(
 			move |connection| -> _ {
@@ -62,10 +66,14 @@ async fn new_movie(_db: Database, data: Json<NewMovie>) -> ApiResult<MovieCreati
 					package_id: package.id,
 					movie_id: movie.id,
 					chapters_id: chapter_results.iter().map(|c| c.id).collect(),
+					file_id: file.id,
 				})
 			},
 		)
 	})
 	.await
-	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	.map_or_else(
+		|e| Err(ApiError::from(e)),
+		|v| Ok(status::Created::new("").body(Json(v))),
+	)
 }
