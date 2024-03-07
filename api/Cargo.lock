@@ -53,6 +53,8 @@ dependencies = [
  "domain",
  "image",
  "infrastructure",
+ "once_cell",
+ "regex",
  "rocket",
  "rocket_okapi",
  "schemars",

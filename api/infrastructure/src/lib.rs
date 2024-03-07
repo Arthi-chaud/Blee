@@ -16,7 +16,7 @@ impl<'r> OpenApiFromRequest<'r> for Database {
 	}
 }
 
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
 pub fn apply_migrations(connection: &mut impl MigrationHarness<diesel::pg::Pg>) {
 	match connection.run_pending_migrations(MIGRATIONS) {
