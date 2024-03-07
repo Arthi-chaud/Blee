@@ -15,4 +15,6 @@ pub struct ExtraCreationResponse {
 	pub package_id: Uuid,
 	#[schemars(example = "example_uuid")]
 	pub extra_id: Uuid,
+	#[schemars(example = "example_uuid")]
+	pub file_id: Uuid,
 }

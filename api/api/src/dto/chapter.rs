@@ -2,10 +2,10 @@ use crate::swagger_examples::*;
 use domain::models::chapter::ChapterType;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// DTO to create a new chapter
-#[derive(Deserialize, JsonSchema)]
+#[derive(Deserialize, JsonSchema, Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct NewChapter {
 	#[schemars(example = "example_chapter_name")]

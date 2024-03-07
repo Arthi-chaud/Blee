@@ -29,6 +29,8 @@ pub struct ErrorResponse<'s> {
 
 pub type ApiResult<T> = Result<Json<T>, ApiError>;
 
+pub type ApiRawResult<T> = Result<T, ApiError>;
+
 impl<'r> Responder<'r, 'static> for ApiError {
 	fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
 		let response_body: ErrorResponse = match self {

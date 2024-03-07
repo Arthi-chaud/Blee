@@ -15,5 +15,7 @@ pub struct MovieCreationResponse {
 	pub package_id: Uuid,
 	#[schemars(example = "example_uuid")]
 	pub movie_id: Uuid,
+	#[schemars(example = "example_uuid")]
+	pub file_id: Uuid,
 	pub chapters_id: Vec<Uuid>,
 }

@@ -1,8 +1,10 @@
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, Deserialize, JsonSchema, Clone, Copy)]
+#[derive(
+	diesel_derive_enum::DbEnum, Debug, PartialEq, Deserialize, Serialize, JsonSchema, Clone, Copy,
+)]
 #[ExistingTypePath = "crate::schema::sql_types::VideoQualities"]
 pub enum VideoQuality {
 	#[db_rename = "8k"]

@@ -2,12 +2,12 @@ use crate::swagger_examples::*;
 use domain::models::extra::ExtraType;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::file::NewFile;
 
 /// DTO to create a new Extra
-#[derive(Deserialize, JsonSchema)]
+#[derive(Deserialize, Serialize, JsonSchema)]
 #[serde(crate = "rocket::serde")]
 pub struct NewExtra {
 	#[schemars(example = "example_artist_name")]

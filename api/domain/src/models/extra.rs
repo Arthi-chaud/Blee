@@ -7,7 +7,7 @@ use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
 #[diesel(table_name = crate::schema::extras)]
@@ -31,7 +31,9 @@ pub struct Extra {
 	pub type_: Vec<Option<ExtraType>>,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize, Clone)]
+#[derive(
+	diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize, Serialize, Clone,
+)]
 #[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::ExtraTypes"]
 pub enum ExtraType {

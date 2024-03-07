@@ -1,10 +1,11 @@
 use crate::dto::extra::NewExtra;
-use crate::error_handling::{ApiError, ApiResult};
+use crate::error_handling::{ApiError, ApiRawResult};
 use crate::responses::extra_creation::ExtraCreationResponse;
 use crate::services;
 use diesel::Connection;
 use domain::models::artist::Artist;
 use infrastructure::Database;
+use rocket::response::status;
 use rocket::{post, serde::json::Json};
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
@@ -17,7 +18,10 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 /// Create a new extra
 #[openapi(tag = "Extras")]
 #[post("/", format = "json", data = "<data>")]
-async fn new_extra(_db: Database, data: Json<NewExtra>) -> ApiResult<ExtraCreationResponse> {
+async fn new_extra(
+	_db: Database,
+	data: Json<NewExtra>,
+) -> ApiRawResult<status::Created<Json<ExtraCreationResponse>>> {
 	_db.run(move |conn| {
 		conn.transaction::<ExtraCreationResponse, diesel::result::Error, _>(
 			move |connection| -> _ {
@@ -60,10 +64,14 @@ async fn new_extra(_db: Database, data: Json<NewExtra>) -> ApiResult<ExtraCreati
 					package_artist_id: package_artist.map(|a| a.id),
 					package_id: package.id,
 					extra_id: extra.id,
+					file_id: file.id,
 				})
 			},
 		)
 	})
 	.await
-	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	.map_or_else(
+		|e| Err(ApiError::from(e)),
+		|v| Ok(status::Created::new("").body(Json(v))),
+	)
 }

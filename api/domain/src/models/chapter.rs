@@ -5,6 +5,7 @@ use rocket::serde::uuid::Uuid;
 use rocket::serde::Deserialize;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
+use serde::Serialize;
 
 #[derive(
 	QueryableByName,
@@ -32,7 +33,9 @@ pub struct Chapter {
 	pub types: Vec<Option<ChapterType>>,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize, Clone)]
+#[derive(
+	diesel_derive_enum::DbEnum, Debug, PartialEq, JsonSchema, Deserialize, Serialize, Clone,
+)]
 #[DbValueStyle = "PascalCase"]
 #[ExistingTypePath = "crate::schema::sql_types::ChapterTypes"]
 pub enum ChapterType {

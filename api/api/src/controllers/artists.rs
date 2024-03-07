@@ -1,11 +1,12 @@
 use crate::config::Config;
-use crate::error_handling::{ApiError, ApiResult};
+use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
 use crate::responses::artist::ArtistResponse;
 use crate::{services, utils};
 use diesel::Connection;
 use domain::models::image::{Image, ImageType};
 use infrastructure::Database;
 use rocket::fs::TempFile;
+use rocket::response::status;
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_okapi::okapi::openapi3::OpenApi;
@@ -33,7 +34,7 @@ async fn post_artist_image(
 	slug_or_uuid: String,
 	data: TempFile<'_>,
 	config: &State<Config>,
-) -> ApiResult<Image> {
+) -> ApiRawResult<status::Created<Json<Image>>> {
 	let bytes = utils::temp_file_to_bytes_vec(data).await?;
 	let c: Config = config.inner().clone();
 	db.run(move |handle| {
@@ -51,5 +52,5 @@ async fn post_artist_image(
 		})
 	})
 	.await
-	.map(|v| Json(v))
+	.map(|v| status::Created::new("").body(Json(v)))
 }

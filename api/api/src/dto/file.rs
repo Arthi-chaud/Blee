@@ -2,10 +2,10 @@ use crate::swagger_examples::*;
 use domain::models::video_quality::VideoQuality;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// DTO to create a new File
-#[derive(Deserialize, JsonSchema, Clone)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct NewFile {
 	/// The aboslute path of the file
