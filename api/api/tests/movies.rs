@@ -61,8 +61,14 @@ mod test_movie {
 
 		assert_eq!(package_artist_id, artist_id);
 
-		// TODO
 		// Check Movie properties
+		let movie_response = client.get(format!("/movies/{}", movie_id)).dispatch();
+		assert_eq!(movie_response.status(), Status::Ok);
+		let movie_value = response_json_value(movie_response);
+		let name = movie_value.get("name").unwrap().as_str().unwrap();
+		assert_eq!(name, "Miss Americana");
+
+		// TODO
 		// Check Chapters properties
 
 		// Check Artist Exists
@@ -73,7 +79,21 @@ mod test_movie {
 		assert_eq!(name, "Taylor Swift");
 
 		// Check Package Exists
-		// Check Package Artist Exists
+		let package_response = client.get(format!("/packages/{}", package_id)).dispatch();
+		assert_eq!(package_response.status(), Status::Ok);
+		let package_value = response_json_value(package_response);
+		let name = package_value.get("name").unwrap().as_str().unwrap();
+		assert_eq!(name, "Miss Americana");
+		let package_artist_id = package_value.get("artist_id").unwrap().as_str().unwrap();
+		assert_eq!(package_artist_id, artist_id);
+
 		// Check File
+		let file_response = client.get(format!("/files/{}", file_id)).dispatch();
+		assert_eq!(file_response.status(), Status::Ok);
+		let file_value = response_json_value(file_response);
+		let path = file_value.get("path").unwrap().as_str().unwrap();
+		assert_eq!(path, "/data/Taylor Swift/Miss Americana.mp4");
+		let quality = file_value.get("quality").unwrap().as_str().unwrap();
+		assert_eq!(quality, "1080p");
 	}
 }
