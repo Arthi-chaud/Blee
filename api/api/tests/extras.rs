@@ -84,7 +84,10 @@ mod test_extra {
 		assert_eq!(file_response.status(), Status::Ok);
 		let file_value = response_json_value(file_response);
 		let path = file_value.get("path").unwrap().as_str().unwrap();
-		assert_eq!(path, "/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4");
+		assert_eq!(
+			path,
+			"/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4"
+		);
 		let quality = file_value.get("quality").unwrap().as_str().unwrap();
 		assert_eq!(quality, "480p");
 	}

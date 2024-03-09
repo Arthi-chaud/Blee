@@ -8,7 +8,7 @@ mod test_movie {
 	use crate::common::*;
 	use api::dto::{chapter::NewChapter, file::NewFile, movie::NewMovie};
 	use chrono::NaiveDate;
-	use domain::models::{chapter::Chapter, movie::MovieType};
+	use domain::models::movie::MovieType;
 	use rocket::http::{ContentType, Status};
 
 	#[test]
@@ -68,8 +68,28 @@ mod test_movie {
 		let name = movie_value.get("name").unwrap().as_str().unwrap();
 		assert_eq!(name, "Miss Americana");
 
-		// TODO
 		// Check Chapters properties
+		let chapter_response = client
+			.get(format!("/movies/{}/chapters", movie_id))
+			.dispatch();
+		assert_eq!(chapter_response.status(), Status::Ok);
+		let chapter_value = response_json_value(chapter_response);
+		let chapters = chapter_value.as_array().unwrap();
+		assert_eq!(chapters.len(), 2);
+		let chapter_one = chapters.first().unwrap();
+		let chapter_name = chapter_one.get("name").unwrap().as_str().unwrap();
+		assert_eq!(chapter_name, "Part 1");
+		let chapter_start = chapter_one.get("start_time").unwrap().as_i64().unwrap();
+		assert_eq!(chapter_start, 60);
+		let chapter_end = chapter_one.get("end_time").unwrap().as_i64().unwrap();
+		assert_eq!(chapter_end, 120);
+		let chapter_two = chapters.last().unwrap();
+		let chapter_name = chapter_two.get("name").unwrap().as_str().unwrap();
+		assert_eq!(chapter_name, "Part 2");
+		let chapter_start = chapter_two.get("start_time").unwrap().as_i64().unwrap();
+		assert_eq!(chapter_start, 120);
+		let chapter_end = chapter_two.get("end_time").unwrap().as_i64().unwrap();
+		assert_eq!(chapter_end, 180);
 
 		// Check Artist Exists
 		let artist_response = client.get(format!("/artists/{}", artist_id)).dispatch();
