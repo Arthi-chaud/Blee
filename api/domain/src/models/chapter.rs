@@ -17,6 +17,8 @@ use serde::Serialize;
 	Associations,
 	Insertable,
 	Clone,
+	JsonSchema,
+	Serialize,
 )]
 #[diesel(table_name = crate::schema::chapters)]
 #[diesel(check_for_backend(diesel::pg::Pg))]

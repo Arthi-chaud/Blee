@@ -1,7 +1,12 @@
 use diesel::{prelude::*, PgConnection};
-use domain::models::extra::{Extra, ExtraType};
+use domain::models::{
+	extra::{Extra, ExtraType},
+	image::Image,
+};
 use rocket::serde::uuid::Uuid;
 use slug::slugify;
+
+use crate::responses::extra::ExtraResponse;
 
 pub fn create<'s>(
 	extra_name: &'s str,
@@ -29,6 +34,27 @@ pub fn create<'s>(
 
 	diesel::insert_into(extras)
 		.values(&creation_dto)
-		// .select(Extra::as_select())
 		.get_result::<Extra>(connection)
+}
+
+pub fn find(
+	uuid: &Uuid,
+	connection: &mut PgConnection,
+) -> Result<ExtraResponse, diesel::result::Error> {
+	use domain::schema::extras::dsl::*;
+	use domain::schema::images::dsl::images;
+
+	let (extra, image) = extras
+		.filter(id.eq(uuid))
+		.left_join(images)
+		.select((Extra::as_select(), Option::<Image>::as_select()))
+		.first(connection)?;
+
+	Ok(ExtraResponse {
+		extra,
+		thumbnail: image,
+		artist: None,
+		package: None,
+		file: None,
+	})
 }

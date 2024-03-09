@@ -1,3 +1,5 @@
 pub mod artist;
-pub mod extra_creation;
-pub mod movie_creation;
+pub mod chapter;
+pub mod extra;
+pub mod movie;
+pub mod package;

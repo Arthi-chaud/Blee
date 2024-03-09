@@ -34,19 +34,16 @@ pub fn find<'s>(
 	use domain::schema::artists::dsl::*;
 	use domain::schema::images::dsl::images;
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
+	let mut query = artists.left_join(images).into_boxed();
 
-	let (artist, image) = match uuid_parse_result {
-		Ok(uuid) => artists
-			.left_join(images)
-			.filter(id.eq(uuid))
-			.select((Artist::as_select(), Option::<Image>::as_select()))
-			.first(connection),
-		_ => artists
-			.left_join(images)
-			.filter(slug.eq(slug_or_uuid))
-			.select((Artist::as_select(), Option::<Image>::as_select()))
-			.first(connection),
-	}?;
+	if let Ok(uuid) = uuid_parse_result {
+		query = query.filter(id.eq(uuid));
+	} else {
+		query = query.filter(slug.eq(slug_or_uuid))
+	}
+	let (artist, image) = query
+		.select((Artist::as_select(), Option::<Image>::as_select()))
+		.first(connection)?;
 
 	Ok(ArtistResponse {
 		artist,

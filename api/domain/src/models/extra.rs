@@ -9,7 +9,9 @@ use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
+#[derive(
+	Queryable, Identifiable, Selectable, Debug, Associations, PartialEq, Serialize, JsonSchema,
+)]
 #[diesel(table_name = crate::schema::extras)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(belongs_to(Package))]
@@ -28,6 +30,7 @@ pub struct Extra {
 	pub file_id: Uuid,
 	pub disc_index: Option<i16>,
 	pub track_index: Option<i16>,
+	#[serde(rename = "type")]
 	pub type_: Vec<Option<ExtraType>>,
 }
 

@@ -48,8 +48,20 @@ mod test_extra {
 
 		assert_eq!(package_artist_id, artist_id);
 
-		// TODO
-		// Check Extra properties
+		// Check Extra
+		let extra_response = client.get(format!("/extras/{}", extra_id)).dispatch();
+		assert_eq!(extra_response.status(), Status::Ok);
+		let extra_value = response_json_value(extra_response);
+		let name = extra_value.get("name").unwrap().as_str().unwrap();
+		assert_eq!(name, "Secret (Music Video)");
+		let disc_index = extra_value.get("disc_index").unwrap().as_i64().unwrap();
+		assert_eq!(disc_index, 1);
+		let track_index = extra_value.get("track_index").unwrap().as_i64().unwrap();
+		assert_eq!(track_index, 8);
+		let extra_artist_id = extra_value.get("artist_id").unwrap().as_str().unwrap();
+		assert_eq!(extra_artist_id, artist_id);
+		let extra_file_id = extra_value.get("file_id").unwrap().as_str().unwrap();
+		assert_eq!(extra_file_id, file_id);
 
 		// Check Artist Exists
 		let artist_response = client.get(format!("/artists/{}", artist_id)).dispatch();
@@ -59,7 +71,24 @@ mod test_extra {
 		assert_eq!(name, "Madonna");
 
 		// Check Package Exists
-		// Check Package Artist Exists
+		let package_response = client.get(format!("/packages/{}", package_id)).dispatch();
+		assert_eq!(package_response.status(), Status::Ok);
+		let package_value = response_json_value(package_response);
+		let name = package_value.get("name").unwrap().as_str().unwrap();
+		assert_eq!(name, "The Video Collection 93:99");
+		let package_artist_id = package_value.get("artist_id").unwrap().as_str().unwrap();
+		assert_eq!(package_artist_id, artist_id);
+
 		// Check File
+		let file_response = client.get(format!("/files/{}", file_id)).dispatch();
+		assert_eq!(file_response.status(), Status::Ok);
+		let file_value = response_json_value(file_response);
+		let path = file_value.get("path").unwrap().as_str().unwrap();
+		assert_eq!(
+			path,
+			"/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4"
+		);
+		let quality = file_value.get("quality").unwrap().as_str().unwrap();
+		assert_eq!(quality, "480p");
 	}
 }

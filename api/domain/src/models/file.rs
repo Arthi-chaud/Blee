@@ -1,9 +1,12 @@
 use diesel::prelude::*;
 use rocket::serde::uuid::Uuid;
+use rocket_okapi::okapi::schemars;
+use rocket_okapi::okapi::schemars::JsonSchema;
+use serde::Serialize;
 
 use super::video_quality::VideoQuality;
 
-#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq)]
+#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Serialize, JsonSchema)]
 #[diesel(table_name = crate::schema::files)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 /// A File

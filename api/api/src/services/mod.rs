@@ -1,5 +1,6 @@
 pub mod artist;
 pub mod chapter;
+pub mod chapters;
 pub mod extra;
 pub mod file;
 pub mod image;

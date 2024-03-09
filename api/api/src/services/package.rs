@@ -1,7 +1,9 @@
 use ::slug::slugify;
 use diesel::{prelude::*, ExpressionMethods, PgConnection};
-use domain::models::{artist::Artist, package::Package};
+use domain::models::{artist::Artist, image::Image, package::Package};
 use rocket::serde::uuid::Uuid;
+
+use crate::responses::package::PackageResponse;
 
 pub fn create_or_find<'s>(
 	artist: Option<Artist>,
@@ -40,4 +42,31 @@ pub fn create_or_find<'s>(
 		.filter(slug.eq(package_slug))
 		.select(Package::as_select())
 		.first(connection)
+}
+
+pub fn find(
+	slug_or_uuid: &String,
+	connection: &mut PgConnection,
+) -> Result<PackageResponse, diesel::result::Error> {
+	use domain::schema::images::dsl as image_dsl;
+	use domain::schema::packages::dsl::*;
+	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
+	let mut query = packages
+		.left_join(image_dsl::images.on(image_dsl::id.nullable().eq(poster_id)))
+		.into_boxed();
+	if let Ok(uuid) = uuid_parse_result {
+		query = query.filter(id.eq(uuid));
+	} else {
+		query = query.filter(slug.eq(slug_or_uuid))
+	}
+
+	let (package, poster) = query
+		.select((Package::as_select(), Option::<Image>::as_select()))
+		.first(connection)?;
+
+	Ok(PackageResponse {
+		package,
+		poster,
+		artist: None,
+	})
 }
