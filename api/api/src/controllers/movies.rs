@@ -1,6 +1,6 @@
 use crate::dto::movie::NewMovie;
-use crate::error_handling::{ApiError, ApiRawResult};
-use crate::responses::movie_creation::MovieCreationResponse;
+use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
+use crate::responses::movie::{MovieCreationResponse, MovieResponse};
 use crate::services;
 use diesel::Connection;
 use domain::models::artist::Artist;
@@ -12,7 +12,7 @@ use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: new_movie]
+	openapi_get_routes_spec![settings: new_movie, get_movie]
 }
 
 /// Create a new movie with its chapters
@@ -76,4 +76,13 @@ async fn new_movie(
 		|e| Err(ApiError::from(e)),
 		|v| Ok(status::Created::new("").body(Json(v))),
 	)
+}
+
+/// Get a Single Movie
+#[openapi(tag = "Movies")]
+#[get("/<slug_or_uuid>")]
+async fn get_movie(db: Database, slug_or_uuid: String) -> ApiResult<MovieResponse> {
+	db.run(move |conn| services::movie::find(&slug_or_uuid, conn))
+		.await
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
 }

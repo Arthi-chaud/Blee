@@ -66,8 +66,10 @@ fn create_server() -> Rocket<Build> {
 		building_rocket, "/".to_owned(), openapi_settings,
 		"/artists" => controllers::artists::get_routes_and_docs(&openapi_settings),
 		"/extras" => controllers::extras::get_routes_and_docs(&openapi_settings),
+		"/files" => controllers::files::get_routes_and_docs(&openapi_settings),
 		"/images" => controllers::images::get_routes_and_docs(&openapi_settings),
 		"/movies" => controllers::movies::get_routes_and_docs(&openapi_settings),
+		"/packages" => controllers::packages::get_routes_and_docs(&openapi_settings),
 		"/swagger" => (vec![], custom_openapi_spec()),
 	};
 

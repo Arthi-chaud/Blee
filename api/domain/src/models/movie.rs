@@ -9,7 +9,9 @@ use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Identifiable, Selectable, Debug, Associations, PartialEq)]
+#[derive(
+	Queryable, Identifiable, Selectable, Debug, Associations, PartialEq, JsonSchema, Serialize,
+)]
 #[diesel(table_name = crate::schema::movies)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(belongs_to(Package))]
@@ -26,6 +28,7 @@ pub struct Movie {
 	pub package_id: Uuid,
 	pub artist_id: Uuid,
 	pub file_id: Uuid,
+	#[serde(rename = "type")]
 	pub type_: MovieType,
 }
 

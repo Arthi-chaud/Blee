@@ -13,6 +13,7 @@ pub struct Image {
 	pub blurhash: String,
 	pub colors: Vec<Option<String>>,
 	pub aspect_ratio: f64,
+	#[serde(rename = "type")]
 	pub type_: ImageType,
 }
 

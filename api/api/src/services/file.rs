@@ -1,5 +1,6 @@
 use diesel::prelude::*;
 use domain::models::{file::File, video_quality::VideoQuality};
+use rocket::serde::uuid::Uuid;
 
 pub fn create_or_find<'s>(
 	file_path: &'s str,
@@ -25,4 +26,10 @@ pub fn create_or_find<'s>(
 	diesel::insert_into(files)
 		.values(&creation_dto)
 		.get_result(connection)
+}
+
+pub fn find(uuid: &Uuid, connection: &mut PgConnection) -> Result<File, diesel::result::Error> {
+	use domain::schema::files::dsl::*;
+
+	files.filter(id.eq(uuid)).first(connection)
 }

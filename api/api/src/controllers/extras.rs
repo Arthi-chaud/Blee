@@ -1,18 +1,19 @@
 use crate::dto::extra::NewExtra;
-use crate::error_handling::{ApiError, ApiRawResult};
-use crate::responses::extra_creation::ExtraCreationResponse;
+use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
+use crate::responses::extra::{ExtraCreationResponse, ExtraResponse};
 use crate::services;
 use diesel::Connection;
 use domain::models::artist::Artist;
 use infrastructure::Database;
 use rocket::response::status;
+use rocket::serde::uuid::Uuid;
 use rocket::{post, serde::json::Json};
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: new_extra]
+	openapi_get_routes_spec![settings: new_extra, get_extra]
 }
 
 /// Create a new extra
@@ -74,4 +75,13 @@ async fn new_extra(
 		|e| Err(ApiError::from(e)),
 		|v| Ok(status::Created::new("").body(Json(v))),
 	)
+}
+
+/// Get a Single extra
+#[openapi(tag = "Extras")]
+#[get("/<uuid>")]
+async fn get_extra(db: Database, uuid: Uuid) -> ApiResult<ExtraResponse> {
+	db.run(move |conn| services::extra::find(&uuid, conn))
+		.await
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
 }
