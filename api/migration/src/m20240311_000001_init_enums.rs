@@ -10,7 +10,7 @@ pub struct Migration;
 #[derive(DeriveIden)]
 struct ChapterTypeEnum;
 #[derive(DeriveIden, EnumIter)]
-enum ChapterType {
+pub enum ChapterType {
 	Performance,
 	Interview,
 	NonMusicalInterview,
@@ -20,7 +20,7 @@ enum ChapterType {
 #[derive(DeriveIden)]
 struct ExtraTypeEnum;
 #[derive(DeriveIden, EnumIter)]
-enum ExtraType {
+pub enum ExtraType {
 	Trailer,
 	Interview,
 	BehindTheScenes,
@@ -34,7 +34,7 @@ enum ExtraType {
 #[derive(DeriveIden)]
 struct MovieTypeEnum;
 #[derive(DeriveIden, EnumIter)]
-enum MovieType {
+pub enum MovieType {
 	Concert,
 	Documentary,
 }
@@ -42,7 +42,7 @@ enum MovieType {
 #[derive(DeriveIden)]
 struct ImageTypeEnum;
 #[derive(DeriveIden, EnumIter)]
-enum ImageType {
+pub enum ImageType {
 	Poster,
 	Banner,
 	Thumbnail,
@@ -51,7 +51,7 @@ enum ImageType {
 #[derive(DeriveIden)]
 struct VideoQualityEnum;
 #[derive(Iden, EnumIter)]
-enum VideoQuality {
+pub enum VideoQuality {
 	#[iden = "8k"]
 	K8,
 	#[iden = "4k"]
