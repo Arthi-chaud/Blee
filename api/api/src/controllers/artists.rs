@@ -1,10 +1,10 @@
 use crate::config::Config;
+use crate::database::Database;
+use crate::dto::artist::ArtistWithPosterResponse;
+use crate::dto::image::ImageResponse;
 use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
-use crate::responses::artist::ArtistResponse;
 use crate::{services, utils};
-use diesel::Connection;
-use domain::models::image::{Image, ImageType};
-use infrastructure::Database;
+use entity::sea_orm_active_enums::ImageTypeEnum;
 use rocket::fs::TempFile;
 use rocket::response::status;
 use rocket::serde::json::Json;
@@ -20,8 +20,8 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 /// Find an Artist
 #[openapi(tag = "Artists")]
 #[get("/<slug_or_uuid>")]
-async fn get_artist(_db: Database, slug_or_uuid: String) -> ApiResult<ArtistResponse> {
-	_db.run(move |conn| services::artist::find(&slug_or_uuid, conn))
+async fn get_artist(db: Database<'_>, slug_or_uuid: String) -> ApiResult<ArtistWithPosterResponse> {
+	services::artist::find(&slug_or_uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
 }
@@ -30,27 +30,27 @@ async fn get_artist(_db: Database, slug_or_uuid: String) -> ApiResult<ArtistResp
 #[openapi(tag = "Artists")]
 #[post("/<slug_or_uuid>/poster", data = "<data>")]
 async fn post_artist_image(
-	db: Database,
+	db: Database<'_>,
 	slug_or_uuid: String,
 	data: TempFile<'_>,
 	config: &State<Config>,
-) -> ApiRawResult<status::Created<Json<Image>>> {
+) -> ApiRawResult<status::Created<Json<ImageResponse>>> {
 	let bytes = utils::temp_file_to_bytes_vec(data).await?;
 	let c: Config = config.inner().clone();
-	db.run(move |handle| {
-		handle.transaction(move |conn| -> Result<Image, ApiError> {
-			let artist =
-				services::artist::find(&slug_or_uuid, conn).map_err(|e| ApiError::from(e))?;
-			let new_poster = services::image::create(&bytes, ImageType::Poster, conn, &c)?;
+	let conn = db.into_inner();
 
-			if let Some(image) = artist.poster {
-				let _ = services::image::delete(&image.id, conn, &c);
-			}
-			services::artist::set_poster(&new_poster.id, &artist.artist.id, conn)
-				.map_err(|e| ApiError::from(e))?;
-			Ok(new_poster)
-		})
-	})
-	.await
-	.map(|v| status::Created::new("").body(Json(v)))
+	let artist = services::artist::find(&slug_or_uuid, conn)
+		.await
+		.map_err(|e| ApiError::from(e))?;
+	let new_poster = services::image::create(&bytes, ImageTypeEnum::Poster, conn, &c)
+		.await
+		.map_err(|e| ApiError::from(e))?;
+
+	if let Some(image) = artist.poster {
+		let _ = services::image::delete(&image.id, conn, &c);
+	}
+	services::artist::set_poster(&new_poster.id, &artist.artist.id, conn)
+		.await
+		.map_err(|e| ApiError::from(e))?;
+	Ok(status::Created::new("").body(Json(ImageResponse::from(new_poster))))
 }

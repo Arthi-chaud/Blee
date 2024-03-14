@@ -1,66 +1,70 @@
-use diesel::prelude::*;
-use diesel::update;
-use diesel::PgConnection;
-use domain::models::artist::Artist;
-use domain::models::image::Image;
+use crate::dto::artist::ArtistWithPosterResponse;
+use entity::{artist, image};
+use migration::Expr;
 use rocket::serde::uuid::Uuid;
+use sea_orm::{sea_query, ActiveValue::Set, ColumnTrait, DbConn, DbErr, EntityTrait, QueryFilter};
 use slug::slugify;
 
-use crate::responses::artist::ArtistResponse;
-
-pub fn create_or_find<'s>(
+pub async fn create_or_find<'s>(
 	artist_name: &'s str,
-	connection: &mut PgConnection,
-) -> Result<Artist, diesel::result::Error> {
-	use domain::schema::artists::dsl::*;
+	connection: &DbConn,
+) -> Result<artist::Model, DbErr> {
 	let artist_slug = slugify(artist_name.to_owned());
+	let new_artist = artist::ActiveModel {
+		name: Set(artist_name.to_owned()),
+		slug: Set(artist_slug.clone()),
+		..Default::default()
+	};
 
-	diesel::insert_into(artists)
-		.values((name.eq(artist_name), slug.eq(&artist_slug)))
-		.on_conflict(slug)
-		.do_nothing()
-		.execute(connection)?;
+	artist::Entity::insert(new_artist.clone())
+		.on_conflict(
+			sea_query::OnConflict::column(artist::Column::Slug)
+				.do_nothing()
+				.to_owned(),
+		)
+		.exec(connection)
+		.await;
 
-	artists
-		.filter(slug.eq(&artist_slug))
-		.select(Artist::as_select())
-		.first(connection)
+	artist::Entity::find()
+		.filter(artist::Column::Slug.eq(artist_slug))
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("".to_string())), |r| Ok(r))
 }
 
-pub fn find<'s>(
+pub async fn find<'s>(
 	slug_or_uuid: &'s str,
-	connection: &mut PgConnection,
-) -> Result<ArtistResponse, diesel::result::Error> {
-	use domain::schema::artists::dsl::*;
-	use domain::schema::images::dsl::images;
+	connection: &DbConn,
+) -> Result<ArtistWithPosterResponse, DbErr> {
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
-	let mut query = artists.left_join(images).into_boxed();
+	let mut query = artist::Entity::find();
 
 	if let Ok(uuid) = uuid_parse_result {
-		query = query.filter(id.eq(uuid));
+		query = query.filter(artist::Column::Id.eq(uuid));
 	} else {
-		query = query.filter(slug.eq(slug_or_uuid))
+		query = query.filter(artist::Column::Slug.eq(slug_or_uuid));
 	}
 	let (artist, image) = query
-		.select((Artist::as_select(), Option::<Image>::as_select()))
-		.first(connection)?;
+		.find_also_related(image::Entity)
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("Artist".to_string())), |r| Ok(r))?;
 
-	Ok(ArtistResponse {
-		artist,
-		poster: image,
+	Ok(ArtistWithPosterResponse {
+		artist: artist.into(),
+		poster: image.map(|i| i.into()),
 	})
 }
 
-pub fn set_poster<'s>(
+pub async fn set_poster<'s>(
 	poster_uuid: &Uuid,
 	artist_uuid: &Uuid,
-	connection: &mut PgConnection,
-) -> Result<(), diesel::result::Error> {
-	use domain::schema::artists::dsl::*;
-
-	update(artists)
-		.filter(id.eq(artist_uuid))
-		.set(poster_id.eq(poster_uuid))
-		.execute(connection)
+	connection: &DbConn,
+) -> Result<(), DbErr> {
+	artist::Entity::update_many()
+		.col_expr(artist::Column::PosterId, Expr::value(*poster_uuid))
+		.filter(artist::Column::Id.eq(*artist_uuid))
+		.exec(connection)
+		.await
 		.map(|_| ())
 }

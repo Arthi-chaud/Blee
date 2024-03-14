@@ -1,7 +1,8 @@
+use crate::database::Database;
+use crate::dto::file::FileResponse;
 use crate::error_handling::{ApiError, ApiResult};
 use crate::services;
-use domain::models::file::File;
-use infrastructure::Database;
+use entity::file;
 use rocket::serde::json::Json;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::openapi3::OpenApi;
@@ -15,8 +16,8 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 /// Get a Single File
 #[openapi(tag = "Files")]
 #[get("/<uuid>")]
-async fn get_file(db: Database, uuid: Uuid) -> ApiResult<File> {
-	db.run(move |conn| services::file::find(&uuid, conn))
+async fn get_file(db: Database<'_>, uuid: Uuid) -> ApiResult<FileResponse> {
+	services::file::find(&uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
 }

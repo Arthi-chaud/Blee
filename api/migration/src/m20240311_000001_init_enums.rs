@@ -124,6 +124,21 @@ impl MigrationTrait for Migration {
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-		todo!();
+		manager
+			.drop_type(
+				sea_query::extension::postgres::Type::drop()
+					.if_exists()
+					.names(vec![
+						SeaRc::new(VideoQualityEnum) as DynIden,
+						SeaRc::new(ChapterTypeEnum) as DynIden,
+						SeaRc::new(ImageTypeEnum) as DynIden,
+						SeaRc::new(ExtraTypeEnum) as DynIden,
+						SeaRc::new(MovieTypeEnum) as DynIden,
+					])
+					.to_owned(),
+			)
+			.await?;
+
+		Ok(())
 	}
 }

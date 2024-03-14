@@ -109,7 +109,11 @@ impl MigrationTrait for Migration {
 							.enumeration(Alias::new("image_type_enum"), ImageType::iter())
 							.not_null(),
 					)
-					.col(ColumnDef::new(Image::Colors).array(ColumnType::Unsigned))
+					.col(
+						ColumnDef::new(Image::Colors)
+							.array(ColumnType::String(Some(7)))
+							.not_null(),
+					)
 					.to_owned(),
 			)
 			.await?;
@@ -197,7 +201,7 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-package-poster_id")
 							.from(Package::Table, Package::PosterId)
-							.to(Artist::Table, Artist::Id),
+							.to(Image::Table, Image::Id),
 					)
 					.to_owned(),
 			)
@@ -244,8 +248,8 @@ impl MigrationTrait for Migration {
 							.from(Extra::Table, Extra::FileId)
 							.to(File::Table, File::Id),
 					)
-					.col(ColumnDef::new(Extra::DiscIndex).small_unsigned())
-					.col(ColumnDef::new(Extra::TrackIndex).small_unsigned())
+					.col(ColumnDef::new(Extra::DiscIndex).unsigned())
+					.col(ColumnDef::new(Extra::TrackIndex).unsigned())
 					.col(
 						//TODO: Should be an array
 						ColumnDef::new(Extra::Type)
@@ -326,8 +330,9 @@ impl MigrationTrait for Migration {
 							.from(Chapter::Table, Chapter::MovieId)
 							.to(Movie::Table, Movie::Id),
 					)
-					.col(ColumnDef::new(Chapter::StartTime).big_unsigned())
-					.col(ColumnDef::new(Chapter::EndTime).big_unsigned())
+					.col(ColumnDef::new(Chapter::StartTime).unsigned().not_null())
+					.col(ColumnDef::new(Chapter::EndTime).unsigned().not_null())
+					//TODO: Should be an array
 					.col(
 						ColumnDef::new(Chapter::Type)
 							.enumeration(Alias::new("chapter_type_enum"), ChapterType::iter())

@@ -1,21 +1,23 @@
 use crate::config::Config;
 use crate::controllers::index::index;
+use crate::database::Db;
 use crate::error_handling::not_found;
 use crate::swagger::custom_openapi_spec;
-use infrastructure::{apply_migrations, Database};
-use rocket::fairing::AdHoc;
+use migration::MigratorTrait;
+use rocket::fairing::{self, AdHoc};
 use rocket::figment::providers::Serialized;
 use rocket::figment::Figment;
 use rocket::{Build, Rocket};
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
+use sea_orm_rocket::Database;
 use std::env;
 
 pub mod config;
 mod controllers;
+mod database;
 pub mod dto;
 mod error_handling;
-pub mod responses;
 pub mod services;
 mod swagger;
 mod swagger_examples;
@@ -29,14 +31,10 @@ pub fn rocket() -> Rocket<Build> {
 	create_server()
 }
 
-async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
-	let _ = Database::get_one(&rocket)
-		.await
-		.expect("Get DB Handle from Rocket")
-		.run(|conn| apply_migrations(conn))
-		.await;
-
-	rocket
+async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
+	let conn = &Db::fetch(&rocket).unwrap().conn;
+	let _ = migration::Migrator::up(conn, None).await;
+	Ok(rocket)
 }
 
 fn create_server() -> Rocket<Build> {
@@ -45,9 +43,9 @@ fn create_server() -> Rocket<Build> {
 		data_folder: data_dir,
 	}));
 	let mut building_rocket = rocket::custom(figment)
-		.attach(Database::fairing())
+		.attach(Db::init())
 		.attach(AdHoc::config::<Config>())
-		.attach(AdHoc::on_ignite("Run migrations", run_migrations))
+		.attach(AdHoc::try_on_ignite("Run migrations", run_migrations))
 		.register("/", catchers![not_found])
 		.mount(
 			"/swagger",
