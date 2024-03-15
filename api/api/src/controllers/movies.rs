@@ -1,17 +1,17 @@
-use crate::dto::movie::NewMovie;
+use crate::database::Database;
+use crate::dto::artist::ArtistResponse;
+use crate::dto::chapter::ChapterResponseWithThumbnail;
+use crate::dto::movie::MovieCreationResponse;
+use crate::dto::movie::{MovieResponseWithRelations, NewMovie};
 use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
-use crate::responses::chapter::ChapterResponse;
-use crate::responses::movie::{MovieCreationResponse, MovieResponse};
 use crate::services;
-use diesel::Connection;
-use domain::models::artist::Artist;
-use infrastructure::Database;
 use rocket::response::status;
 use rocket::serde::uuid::Uuid;
 use rocket::{post, serde::json::Json};
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
+use sea_orm::{DbErr, TransactionTrait};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
 	openapi_get_routes_spec![settings: new_movie, get_movie, get_movie_chapters]
@@ -21,34 +21,33 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 #[openapi(tag = "Movies")]
 #[post("/", format = "json", data = "<data>")]
 async fn new_movie(
-	_db: Database,
+	db: Database<'_>,
 	data: Json<NewMovie>,
 ) -> ApiRawResult<status::Created<Json<MovieCreationResponse>>> {
-	_db.run(move |conn| {
-		conn.transaction::<MovieCreationResponse, diesel::result::Error, _>(
-			move |connection| -> _ {
+	db.into_inner()
+		.transaction::<_, MovieCreationResponse, DbErr>(|txn| {
+			Box::pin(async move {
 				let file = services::file::create_or_find(
 					&data.file.path,
 					data.file.size,
 					data.file.quality,
-					connection,
-				)?;
-				let package_artist = data.package_artist_name.clone().map_or(
-					Ok::<Option<Artist>, diesel::result::Error>(None),
-					|artist_name| {
-						Ok(Some(services::artist::create_or_find(
-							&artist_name,
-							connection,
-						)?))
-					},
-				)?;
-				let movie_artist = services::artist::create_or_find(&data.artist_name, connection)?;
+					txn,
+				)
+				.await?;
+				let mut package_artist: Option<ArtistResponse> = None;
+
+				if let Some(pa_name) = &data.package_artist_name {
+					package_artist = Some(services::artist::create_or_find(&pa_name, txn).await?);
+				}
+
+				let movie_artist = services::artist::create_or_find(&data.artist_name, txn).await?;
 				let package = services::package::create_or_find(
-					package_artist.clone(),
+					&package_artist,
 					&data.package_name,
 					data.package_release_date,
-					connection,
-				)?;
+					txn,
+				)
+				.await?;
 
 				let movie = services::movie::create(
 					&data.movie_name,
@@ -56,11 +55,12 @@ async fn new_movie(
 					&movie_artist,
 					&package.id,
 					&file.id,
-					connection,
-				)?;
+					txn,
+				)
+				.await?;
 
 				let chapter_results =
-					services::chapter::create_many(&data.chapters, &movie.id, connection)?;
+					services::chapter::create_many(&data.chapters, &movie.id, txn).await?;
 
 				Ok(MovieCreationResponse {
 					artist_id: movie_artist.id,
@@ -70,21 +70,23 @@ async fn new_movie(
 					chapters_id: chapter_results.iter().map(|c| c.id).collect(),
 					file_id: file.id,
 				})
-			},
+			})
+		})
+		.await
+		.map_or_else(
+			|e| Err(ApiError::from(e)),
+			|v| Ok(status::Created::new("").body(Json(v))),
 		)
-	})
-	.await
-	.map_or_else(
-		|e| Err(ApiError::from(e)),
-		|v| Ok(status::Created::new("").body(Json(v))),
-	)
 }
 
 /// Get a Single Movie
 #[openapi(tag = "Movies")]
 #[get("/<slug_or_uuid>")]
-async fn get_movie(db: Database, slug_or_uuid: String) -> ApiResult<MovieResponse> {
-	db.run(move |conn| services::movie::find(&slug_or_uuid, conn))
+async fn get_movie(
+	db: Database<'_>,
+	slug_or_uuid: String,
+) -> ApiResult<MovieResponseWithRelations> {
+	services::movie::find(&slug_or_uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
 }
@@ -92,8 +94,11 @@ async fn get_movie(db: Database, slug_or_uuid: String) -> ApiResult<MovieRespons
 /// Get a Movie's Chapters
 #[openapi(tag = "Movies")]
 #[get("/<uuid>/chapters")]
-async fn get_movie_chapters(db: Database, uuid: Uuid) -> ApiResult<Vec<ChapterResponse>> {
-	db.run(move |conn| services::chapters::find_by_movie(&uuid, conn))
+async fn get_movie_chapters(
+	db: Database<'_>,
+	uuid: Uuid,
+) -> ApiResult<Vec<ChapterResponseWithThumbnail>> {
+	services::chapter::find_by_movie(&uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
 }

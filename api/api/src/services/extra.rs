@@ -1,58 +1,55 @@
-use diesel::{prelude::*, PgConnection};
-use domain::models::{
-	extra::{Extra, ExtraType},
-	image::Image,
-};
+use crate::dto::extra::{ExtraResponseWithRelations, ExtraType};
+use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
+use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
 use slug::slugify;
 
-use crate::responses::extra::ExtraResponse;
-
-pub fn create<'s>(
+pub async fn create<'s, 'a, C>(
 	extra_name: &'s str,
-	disc: Option<i16>,
-	track: Option<i16>,
+	disc: Option<i32>,
+	track: Option<i32>,
 	types: &Vec<ExtraType>,
 	package_uuid: &Uuid,
 	artist_uuid: &Uuid,
 	file_uuid: &Uuid,
-	connection: &mut PgConnection,
-) -> Result<Extra, diesel::result::Error> {
-	use domain::schema::extras::dsl::*;
-	let option_types: Vec<Option<ExtraType>> = types.iter().map(|e| Some(e.clone())).collect();
+	connection: &'a C,
+) -> Result<extra::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
+	let creation_dto = extra::ActiveModel {
+		name: Set(extra_name.to_string()),
+		slug: Set(slugify(extra_name)),
+		package_id: Set(*package_uuid),
+		artist_id: Set(*artist_uuid),
+		file_id: Set(*file_uuid),
+		disc_index: Set(disc),
+		track_index: Set(track),
+		r#type: Set(types.iter().map(|e| ExtraTypeEnum::from(*e)).collect()),
+		..Default::default()
+	};
 
-	let creation_dto = (
-		name.eq(extra_name),
-		slug.eq(slugify(extra_name)),
-		package_id.eq(package_uuid),
-		artist_id.eq(artist_uuid),
-		file_id.eq(file_uuid),
-		disc_index.eq(disc),
-		track_index.eq(track),
-		type_.eq(option_types),
-	);
-
-	diesel::insert_into(extras)
-		.values(&creation_dto)
-		.get_result::<Extra>(connection)
+	extra::Entity::insert(creation_dto)
+		.exec_with_returning(connection)
+		.await
 }
 
-pub fn find(
+pub async fn find<'a, C>(
 	uuid: &Uuid,
-	connection: &mut PgConnection,
-) -> Result<ExtraResponse, diesel::result::Error> {
-	use domain::schema::extras::dsl::*;
-	use domain::schema::images::dsl::images;
+	connection: &'a C,
+) -> Result<ExtraResponseWithRelations, DbErr>
+where
+	C: ConnectionTrait,
+{
+	let (extra, image) = extra::Entity::find_by_id(*uuid)
+		.find_also_related(image::Entity)
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("Extra".to_string())), |r| Ok(r))?;
 
-	let (extra, image) = extras
-		.filter(id.eq(uuid))
-		.left_join(images)
-		.select((Extra::as_select(), Option::<Image>::as_select()))
-		.first(connection)?;
-
-	Ok(ExtraResponse {
-		extra,
-		thumbnail: image,
+	Ok(ExtraResponseWithRelations {
+		extra: extra.into(),
+		thumbnail: image.map(|x| x.into()),
 		artist: None,
 		package: None,
 		file: None,

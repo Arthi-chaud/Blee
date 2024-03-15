@@ -1,14 +1,15 @@
-use api;
-use diesel::{sql_query, RunQueryDsl};
-use infrastructure::Database;
+use api::{self, database::Db};
+use entity::{artist, chapter, extra, file, movie, package};
 use once_cell::sync::OnceCell;
 use rocket::{
 	fairing::AdHoc,
 	local::blocking::{Client, LocalResponse},
 	Build, Rocket,
 };
+use sea_orm::{EntityTrait, Set};
+use sea_orm_rocket::Database;
 use serde_json::Value;
-use std::{fs, sync::Mutex};
+use std::sync::Mutex;
 // SRC https://github.com/TatriX/realworld-rust-rocket/blob/master/tests/common.rs
 
 /// Helper function for converting response to json value.
@@ -26,15 +27,22 @@ pub fn test_client() -> &'static Mutex<Client> {
 }
 
 pub async fn seed_data(rocket: Rocket<Build>) -> Rocket<Build> {
-	let _ = Database::get_one(&rocket)
-		.await
-		.expect("Get DB Handle from Rocket")
-		.run(|conn| {
-			for line in fs::read_to_string("./tests/seed.sql").unwrap().lines() {
-				let _ = sql_query(line).execute(conn).or_else(|_| Err(()));
-			}
-		})
-		.await;
+	let conn = &Db::fetch(&rocket).unwrap().conn;
+
+	let _ = extra::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = package::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = artist::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = file::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = movie::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = chapter::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = artist::Entity::insert(artist::ActiveModel {
+		name: Set("Aretha Franklin".to_string()),
+		slug: Set("aretha-franklin".to_string()),
+		..Default::default()
+	})
+	.exec_with_returning(conn)
+	.await
+	.unwrap();
 
 	rocket
 }

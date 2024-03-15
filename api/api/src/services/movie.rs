@@ -1,60 +1,63 @@
-use diesel::{prelude::*, PgConnection};
-use domain::models::{
-	artist::Artist,
-	image::Image,
-	movie::{Movie, MovieType},
+use crate::dto::{
+	artist::ArtistResponse,
+	movie::{MovieResponseWithRelations, MovieType},
 };
+use entity::{image, movie};
 use rocket::serde::uuid::Uuid;
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
 use slug::slugify;
 
-use crate::responses::movie::MovieResponse;
-
-pub fn create<'s>(
+pub async fn create<'s, 'a, C>(
 	movie_name: &'s str,
 	movie_type: MovieType,
-	artist: &Artist,
+	artist: &ArtistResponse,
 	package_uuid: &Uuid,
 	file_uuid: &Uuid,
-	connection: &mut PgConnection,
-) -> Result<Movie, diesel::result::Error> {
-	use domain::schema::movies::dsl::*;
-	let creation_dto = (
-		name.eq(movie_name),
-		slug.eq(slugify(format!("{} {}", artist.name, movie_name))),
-		package_id.eq(package_uuid),
-		type_.eq(movie_type),
-		artist_id.eq(artist.id),
-		file_id.eq(file_uuid),
-	);
+	connection: &'a C,
+) -> Result<movie::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
+	let new_movie = movie::ActiveModel {
+		name: Set(movie_name.to_string()),
+		slug: Set(slugify(format!("{} {}", artist.name, movie_name))),
+		package_id: Set(*package_uuid),
+		r#type: Set(movie_type.into()),
+		artist_id: Set(artist.id),
+		file_id: Set(*file_uuid),
+		..Default::default()
+	};
 
-	diesel::insert_into(movies)
-		.values(&creation_dto)
-		// .select(Extra::as_select())
-		.get_result::<Movie>(connection)
+	movie::Entity::insert(new_movie.clone())
+		.exec_with_returning(connection)
+		.await
 }
 
-pub fn find(
+pub async fn find<'a, C>(
 	slug_or_uuid: &String,
-	connection: &mut PgConnection,
-) -> Result<MovieResponse, diesel::result::Error> {
-	use domain::schema::images::dsl::images;
-	use domain::schema::movies::dsl::*;
+	connection: &'a C,
+) -> Result<MovieResponseWithRelations, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
-	let mut query = movies.left_join(images).into_boxed();
+	let mut query = movie::Entity::find();
 
 	if let Ok(uuid) = uuid_parse_result {
-		query = query.filter(id.eq(uuid));
+		query = query.filter(movie::Column::Id.eq(uuid));
 	} else {
-		query = query.filter(slug.eq(slug_or_uuid))
+		query = query.filter(movie::Column::Slug.eq(slug_or_uuid));
 	}
 
 	let (movie, poster) = query
-		.select((Movie::as_select(), Option::<Image>::as_select()))
-		.first(connection)?;
+		.find_also_related(image::Entity)
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("Movie".to_string())), |r| Ok(r))?;
 
-	Ok(MovieResponse {
-		movie,
-		poster,
+	Ok(MovieResponseWithRelations {
+		movie: movie.into(),
+		poster: poster.map(|x| x.into()),
 		artist: None,
 		package: None,
 		file: None,

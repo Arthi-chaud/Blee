@@ -14,6 +14,10 @@ pub fn example_artist_name() -> &'static str {
 	"My Artist"
 }
 
+pub fn example_artist_slug() -> &'static str {
+	"my-artist"
+}
+
 pub fn example_chapter_name() -> &'static str {
 	"I Love New York..."
 }
@@ -44,4 +48,20 @@ pub fn example_extra_name() -> &'static str {
 
 pub fn example_movie_type() -> &'static str {
 	"Concert"
+}
+
+pub fn example_description() -> &'static str {
+	"This is a short description of some kind of content."
+}
+
+pub fn example_image_blurhash() -> &'static str {
+	"L00000fQfQfQfQfQfQfQfQfQfQfQ"
+}
+
+pub fn example_image_ratio() -> f32 {
+	4 as f32 / 3 as f32
+}
+
+pub fn example_image_colors() -> Vec<&'static str> {
+	vec!["#ffffff", "#000000", "#ff0000"]
 }

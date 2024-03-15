@@ -1,7 +1,5 @@
 use std::io::Cursor;
 
-use diesel::result::DatabaseErrorKind;
-use diesel::result::Error as DieselError;
 use rocket::http::ContentType;
 use rocket::http::Status;
 use rocket::response::{self, Responder, Response};
@@ -12,11 +10,15 @@ use rocket_okapi::okapi::openapi3::Responses;
 use rocket_okapi::okapi::Map;
 use rocket_okapi::response::OpenApiResponderInner;
 use rocket_okapi::OpenApiError;
+use sea_orm::error::DbErr;
+use sea_orm::SqlErr;
+use sea_orm::TransactionError;
 use serde::Serialize;
 
 #[derive(Debug)]
 pub enum ApiError {
-	DieselError(DieselError),
+	DatabaseError(DbErr),
+	SqlError(SqlErr),
 	ImageProcessingError,
 	ImageServingError,
 }
@@ -42,14 +44,11 @@ impl<'r> Responder<'r, 'static> for ApiError {
 				status_code: Status::NotFound,
 				message: "Could not serve requested image.",
 			},
-			ApiError::DieselError(DieselError::NotFound) => ErrorResponse {
+			ApiError::DatabaseError(DbErr::RecordNotFound(_)) => ErrorResponse {
 				status_code: Status::NotFound,
 				message: "Resource not found.",
 			},
-			ApiError::DieselError(DieselError::DatabaseError(
-				DatabaseErrorKind::UniqueViolation,
-				_,
-			)) => ErrorResponse {
+			ApiError::SqlError(SqlErr::UniqueConstraintViolation(_)) => ErrorResponse {
 				status_code: Status::Conflict,
 				message: "Resource already exists.",
 			},
@@ -70,9 +69,24 @@ impl<'r> Responder<'r, 'static> for ApiError {
 	}
 }
 
-impl From<DieselError> for ApiError {
-	fn from(error: DieselError) -> ApiError {
-		ApiError::DieselError(error)
+impl From<DbErr> for ApiError {
+	fn from(error: DbErr) -> ApiError {
+		ApiError::DatabaseError(error)
+	}
+}
+
+impl From<SqlErr> for ApiError {
+	fn from(error: SqlErr) -> ApiError {
+		ApiError::SqlError(error)
+	}
+}
+
+impl From<TransactionError<DbErr>> for ApiError {
+	fn from(error: TransactionError<DbErr>) -> ApiError {
+		match error {
+			TransactionError::Connection(c) => ApiError::from(c),
+			TransactionError::Transaction(c) => ApiError::from(c),
+		}
 	}
 }
 

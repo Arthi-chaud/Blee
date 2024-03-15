@@ -1,7 +1,7 @@
 use crate::config::Config;
+use crate::database::Database;
 use crate::error_handling::ApiError;
 use crate::services;
-use infrastructure::Database;
 use rocket::fs::NamedFile;
 use rocket::serde::uuid::Uuid;
 use rocket::State;
@@ -19,12 +19,12 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 #[get("/<uuid>")]
 async fn serve_image(
 	uuid: Uuid,
-	db: Database,
+	db: Database<'_>,
 	config: &State<Config>,
 ) -> Result<NamedFile, ApiError> {
-	let image_row = db
-		.run(move |conn| services::image::get(&uuid, conn).map_err(|e| ApiError::from(e)))
-		.await?;
+	let image_row = services::image::get(&uuid, db.into_inner())
+		.await
+		.map_err(|e| ApiError::from(e))?;
 	let image_path = Path::new(&config.data_folder)
 		.join(image_row.id.to_string())
 		.join("image.webp");

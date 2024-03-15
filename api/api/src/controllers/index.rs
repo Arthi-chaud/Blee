@@ -1,4 +1,4 @@
-use infrastructure::Database;
+use crate::database::Database;
 use rocket::{get, serde::json::Json};
 use serde::Serialize;
 
@@ -8,7 +8,7 @@ pub struct IndexResponse {
 }
 
 #[get("/")]
-pub fn index(_db: Database) -> Json<IndexResponse> {
+pub fn index(_db: Database<'_>) -> Json<IndexResponse> {
 	Json(IndexResponse {
 		message: "Welcome to Blee's API. Hit '/swagger' for more!",
 	})

@@ -1,35 +1,36 @@
-use diesel::prelude::*;
-use domain::models::{file::File, video_quality::VideoQuality};
+use entity::file;
 use rocket::serde::uuid::Uuid;
+use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
 
-pub fn create_or_find<'s>(
+use crate::dto::file::{FileResponse, VideoQuality};
+
+pub async fn create_or_find<'s, 'a, C>(
 	file_path: &'s str,
-	file_size: i64,
+	file_size: u64,
 	video_quality: VideoQuality,
-	connection: &mut PgConnection,
-) -> Result<File, diesel::result::Error> {
-	use domain::schema::files::dsl::*;
-
-	#[derive(Insertable)]
-	#[diesel(table_name = domain::schema::files)]
-	struct NewFile<'s> {
-		path: &'s str,
-		size: i64,
-		quality: VideoQuality,
-	}
-	let creation_dto = NewFile {
-		path: file_path,
-		size: file_size,
-		quality: video_quality,
-	};
-
-	diesel::insert_into(files)
-		.values(&creation_dto)
-		.get_result(connection)
+	connection: &'a C,
+) -> Result<file::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
+	file::Entity::insert(file::ActiveModel {
+		path: Set(file_path.to_string()),
+		size: Set(file_size as i64),
+		quality: Set(video_quality.into()),
+		..Default::default()
+	})
+	.exec_with_returning(connection)
+	.await
 }
 
-pub fn find(uuid: &Uuid, connection: &mut PgConnection) -> Result<File, diesel::result::Error> {
-	use domain::schema::files::dsl::*;
-
-	files.filter(id.eq(uuid)).first(connection)
+pub async fn find<'a, C>(uuid: &Uuid, connection: &'a C) -> Result<FileResponse, DbErr>
+where
+	C: ConnectionTrait,
+{
+	file::Entity::find_by_id(uuid.clone())
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("File".to_string())), |r| {
+			Ok(r.into())
+		})
 }

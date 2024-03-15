@@ -6,9 +6,12 @@ mod test_movie {
 	use std::vec;
 
 	use crate::common::*;
-	use api::dto::{chapter::NewChapter, file::NewFile, movie::NewMovie};
+	use api::dto::{
+		chapter::NewChapter,
+		file::{NewFile, VideoQuality},
+		movie::{MovieType, NewMovie},
+	};
 	use chrono::NaiveDate;
-	use domain::models::movie::MovieType;
 	use rocket::http::{ContentType, Status};
 
 	#[test]
@@ -25,7 +28,7 @@ mod test_movie {
 			file: NewFile {
 				path: "/data/Taylor Swift/Miss Americana.mp4".to_owned(),
 				size: 160000,
-				quality: domain::models::video_quality::VideoQuality::P1080,
+				quality: VideoQuality::P1080,
 			},
 			chapters: vec![
 				NewChapter {
