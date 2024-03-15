@@ -2,9 +2,10 @@ use ::blurhash::encode;
 use ::image::{io::Reader as ImageReader, EncodableLayout, GenericImageView};
 use colors_transform::Rgb;
 use entity::image;
-use entity::sea_orm_active_enums::ImageTypeEnum;
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
+use sea_orm::ColumnTrait;
+use sea_orm::QueryFilter;
+use sea_orm::{prelude::Expr, ConnectionTrait, DbErr, EntityTrait, Set};
 use std::fs;
 use std::io::Cursor;
 use std::io::Write;
@@ -12,11 +13,44 @@ use std::path::Path;
 use webp::Encoder;
 
 use crate::config::Config;
+use crate::dto::image::ImageType;
 use crate::error_handling::ApiError;
 
-pub async fn create<'s, 'a, C>(
+/// Handles the image's bytes, create a row in the db and links it to the parent
+/// resource (e.g. artist)
+pub async fn save_image<'a, E, C, T>(
+	bytes: &Vec<u8>,
+	image_type: ImageType,
+	previous_image_id: Option<Uuid>,
+	owner_id: &Uuid, // UUID of the resource that own the image
+	_parent_entity: E,
+	parent_id_column: T,
+	parent_image_column: T, // PosterId
+	conn: &'a C,
+	config: &Config,
+) -> Result<image::Model, ApiError>
+where
+	C: ConnectionTrait,
+	E: EntityTrait,
+	T: ColumnTrait,
+{
+	let new_poster = self::create(&bytes, image_type, conn, &config).await?;
+
+	if let Some(image_id) = previous_image_id {
+		let _ = self::delete(&image_id, conn, &config);
+	}
+	let _ = E::update_many()
+		.col_expr(parent_image_column, Expr::value(new_poster.id))
+		.filter(parent_id_column.eq(*owner_id))
+		.exec(conn)
+		.await
+		.map(|_| ());
+	Ok(new_poster)
+}
+
+async fn create<'s, 'a, C>(
 	image_bytes: &Vec<u8>,
-	image_type: ImageTypeEnum,
+	image_type: ImageType,
 	connection: &'a C,
 	config: &Config,
 ) -> Result<image::Model, ApiError>
@@ -57,7 +91,7 @@ where
 				blurhash: Set(blurhash_value),
 				colors: Set(top_colors_hex),
 				aspect_ratio: Set((width as f32) / (height as f32)),
-				r#type: Set(image_type),
+				r#type: Set(image_type.into()),
 				..Default::default()
 			},
 			webp_image.as_bytes().to_vec(),

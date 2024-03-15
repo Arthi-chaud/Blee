@@ -1,12 +1,18 @@
+use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
 use crate::dto::extra::ExtraCreationResponse;
 use crate::dto::extra::ExtraResponseWithRelations;
 use crate::dto::extra::NewExtra;
+use crate::dto::image::ImageResponse;
 use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
 use crate::services;
+use crate::utils;
+use entity::extra;
+use rocket::fs::TempFile;
 use rocket::response::status;
 use rocket::serde::uuid::Uuid;
+use rocket::State;
 use rocket::{post, serde::json::Json};
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
@@ -15,7 +21,7 @@ use sea_orm::DbErr;
 use sea_orm::TransactionTrait;
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: new_extra, get_extra]
+	openapi_get_routes_spec![settings: new_extra, get_extra, post_extra_thumbnail]
 }
 
 /// Create a new extra
@@ -83,4 +89,35 @@ async fn get_extra(db: Database<'_>, uuid: Uuid) -> ApiResult<ExtraResponseWithR
 	services::extra::find(&uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+}
+
+/// Upload an Extra's Thumbnail
+#[openapi(tag = "Extras")]
+#[post("/<uuid>/thumbnail", data = "<data>")]
+async fn post_extra_thumbnail(
+	db: Database<'_>,
+	uuid: Uuid,
+	data: TempFile<'_>,
+	config: &State<Config>,
+) -> ApiRawResult<status::Created<Json<ImageResponse>>> {
+	let bytes = utils::temp_file_to_bytes_vec(data).await?;
+	let conn = db.into_inner();
+
+	let extra = services::extra::find(&uuid, conn)
+		.await
+		.map_err(|e| ApiError::from(e))?;
+	let new_poster = services::image::save_image(
+		&bytes,
+		crate::dto::image::ImageType::Thumbnail,
+		extra.thumbnail.map(|t| t.id),
+		&extra.extra.id,
+		extra::Entity,
+		extra::Column::Id,
+		extra::Column::ThumbnailId,
+		conn,
+		config,
+	)
+	.await?;
+
+	Ok(status::Created::new("").body(Json(ImageResponse::from(new_poster))))
 }
