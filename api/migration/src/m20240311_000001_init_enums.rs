@@ -8,7 +8,7 @@ use sea_orm_migration::{
 pub struct Migration;
 
 #[derive(DeriveIden)]
-struct ChapterTypeEnum;
+pub struct ChapterTypeEnum;
 #[derive(DeriveIden, EnumIter)]
 pub enum ChapterType {
 	Performance,
@@ -18,7 +18,7 @@ pub enum ChapterType {
 }
 
 #[derive(DeriveIden)]
-struct ExtraTypeEnum;
+pub struct ExtraTypeEnum;
 #[derive(DeriveIden, EnumIter)]
 pub enum ExtraType {
 	Trailer,

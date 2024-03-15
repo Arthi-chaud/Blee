@@ -16,7 +16,7 @@ pub struct Model {
 	pub package_id: Uuid,
 	pub artist_id: Uuid,
 	pub file_id: Uuid,
-	pub registered_at: Option<Date>,
+	pub registered_at: Date,
 	pub r#type: MovieTypeEnum,
 }
 

@@ -1,22 +1,28 @@
-use crate::dto::movie::MovieResponse;
-use entity::{artist, image, movie, sea_orm_active_enums::MovieTypeEnum};
+use crate::dto::{
+	artist::ArtistResponse,
+	movie::{MovieResponseWithRelations, MovieType},
+};
+use entity::{image, movie};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, DbConn, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
 use slug::slugify;
 
-pub async fn create<'s>(
+pub async fn create<'s, 'a, C>(
 	movie_name: &'s str,
-	movie_type: MovieTypeEnum,
-	artist: &artist::Model,
+	movie_type: MovieType,
+	artist: &ArtistResponse,
 	package_uuid: &Uuid,
 	file_uuid: &Uuid,
-	connection: &DbConn,
-) -> Result<movie::Model, DbErr> {
+	connection: &'a C,
+) -> Result<movie::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let new_movie = movie::ActiveModel {
 		name: Set(movie_name.to_string()),
 		slug: Set(slugify(format!("{} {}", artist.name, movie_name))),
 		package_id: Set(*package_uuid),
-		r#type: Set(movie_type),
+		r#type: Set(movie_type.into()),
 		artist_id: Set(artist.id),
 		file_id: Set(*file_uuid),
 		..Default::default()
@@ -27,7 +33,13 @@ pub async fn create<'s>(
 		.await
 }
 
-pub async fn find(slug_or_uuid: &String, connection: &DbConn) -> Result<MovieResponse, DbErr> {
+pub async fn find<'a, C>(
+	slug_or_uuid: &String,
+	connection: &'a C,
+) -> Result<MovieResponseWithRelations, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
 	let mut query = movie::Entity::find();
 
@@ -43,9 +55,9 @@ pub async fn find(slug_or_uuid: &String, connection: &DbConn) -> Result<MovieRes
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Movie".to_string())), |r| Ok(r))?;
 
-	Ok(MovieResponse {
-		movie,
-		poster,
+	Ok(MovieResponseWithRelations {
+		movie: movie.into(),
+		poster: poster.map(|x| x.into()),
 		artist: None,
 		package: None,
 		file: None,

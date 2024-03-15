@@ -31,7 +31,7 @@ impl From<image::Model> for ImageResponse {
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-enum ImageType {
+pub enum ImageType {
 	Banner,
 	Poster,
 	Thumbnail,

@@ -1,6 +1,6 @@
 use crate::swagger_examples::*;
+use entity::chapter;
 use entity::sea_orm_active_enums::ChapterTypeEnum;
-use entity::{chapter, image};
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
@@ -30,7 +30,7 @@ pub struct ChapterResponse {
 	pub start_time: i32,
 	/// the end timespamp of the chapter, in seconds
 	pub end_time: i32,
-	pub r#type: ChapterType,
+	pub r#type: Vec<ChapterType>,
 }
 
 impl From<chapter::Model> for ChapterResponse {
@@ -42,12 +42,12 @@ impl From<chapter::Model> for ChapterResponse {
 			movie_id: value.movie_id,
 			start_time: value.start_time,
 			end_time: value.end_time,
-			r#type: value.r#type.into(),
+			r#type: value.r#type.iter().map(|e| e.clone().into()).collect(),
 		}
 	}
 }
 
-#[derive(Serialize, JsonSchema, Deserialize)]
+#[derive(Serialize, JsonSchema, Deserialize, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 pub enum ChapterType {
 	Interview,
@@ -63,6 +63,17 @@ impl From<ChapterTypeEnum> for ChapterType {
 			ChapterTypeEnum::NonMusicalInterview => ChapterType::NonMusicalInterview,
 			ChapterTypeEnum::Performance => ChapterType::Performance,
 			ChapterTypeEnum::Other => ChapterType::Other,
+		}
+	}
+}
+
+impl From<ChapterType> for ChapterTypeEnum {
+	fn from(value: ChapterType) -> Self {
+		match value {
+			ChapterType::Interview => ChapterTypeEnum::Interview,
+			ChapterType::NonMusicalInterview => ChapterTypeEnum::NonMusicalInterview,
+			ChapterType::Performance => ChapterTypeEnum::Performance,
+			ChapterType::Other => ChapterTypeEnum::Other,
 		}
 	}
 }

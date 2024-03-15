@@ -2,7 +2,6 @@ use crate::database::Database;
 use crate::dto::file::FileResponse;
 use crate::error_handling::{ApiError, ApiResult};
 use crate::services;
-use entity::file;
 use rocket::serde::json::Json;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::openapi3::OpenApi;

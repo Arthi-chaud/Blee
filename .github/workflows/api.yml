@@ -60,7 +60,7 @@ jobs:
     needs: [ Build ]
     if: ${{ needs.changes.outputs.api == 'true' && always() }}
     env:
-      ROCKET_DATABASES: '{db={url="postgresql://test:test@localhost:5432/test"}}'
+      ROCKET_DATABASES: '{sea_orm={url="postgresql://test:test@localhost:5432/test"}}'
       CONFIG_DIR: "./data"
     services:
       postgres:

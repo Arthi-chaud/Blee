@@ -1,5 +1,7 @@
 use crate::swagger_examples::*;
 use chrono::NaiveDateTime;
+use entity::movie;
+use entity::sea_orm_active_enums::MovieTypeEnum;
 use rocket::serde;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
@@ -48,6 +50,22 @@ pub struct MovieResponse {
 	pub type_: MovieType,
 }
 
+impl From<movie::Model> for MovieResponse {
+	fn from(value: movie::Model) -> Self {
+		MovieResponse {
+			id: value.id,
+			name: value.name,
+			slug: value.slug,
+			poster_id: value.poster_id,
+			registered_at: value.registered_at.into(),
+			package_id: value.package_id,
+			artist_id: value.artist_id,
+			file_id: value.file_id,
+			type_: value.r#type.into(),
+		}
+	}
+}
+
 /// DTO to create a new Movie
 #[derive(Deserialize, JsonSchema, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -84,9 +102,27 @@ pub struct MovieCreationResponse {
 	pub chapters_id: Vec<Uuid>,
 }
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, JsonSchema, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
-enum MovieType {
+pub enum MovieType {
 	Concert,
 	Documentary,
+}
+
+impl From<MovieTypeEnum> for MovieType {
+	fn from(value: MovieTypeEnum) -> Self {
+		match value {
+			MovieTypeEnum::Concert => MovieType::Concert,
+			MovieTypeEnum::Documentary => MovieType::Documentary,
+		}
+	}
+}
+
+impl From<MovieType> for MovieTypeEnum {
+	fn from(value: MovieType) -> Self {
+		match value {
+			MovieType::Concert => MovieTypeEnum::Concert,
+			MovieType::Documentary => MovieTypeEnum::Documentary,
+		}
+	}
 }

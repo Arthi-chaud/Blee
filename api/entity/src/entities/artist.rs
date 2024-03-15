@@ -13,7 +13,7 @@ pub struct Model {
 	pub slug: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub description: Option<String>,
-	pub registered_at: Option<Date>,
+	pub registered_at: Date,
 	pub poster_id: Option<Uuid>,
 }
 

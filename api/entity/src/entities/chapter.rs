@@ -14,7 +14,7 @@ pub struct Model {
 	pub movie_id: Uuid,
 	pub start_time: i32,
 	pub end_time: i32,
-	pub r#type: ChapterTypeEnum,
+	pub r#type: Vec<ChapterTypeEnum>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

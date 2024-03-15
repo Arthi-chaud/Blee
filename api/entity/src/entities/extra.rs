@@ -12,13 +12,13 @@ pub struct Model {
 	pub name: String,
 	pub slug: String,
 	pub thumbnail_id: Option<Uuid>,
-	pub registered_at: Option<Date>,
+	pub registered_at: Date,
 	pub package_id: Uuid,
 	pub artist_id: Uuid,
 	pub file_id: Uuid,
 	pub disc_index: Option<i32>,
 	pub track_index: Option<i32>,
-	pub r#type: ExtraTypeEnum,
+	pub r#type: Vec<ExtraTypeEnum>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

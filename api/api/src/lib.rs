@@ -15,7 +15,7 @@ use std::env;
 
 pub mod config;
 mod controllers;
-mod database;
+pub mod database;
 pub mod dto;
 mod error_handling;
 pub mod services;

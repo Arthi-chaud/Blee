@@ -1,14 +1,19 @@
-use crate::dto::artist::ArtistWithPosterResponse;
+use crate::dto::artist::{ArtistResponse, ArtistWithPosterResponse};
 use entity::{artist, image};
 use migration::Expr;
 use rocket::serde::uuid::Uuid;
-use sea_orm::{sea_query, ActiveValue::Set, ColumnTrait, DbConn, DbErr, EntityTrait, QueryFilter};
+use sea_orm::{
+	sea_query, ActiveValue::Set, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter,
+};
 use slug::slugify;
 
-pub async fn create_or_find<'s>(
+pub async fn create_or_find<'s, 'a, C>(
 	artist_name: &'s str,
-	connection: &DbConn,
-) -> Result<artist::Model, DbErr> {
+	connection: &'a C,
+) -> Result<ArtistResponse, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let artist_slug = slugify(artist_name.to_owned());
 	let new_artist = artist::ActiveModel {
 		name: Set(artist_name.to_owned()),
@@ -16,7 +21,7 @@ pub async fn create_or_find<'s>(
 		..Default::default()
 	};
 
-	artist::Entity::insert(new_artist.clone())
+	let _ = artist::Entity::insert(new_artist.clone())
 		.on_conflict(
 			sea_query::OnConflict::column(artist::Column::Slug)
 				.do_nothing()
@@ -29,13 +34,16 @@ pub async fn create_or_find<'s>(
 		.filter(artist::Column::Slug.eq(artist_slug))
 		.one(connection)
 		.await?
-		.map_or(Err(DbErr::RecordNotFound("".to_string())), |r| Ok(r))
+		.map_or(Err(DbErr::RecordNotFound("".to_string())), |r| Ok(r.into()))
 }
 
-pub async fn find<'s>(
+pub async fn find<'s, 'a, C>(
 	slug_or_uuid: &'s str,
-	connection: &DbConn,
-) -> Result<ArtistWithPosterResponse, DbErr> {
+	connection: &'a C,
+) -> Result<ArtistWithPosterResponse, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
 	let mut query = artist::Entity::find();
 
@@ -56,11 +64,14 @@ pub async fn find<'s>(
 	})
 }
 
-pub async fn set_poster<'s>(
+pub async fn set_poster<'s, 'a, C>(
 	poster_uuid: &Uuid,
 	artist_uuid: &Uuid,
-	connection: &DbConn,
-) -> Result<(), DbErr> {
+	connection: &'a C,
+) -> Result<(), DbErr>
+where
+	C: ConnectionTrait,
+{
 	artist::Entity::update_many()
 		.col_expr(artist::Column::PosterId, Expr::value(*poster_uuid))
 		.filter(artist::Column::Id.eq(*artist_uuid))

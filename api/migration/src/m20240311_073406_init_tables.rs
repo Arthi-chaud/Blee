@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Iterable};
 
 use crate::m20240311_000001_init_enums::{
-	ChapterType, ExtraType, ImageType, MovieType, VideoQuality,
+	ChapterType, ChapterTypeEnum, ExtraType, ExtraTypeEnum, ImageType, MovieType, VideoQuality,
 };
 
 #[derive(DeriveMigrationName)]
@@ -101,7 +101,13 @@ impl MigrationTrait for Migration {
 				Table::create()
 					.table(Image::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(Image::Id).uuid().not_null().primary_key())
+					.col(
+						ColumnDef::new(Image::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
 					.col(ColumnDef::new(Image::Blurhash).string().not_null())
 					.col(ColumnDef::new(Image::AspectRatio).float().not_null())
 					.col(
@@ -122,7 +128,13 @@ impl MigrationTrait for Migration {
 				Table::create()
 					.table(Artist::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(Artist::Id).uuid().not_null().primary_key())
+					.col(
+						ColumnDef::new(Artist::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
 					.col(ColumnDef::new(Artist::Name).string().not_null())
 					.col(
 						ColumnDef::new(Artist::Slug)
@@ -134,6 +146,7 @@ impl MigrationTrait for Migration {
 					.col(
 						ColumnDef::new(Artist::RegisteredAt)
 							.date()
+							.not_null()
 							.default(Expr::current_date()),
 					)
 					.col(ColumnDef::new(Artist::PosterId).uuid())
@@ -151,7 +164,13 @@ impl MigrationTrait for Migration {
 				Table::create()
 					.table(File::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(File::Id).uuid().not_null().primary_key())
+					.col(
+						ColumnDef::new(File::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
 					.col(ColumnDef::new(File::Path).string().not_null().unique_key())
 					.col(ColumnDef::new(File::Size).big_unsigned().not_null())
 					.col(
@@ -174,7 +193,13 @@ impl MigrationTrait for Migration {
 				Table::create()
 					.table(Package::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(Package::Id).uuid().not_null().primary_key())
+					.col(
+						ColumnDef::new(Package::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
 					.col(ColumnDef::new(Package::Name).string().not_null())
 					.col(
 						ColumnDef::new(Package::Slug)
@@ -187,6 +212,7 @@ impl MigrationTrait for Migration {
 					.col(
 						ColumnDef::new(Package::RegisteredAt)
 							.date()
+							.not_null()
 							.default(Expr::current_date()),
 					)
 					.col(ColumnDef::new(Package::ArtistId).uuid())
@@ -212,7 +238,13 @@ impl MigrationTrait for Migration {
 				Table::create()
 					.table(Extra::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(Extra::Id).uuid().not_null().primary_key())
+					.col(
+						ColumnDef::new(Extra::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
 					.col(ColumnDef::new(Extra::Name).string().not_null())
 					.col(ColumnDef::new(Extra::Slug).string().not_null())
 					.col(ColumnDef::new(Extra::ThumbnailId).uuid())
@@ -225,6 +257,7 @@ impl MigrationTrait for Migration {
 					.col(
 						ColumnDef::new(Extra::RegisteredAt)
 							.date()
+							.not_null()
 							.default(Expr::current_date()),
 					)
 					.col(ColumnDef::new(Extra::PackageId).uuid().not_null())
@@ -251,9 +284,11 @@ impl MigrationTrait for Migration {
 					.col(ColumnDef::new(Extra::DiscIndex).unsigned())
 					.col(ColumnDef::new(Extra::TrackIndex).unsigned())
 					.col(
-						//TODO: Should be an array
 						ColumnDef::new(Extra::Type)
-							.enumeration(Alias::new("extra_type_enum"), ExtraType::iter())
+							.array(ColumnType::Enum {
+								name: ExtraTypeEnum.into_iden(),
+								variants: ExtraType::iter().map(|e| e.into_iden()).collect(),
+							})
 							.not_null(),
 					)
 					.to_owned(),
@@ -264,7 +299,13 @@ impl MigrationTrait for Migration {
 				Table::create()
 					.table(Movie::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(Movie::Id).uuid().not_null().primary_key())
+					.col(
+						ColumnDef::new(Movie::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
 					.col(ColumnDef::new(Movie::Name).string().not_null())
 					.col(ColumnDef::new(Movie::Slug).string().not_null().unique_key())
 					.col(ColumnDef::new(Movie::PosterId).uuid())
@@ -298,6 +339,7 @@ impl MigrationTrait for Migration {
 					.col(
 						ColumnDef::new(Movie::RegisteredAt)
 							.date()
+							.not_null()
 							.default(Expr::current_date()),
 					)
 					.col(
@@ -314,7 +356,13 @@ impl MigrationTrait for Migration {
 				Table::create()
 					.table(Chapter::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(Chapter::Id).uuid().not_null().primary_key())
+					.col(
+						ColumnDef::new(Chapter::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
 					.col(ColumnDef::new(Chapter::Name).string().not_null())
 					.col(ColumnDef::new(Chapter::ThumbnailId).uuid())
 					.foreign_key(
@@ -332,10 +380,12 @@ impl MigrationTrait for Migration {
 					)
 					.col(ColumnDef::new(Chapter::StartTime).unsigned().not_null())
 					.col(ColumnDef::new(Chapter::EndTime).unsigned().not_null())
-					//TODO: Should be an array
 					.col(
 						ColumnDef::new(Chapter::Type)
-							.enumeration(Alias::new("chapter_type_enum"), ChapterType::iter())
+							.array(ColumnType::Enum {
+								name: ChapterTypeEnum.into_iden(),
+								variants: ChapterType::iter().map(|e| e.into_iden()).collect(),
+							})
 							.not_null(),
 					)
 					.to_owned(),

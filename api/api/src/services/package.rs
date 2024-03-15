@@ -1,28 +1,31 @@
-use crate::dto::package::PackageResponse;
+use crate::dto::{artist::ArtistResponse, package::PackageResponseWithRelations};
 use ::slug::slugify;
-use entity::{artist, image, package};
+use entity::{image, package};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{sea_query, ColumnTrait, DbConn, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
 
-pub async fn create_or_find<'s>(
-	artist: Option<artist::Model>,
+pub async fn create_or_find<'s, 'a, C>(
+	artist: &Option<ArtistResponse>,
 	package_name: &'s str,
 	release_date: Option<chrono::NaiveDate>,
-	connection: &DbConn,
-) -> Result<package::Model, DbErr> {
+	connection: &'a C,
+) -> Result<package::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let artist_name = artist
-		.clone()
+		.as_ref()
 		.map_or(String::from("Various Artist"), |a| a.name.clone());
 	let package_slug = slugify(format!("{} {}", artist_name, package_name));
 	let new_package = package::ActiveModel {
 		name: Set(package_name.to_string()),
 		slug: Set(package_slug.to_owned()),
 		release_year: Set(release_date),
-		artist_id: Set(artist.map(|a| a.id)),
+		artist_id: Set(artist.as_ref().map(|a| a.id)),
 		..Default::default()
 	};
 
-	package::Entity::insert(new_package.clone())
+	let _ = package::Entity::insert(new_package.clone())
 		.on_conflict(
 			sea_query::OnConflict::column(package::Column::Slug)
 				.do_nothing()
@@ -38,7 +41,13 @@ pub async fn create_or_find<'s>(
 		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))
 }
 
-pub async fn find(slug_or_uuid: &String, connection: &DbConn) -> Result<PackageResponse, DbErr> {
+pub async fn find<'a, C>(
+	slug_or_uuid: &String,
+	connection: &'a C,
+) -> Result<PackageResponseWithRelations, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
 	let mut query = package::Entity::find();
 
@@ -54,9 +63,9 @@ pub async fn find(slug_or_uuid: &String, connection: &DbConn) -> Result<PackageR
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))?;
 
-	Ok(PackageResponse {
-		package,
-		poster,
+	Ok(PackageResponseWithRelations {
+		package: package.into(),
+		poster: poster.map(|x| x.into()),
 		artist: None,
 	})
 }

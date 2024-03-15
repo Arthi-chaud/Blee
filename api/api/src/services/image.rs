@@ -1,15 +1,10 @@
 use ::blurhash::encode;
-use ::image::io::Reader as ImageReader;
-use ::image::EncodableLayout;
-use ::image::GenericImageView;
+use ::image::{io::Reader as ImageReader, EncodableLayout, GenericImageView};
 use colors_transform::Rgb;
 use entity::image;
 use entity::sea_orm_active_enums::ImageTypeEnum;
 use rocket::serde::uuid::Uuid;
-use sea_orm::DbConn;
-use sea_orm::DbErr;
-use sea_orm::EntityTrait;
-use sea_orm::Set;
+use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
 use std::fs;
 use std::io::Cursor;
 use std::io::Write;
@@ -19,14 +14,16 @@ use webp::Encoder;
 use crate::config::Config;
 use crate::error_handling::ApiError;
 
-pub async fn create<'s>(
+pub async fn create<'s, 'a, C>(
 	image_bytes: &Vec<u8>,
 	image_type: ImageTypeEnum,
-	connection: &DbConn,
+	connection: &'a C,
 	config: &Config,
-) -> Result<image::Model, ApiError> {
-	let webp_image;
-	let new_image_row: Result<image::ActiveModel, ApiError> = {
+) -> Result<image::Model, ApiError>
+where
+	C: ConnectionTrait,
+{
+	let res: Result<(image::ActiveModel, Vec<u8>), ApiError> = {
 		let img = ImageReader::new(Cursor::new(image_bytes))
 			.with_guessed_format()
 			.map_err(|_| ApiError::ImageProcessingError)?
@@ -34,7 +31,7 @@ pub async fn create<'s>(
 			.map_err(|_| ApiError::ImageProcessingError)?;
 		let (width, height) = img.dimensions();
 
-		webp_image = Encoder::from_image(&img)
+		let webp_image = Encoder::from_image(&img)
 			.map_err(|_| ApiError::ImageProcessingError)?
 			.encode(100f32);
 		let decoded_bytes = img.to_rgba8();
@@ -55,16 +52,20 @@ pub async fn create<'s>(
 			.collect();
 		let blurhash_value = encode(3, 4, width, height, &decoded_bytes)
 			.map_err(|_| ApiError::ImageProcessingError)?;
-		Ok(image::ActiveModel {
-			blurhash: Set(blurhash_value),
-			colors: Set(top_colors_hex),
-			aspect_ratio: Set((width as f32) / (height as f32)),
-			r#type: Set(image_type),
-			..Default::default()
-		})
+		Ok((
+			image::ActiveModel {
+				blurhash: Set(blurhash_value),
+				colors: Set(top_colors_hex),
+				aspect_ratio: Set((width as f32) / (height as f32)),
+				r#type: Set(image_type),
+				..Default::default()
+			},
+			webp_image.as_bytes().to_vec(),
+		))
 	};
 
-	let saved_image = image::Entity::insert(new_image_row?)
+	let (new_image_row, webp_image) = res?;
+	let saved_image = image::Entity::insert(new_image_row)
 		.exec_with_returning(connection)
 		.await?;
 
@@ -76,17 +77,20 @@ pub async fn create<'s>(
 		.open(image_dir.join("image.webp"))
 		.map_err(|_| ApiError::ImageProcessingError)?;
 
-	file.write_all(&webp_image.as_bytes())
+	file.write_all(&webp_image)
 		.map_err(|_| ApiError::ImageProcessingError)?;
 
 	Ok(saved_image)
 }
 
-pub async fn delete<'s>(
+pub async fn delete<'s, 'a, C>(
 	image_uuid: &Uuid,
-	connection: &DbConn,
+	connection: &'a C,
 	config: &Config,
-) -> Result<(), DbErr> {
+) -> Result<(), DbErr>
+where
+	C: ConnectionTrait,
+{
 	use entity::prelude::Image;
 	Image::delete_by_id(image_uuid.to_owned())
 		.exec(connection)
@@ -97,7 +101,10 @@ pub async fn delete<'s>(
 	Ok(())
 }
 
-pub async fn get(image_uuid: &Uuid, connection: &DbConn) -> Result<image::Model, DbErr> {
+pub async fn get<'a, C>(image_uuid: &Uuid, connection: &'a C) -> Result<image::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
 	image::Entity::find_by_id(image_uuid.clone())
 		.one(connection)
 		.await?

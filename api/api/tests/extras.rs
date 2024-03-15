@@ -4,9 +4,11 @@ mod common;
 mod test_extra {
 
 	use crate::common::*;
-	use api::dto::{extra::NewExtra, file::NewFile};
+	use api::dto::{
+		extra::{ExtraType, NewExtra},
+		file::{NewFile, VideoQuality},
+	};
 	use chrono::NaiveDate;
-	use domain::models::extra::ExtraType;
 	use rocket::http::{ContentType, Status};
 
 	#[test]
@@ -26,7 +28,7 @@ mod test_extra {
 				path: "/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4"
 					.to_owned(),
 				size: 160000,
-				quality: domain::models::video_quality::VideoQuality::P420,
+				quality: VideoQuality::P480,
 			},
 		};
 		let response = client

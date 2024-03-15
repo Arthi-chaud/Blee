@@ -1,19 +1,22 @@
-use crate::dto::extra::ExtraResponseWithRelations;
+use crate::dto::extra::{ExtraResponseWithRelations, ExtraType};
 use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{DbConn, DbErr, EntityTrait, Set};
+use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
 use slug::slugify;
 
-pub async fn create<'s>(
+pub async fn create<'s, 'a, C>(
 	extra_name: &'s str,
 	disc: Option<i32>,
 	track: Option<i32>,
-	types: &Vec<ExtraTypeEnum>,
+	types: &Vec<ExtraType>,
 	package_uuid: &Uuid,
 	artist_uuid: &Uuid,
 	file_uuid: &Uuid,
-	connection: &DbConn,
-) -> Result<extra::Model, DbErr> {
+	connection: &'a C,
+) -> Result<extra::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let creation_dto = extra::ActiveModel {
 		name: Set(extra_name.to_string()),
 		slug: Set(slugify(extra_name)),
@@ -22,7 +25,7 @@ pub async fn create<'s>(
 		file_id: Set(*file_uuid),
 		disc_index: Set(disc),
 		track_index: Set(track),
-		r#type: Set(types.first().unwrap().clone()), //TODO
+		r#type: Set(types.iter().map(|e| ExtraTypeEnum::from(*e)).collect()),
 		..Default::default()
 	};
 
@@ -31,7 +34,13 @@ pub async fn create<'s>(
 		.await
 }
 
-pub async fn find(uuid: &Uuid, connection: &DbConn) -> Result<ExtraResponseWithRelations, DbErr> {
+pub async fn find<'a, C>(
+	uuid: &Uuid,
+	connection: &'a C,
+) -> Result<ExtraResponseWithRelations, DbErr>
+where
+	C: ConnectionTrait,
+{
 	let (extra, image) = extra::Entity::find_by_id(*uuid)
 		.find_also_related(image::Entity)
 		.one(connection)

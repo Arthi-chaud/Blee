@@ -58,7 +58,6 @@ pub fn example_image_blurhash() -> &'static str {
 	"L00000fQfQfQfQfQfQfQfQfQfQfQ"
 }
 
-
 pub fn example_image_ratio() -> f32 {
 	4 as f32 / 3 as f32
 }

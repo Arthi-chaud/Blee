@@ -12,6 +12,7 @@ use rocket_okapi::response::OpenApiResponderInner;
 use rocket_okapi::OpenApiError;
 use sea_orm::error::DbErr;
 use sea_orm::SqlErr;
+use sea_orm::TransactionError;
 use serde::Serialize;
 
 #[derive(Debug)]
@@ -77,6 +78,15 @@ impl From<DbErr> for ApiError {
 impl From<SqlErr> for ApiError {
 	fn from(error: SqlErr) -> ApiError {
 		ApiError::SqlError(error)
+	}
+}
+
+impl From<TransactionError<DbErr>> for ApiError {
+	fn from(error: TransactionError<DbErr>) -> ApiError {
+		match error {
+			TransactionError::Connection(c) => ApiError::from(c),
+			TransactionError::Transaction(c) => ApiError::from(c),
+		}
 	}
 }
 

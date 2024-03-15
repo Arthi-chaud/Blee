@@ -14,7 +14,7 @@ pub struct Model {
 	pub release_year: Option<Date>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub description: Option<String>,
-	pub registered_at: Option<Date>,
+	pub registered_at: Date,
 	pub artist_id: Option<Uuid>,
 	pub poster_id: Option<Uuid>,
 }

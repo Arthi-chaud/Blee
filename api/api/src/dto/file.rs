@@ -45,8 +45,8 @@ impl From<file::Model> for FileResponse {
 	}
 }
 
-#[derive(Deserialize, Serialize, JsonSchema, Clone)]
-enum VideoQuality {
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
+pub enum VideoQuality {
 	#[serde(rename(deserialize = "8k", serialize = "8k"))]
 	K8,
 	#[serde(rename(deserialize = "4k", serialize = "4k"))]
@@ -79,6 +79,22 @@ impl From<VideoQualityEnum> for VideoQuality {
 			VideoQualityEnum::_720p => VideoQuality::P720,
 			VideoQualityEnum::_8k => VideoQuality::K8,
 			VideoQualityEnum::Other => VideoQuality::Other,
+		}
+	}
+}
+
+impl From<VideoQuality> for VideoQualityEnum {
+	fn from(value: VideoQuality) -> Self {
+		match value {
+			VideoQuality::P1080 => VideoQualityEnum::_1080p,
+			VideoQuality::P240 => VideoQualityEnum::_240p,
+			VideoQuality::K2 => VideoQualityEnum::_2k,
+			VideoQuality::P360 => VideoQualityEnum::_360p,
+			VideoQuality::P480 => VideoQualityEnum::_480p,
+			VideoQuality::K4 => VideoQualityEnum::_4k,
+			VideoQuality::P720 => VideoQualityEnum::_720p,
+			VideoQuality::K8 => VideoQualityEnum::_8k,
+			VideoQuality::Other => VideoQualityEnum::Other,
 		}
 	}
 }
