@@ -154,7 +154,8 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-artist-poster_id")
 							.from(Artist::Table, Artist::PosterId)
-							.to(Image::Table, Image::Id),
+							.to(Image::Table, Image::Id)
+							.on_delete(ForeignKeyAction::SetNull),
 					)
 					.to_owned(),
 			)
@@ -183,7 +184,8 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-file-scrubber_id")
 							.from(File::Table, File::ScrubberId)
-							.to(Image::Table, Image::Id),
+							.to(Image::Table, Image::Id)
+							.on_delete(ForeignKeyAction::SetNull),
 					)
 					.to_owned(),
 			)
@@ -227,7 +229,8 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-package-poster_id")
 							.from(Package::Table, Package::PosterId)
-							.to(Image::Table, Image::Id),
+							.to(Image::Table, Image::Id)
+							.on_delete(ForeignKeyAction::SetNull),
 					)
 					.to_owned(),
 			)
@@ -252,7 +255,8 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-extra-thumbnail_id")
 							.from(Extra::Table, Extra::ThumbnailId)
-							.to(Image::Table, Image::Id),
+							.to(Image::Table, Image::Id)
+							.on_delete(ForeignKeyAction::SetNull),
 					)
 					.col(
 						ColumnDef::new(Extra::RegisteredAt)
@@ -313,7 +317,8 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-movie-poster_id")
 							.from(Movie::Table, Movie::PosterId)
-							.to(Image::Table, Image::Id),
+							.to(Image::Table, Image::Id)
+							.on_delete(ForeignKeyAction::SetNull),
 					)
 					.col(ColumnDef::new(Movie::PackageId).uuid().not_null())
 					.foreign_key(
@@ -369,7 +374,8 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-chapter-thumbnail_id")
 							.from(Chapter::Table, Chapter::ThumbnailId)
-							.to(Image::Table, Image::Id),
+							.to(Image::Table, Image::Id)
+							.on_delete(ForeignKeyAction::SetNull),
 					)
 					.col(ColumnDef::new(Chapter::MovieId).uuid().not_null())
 					.foreign_key(
