@@ -1,5 +1,5 @@
 use api::{self, database::Db};
-use entity::{artist, chapter, extra, file, movie, package};
+use entity::{artist, chapter, extra, file, image, movie, package};
 use once_cell::sync::OnceCell;
 use rocket::{
 	fairing::AdHoc,
@@ -30,11 +30,12 @@ pub async fn seed_data(rocket: Rocket<Build>) -> Rocket<Build> {
 	let conn = &Db::fetch(&rocket).unwrap().conn;
 
 	let _ = extra::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = chapter::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = movie::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = package::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = artist::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = file::Entity::delete_many().exec(conn).await.unwrap();
-	let _ = movie::Entity::delete_many().exec(conn).await.unwrap();
-	let _ = chapter::Entity::delete_many().exec(conn).await.unwrap();
+	let _ = image::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = artist::Entity::insert(artist::ActiveModel {
 		name: Set("Aretha Franklin".to_string()),
 		slug: Set("aretha-franklin".to_string()),
