@@ -81,10 +81,19 @@ jobs:
         uses: actions/checkout@v4
       - name: Restore Dependencies
         uses: ./.github/actions/cache-api
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
       - name: Build
         run: cargo build
       - name: Run unit tests
-        run: cargo test --tests -- --test-threads=1
+        run: cargo llvm-cov --lcov --output-path lcov.info --tests -- --test-threads=1
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./api/lcov.info
+          flags: api
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   Dockerize:
     if: ${{ needs.changes.outputs.api == 'true' && github.event_name == 'pull_request' }}
     needs: [ Build ]
