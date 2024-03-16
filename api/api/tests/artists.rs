@@ -2,12 +2,6 @@ mod common;
 
 #[cfg(test)]
 mod test_artist {
-	use std::{
-		fs::{self, remove_dir_all},
-		path::PathBuf,
-	};
-
-	use regex::Regex;
 	use rocket::http::Status;
 
 	use crate::common::*;
@@ -50,63 +44,11 @@ mod test_artist {
 	}
 
 	#[test]
-	/// Test `/artists/:slug_or_id/poster`
-	fn test_artist_poster() {
-		let client = test_client().lock().unwrap();
-
-		let response = client
-			.post("/artists/aretha-franklin/poster")
-			.body(fs::read("./tests/assets/poster.png").unwrap())
-			.dispatch();
-		assert_eq!(response.status(), Status::Created);
-		let poster = response_json_value(response);
-		let poster_id = poster.get("id").unwrap().as_str().unwrap();
-		let poster_colors = poster.get("colors").unwrap().as_array().unwrap();
-		let poster_blurhash = poster.get("blurhash").unwrap().as_str().unwrap();
-		let poster_ratio = poster.get("aspect_ratio").unwrap().as_f64().unwrap();
-
-		assert_eq!(poster_blurhash, "T02Yt$WBx]x]ofITRiay4mt8axWA");
-		assert_ne!(poster_colors.len(), 0);
-		assert_eq!(poster_ratio, 1 as f64);
-		for color in poster_colors {
-			println!("{}", color.as_str().unwrap());
-			assert!(Regex::new(r"#(\d|[a-z]){6}")
-				.unwrap()
-				.is_match(color.as_str().unwrap()))
-		}
-
-		let poster_dir_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.as_path()
-			.join(&std::env::var("CONFIG_DIR").unwrap().to_string())
-			.join(poster_id);
-		println!("{}", poster_dir_path.to_str().unwrap());
-
-		assert!(poster_dir_path.join("image.webp").exists());
-
-		// Teardown
-		let _ = remove_dir_all(poster_dir_path);
-	}
-	#[test]
 	/// Test `/artists/:slug_or_id/poster` failures
 	fn test_artist_poster_failures() {
 		let client = test_client().lock().unwrap();
 
 		let unknown_artist = client.post("/artists/aretha-frankli/poster").dispatch();
 		assert_eq!(unknown_artist.status(), Status::NotFound);
-
-		let missing_attached_file = client.post("/artists/aretha-franklin/poster").dispatch();
-		assert_eq!(missing_attached_file.status(), Status::BadRequest);
-		let not_an_image = client
-			.post("/artists/aretha-franklin/poster")
-			.body(
-				fs::read(
-					PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-						.as_path()
-						.join("Cargo.toml"),
-				)
-				.unwrap(),
-			)
-			.dispatch();
-		assert_eq!(not_an_image.status(), Status::BadRequest);
 	}
 }

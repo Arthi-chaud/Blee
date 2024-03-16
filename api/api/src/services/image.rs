@@ -1,4 +1,5 @@
 use ::blurhash::encode;
+use ::image::ColorType;
 use ::image::{io::Reader as ImageReader, EncodableLayout, GenericImageView};
 use colors_transform::Rgb;
 use entity::image;
@@ -10,7 +11,6 @@ use std::fs;
 use std::io::Cursor;
 use std::io::Write;
 use std::path::Path;
-use webp::Encoder;
 
 use crate::config::Config;
 use crate::dto::image::ImageType;
@@ -37,7 +37,7 @@ where
 	let new_poster = self::create(&bytes, image_type, conn, &config).await?;
 
 	if let Some(image_id) = previous_image_id {
-		let _ = self::delete(&image_id, conn, &config);
+		let _ = self::delete(&image_id, conn, &config).await;
 	}
 	let _ = E::update_many()
 		.col_expr(parent_image_column, Expr::value(new_poster.id))
@@ -64,16 +64,25 @@ where
 			.decode()
 			.map_err(|_| ApiError::ImageProcessingError)?;
 		let (width, height) = img.dimensions();
-
-		let webp_image = Encoder::from_image(&img)
-			.map_err(|_| ApiError::ImageProcessingError)?
-			.encode(100f32);
+		let webp_image = webp::Encoder::new(
+			img.clone().into_rgb8().as_bytes(),
+			webp::PixelLayout::Rgb,
+			width,
+			height,
+		)
+		.encode(100f32);
 		let decoded_bytes = img.to_rgba8();
 
 		// Source: https://github.com/RazrFalcon/color-thief-rs/blob/4cc0b1bbf1b725e8241f90ce548a22ce06a84f94/tests/test.rs#L8
-		let color_format = match img {
-			::image::DynamicImage::ImageRgb8(_) => color_thief::ColorFormat::Rgb,
-			::image::DynamicImage::ImageRgba8(_) => color_thief::ColorFormat::Rgba,
+		let color_format = match img.color() {
+			ColorType::Rgb8 => color_thief::ColorFormat::Rgb,
+			ColorType::Rgb16 => color_thief::ColorFormat::Rgb,
+			ColorType::Rgb32F => color_thief::ColorFormat::Rgb,
+			ColorType::Rgba8 => color_thief::ColorFormat::Rgba,
+			ColorType::Rgba16 => color_thief::ColorFormat::Rgba,
+			ColorType::Rgba32F => color_thief::ColorFormat::Rgba,
+			ColorType::L8 => color_thief::ColorFormat::Bgr,
+			ColorType::L16 => color_thief::ColorFormat::Bgr,
 			_ => unreachable!(),
 		};
 		let top_colors_hex = color_thief::get_palette(&decoded_bytes, color_format, 4, 5)
