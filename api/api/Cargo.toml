@@ -21,10 +21,10 @@ sea-orm-rocket = { git = "https://github.com/SeaQL/sea-orm.git", branch = "maste
 chrono = { version = "0.4.34", features = ["serde"] }
 slug = "0.1.5"
 blurhash = "0.2.1"
-image = "0.24.9"
+image = { version = "0.25"}
 color-thief = "0.2"
 colors-transform = "0.2.11"
-webp = "0.2"
+webp = "0.2.6"
 tempfile = "3.10.1"
 
 [dev-dependencies]

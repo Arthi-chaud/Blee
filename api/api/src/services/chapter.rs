@@ -60,3 +60,22 @@ where
 		})
 		.collect())
 }
+
+pub async fn find<'a, C>(
+	uuid: &Uuid,
+	connection: &'a C,
+) -> Result<ChapterResponseWithThumbnail, DbErr>
+where
+	C: ConnectionTrait,
+{
+	let (chapter, thumbnail) = chapter::Entity::find_by_id(*uuid)
+		.find_also_related(image::Entity)
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("Chapter".to_string())), |r| Ok(r))?;
+
+	Ok(ChapterResponseWithThumbnail {
+		chapter: chapter.clone().into(),
+		thumbnail: thumbnail.clone().map(|x| x.into()),
+	})
+}

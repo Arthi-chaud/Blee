@@ -1,54 +1,45 @@
 use crate::config::Config;
 use crate::database::Database;
-use crate::dto::artist::ArtistWithPosterResponse;
 use crate::dto::image::ImageResponse;
-use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
+use crate::error_handling::{ApiError, ApiRawResult};
 use crate::{services, utils};
-use entity::artist;
+use entity::chapter;
 use rocket::fs::TempFile;
 use rocket::response::status;
 use rocket::serde::json::Json;
+use rocket::serde::uuid::Uuid;
 use rocket::State;
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: get_artist, post_artist_image]
+	openapi_get_routes_spec![settings: post_chapter_thumbnail]
 }
 
-/// Find an Artist
-#[openapi(tag = "Artists")]
-#[get("/<slug_or_uuid>")]
-async fn get_artist(db: Database<'_>, slug_or_uuid: String) -> ApiResult<ArtistWithPosterResponse> {
-	services::artist::find(&slug_or_uuid, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
-}
-
-/// Upload an Artist's image
-#[openapi(tag = "Artists")]
-#[post("/<slug_or_uuid>/poster", data = "<data>")]
-async fn post_artist_image(
+/// Upload a Chapter's thumbnail
+#[openapi(tag = "Chapters")]
+#[post("/<uuid>/thumbnail", data = "<data>")]
+async fn post_chapter_thumbnail(
 	db: Database<'_>,
-	slug_or_uuid: String,
+	uuid: Uuid,
 	data: TempFile<'_>,
 	config: &State<Config>,
 ) -> ApiRawResult<status::Created<Json<ImageResponse>>> {
 	let bytes = utils::temp_file_to_bytes_vec(data).await?;
 	let conn = db.into_inner();
 
-	let artist = services::artist::find(&slug_or_uuid, conn)
+	let chapter = services::chapter::find(&uuid, conn)
 		.await
 		.map_err(|e| ApiError::from(e))?;
 	let new_poster = services::image::save_image(
 		&bytes,
-		crate::dto::image::ImageType::Poster,
-		artist.poster.map(|p| p.id),
-		&artist.artist.id,
-		artist::Entity,
-		artist::Column::Id,
-		artist::Column::PosterId,
+		crate::dto::image::ImageType::Thumbnail,
+		chapter.thumbnail.map(|p| p.id),
+		&chapter.chapter.id,
+		chapter::Entity,
+		chapter::Column::Id,
+		chapter::Column::ThumbnailId,
 		conn,
 		config,
 	)

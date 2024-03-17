@@ -46,3 +46,13 @@ impl From<ImageTypeEnum> for ImageType {
 		}
 	}
 }
+
+impl From<ImageType> for ImageTypeEnum {
+	fn from(value: ImageType) -> Self {
+		match value {
+			ImageType::Banner => ImageTypeEnum::Banner,
+			ImageType::Poster => ImageTypeEnum::Poster,
+			ImageType::Thumbnail => ImageTypeEnum::Thumbnail,
+		}
+	}
+}

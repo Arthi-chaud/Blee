@@ -63,6 +63,7 @@ fn create_server() -> Rocket<Build> {
 	mount_endpoints_and_merged_docs! {
 		building_rocket, "/".to_owned(), openapi_settings,
 		"/artists" => controllers::artists::get_routes_and_docs(&openapi_settings),
+		"/chapters" => controllers::chapters::get_routes_and_docs(&openapi_settings),
 		"/extras" => controllers::extras::get_routes_and_docs(&openapi_settings),
 		"/files" => controllers::files::get_routes_and_docs(&openapi_settings),
 		"/images" => controllers::images::get_routes_and_docs(&openapi_settings),
