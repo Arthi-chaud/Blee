@@ -9,7 +9,6 @@ use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-
 #[derive(Serialize, JsonSchema)]
 pub struct ExtraResponseWithRelations {
 	#[serde(flatten)]
@@ -143,6 +142,7 @@ pub struct NewExtra {
 	pub disc_index: Option<i32>,
 	#[schemars(example = "example_index")]
 	pub track_index: Option<i32>,
+	/// Must Not Be Empty
 	pub types: Vec<ExtraType>,
 	pub file: NewFile,
 }

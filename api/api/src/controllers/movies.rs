@@ -29,6 +29,15 @@ async fn new_movie(
 	db: Database<'_>,
 	data: Json<NewMovie>,
 ) -> ApiRawResult<status::Created<Json<MovieCreationResponse>>> {
+	// TODO: This should be validated before the controller is called
+	for chapter in data.0.chapters.iter() {
+		if chapter.types.is_empty() {
+			return Err(ApiError::ValidationError(format!(
+				"Chapter '{}' should have at least one type",
+				chapter.name
+			)));
+		}
+	}
 	db.into_inner()
 		.transaction::<_, MovieCreationResponse, DbErr>(|txn| {
 			Box::pin(async move {

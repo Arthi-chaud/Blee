@@ -88,5 +88,6 @@ pub struct NewChapter {
 	pub start_timestamp: u64,
 	/// the end timespamp of the chapter, in seconds
 	pub end_timestamp: u64,
+	/// Must not be empty
 	pub types: Vec<ChapterType>,
 }
