@@ -31,6 +31,12 @@ async fn new_extra(
 	db: Database<'_>,
 	data: Json<NewExtra>,
 ) -> ApiRawResult<status::Created<Json<ExtraCreationResponse>>> {
+	// TODO: This should be validated before the controller is called
+	if data.types.is_empty() {
+		return Err(ApiError::ValidationError(
+			"There should be at least one type.".to_owned(),
+		));
+	}
 	db.into_inner()
 		.transaction::<_, ExtraCreationResponse, DbErr>(|txn| {
 			Box::pin(async move {

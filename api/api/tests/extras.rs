@@ -13,7 +13,7 @@ mod test_extra {
 
 	#[test]
 	/// Test POST `/extras`
-	fn test_extras() {
+	fn test_new_extra() {
 		let client = test_client().lock().unwrap();
 		let dto = NewExtra {
 			artist_name: "Madonna".to_owned(),
@@ -92,5 +92,58 @@ mod test_extra {
 		);
 		let quality = file_value.get("quality").unwrap().as_str().unwrap();
 		assert_eq!(quality, "480p");
+	}
+
+	#[test]
+	fn test_new_extra_failure_already_exists() {
+		let client = test_client().lock().unwrap();
+		let dto = NewExtra {
+			artist_name: "Madonna".to_owned(),
+			extra_name: "Secret (Music Video)".to_owned(),
+			package_artist_name: Some("Madonna".to_owned()),
+			package_name: "The Video Collection 93:99".to_owned(),
+			disc_index: Some(1),
+			track_index: Some(8),
+			package_release_date: NaiveDate::from_ymd_opt(1999, 01, 02),
+			types: vec![ExtraType::MusicVideo],
+			file: NewFile {
+				path: "/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4"
+					.to_owned(),
+				size: 160000,
+				quality: VideoQuality::P480,
+			},
+		};
+		let response = client
+			.post("/extras")
+			.header(ContentType::JSON)
+			.body(serde_json::to_value(dto).unwrap().to_string())
+			.dispatch();
+		assert_eq!(response.status(), Status::Conflict);
+	}
+
+	#[test]
+	fn test_new_extra_failure_empty_type_list() {
+		let client = test_client().lock().unwrap();
+		let dto = NewExtra {
+			artist_name: "Madonna".to_owned(),
+			extra_name: "Secret (Music Video)".to_owned(),
+			package_artist_name: Some("Madonna".to_owned()),
+			package_name: "The Video Collection 93:99".to_owned(),
+			disc_index: Some(1),
+			track_index: Some(8),
+			package_release_date: NaiveDate::from_ymd_opt(1999, 01, 02),
+			types: vec![],
+			file: NewFile {
+				path: "Secret (Music Video).mp4".to_owned(),
+				size: 160000,
+				quality: VideoQuality::P480,
+			},
+		};
+		let response = client
+			.post("/extras")
+			.header(ContentType::JSON)
+			.body(serde_json::to_value(dto).unwrap().to_string())
+			.dispatch();
+		assert_eq!(response.status(), Status::BadRequest);
 	}
 }

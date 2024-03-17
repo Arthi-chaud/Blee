@@ -11,6 +11,7 @@ use rocket_okapi::okapi::Map;
 use rocket_okapi::response::OpenApiResponderInner;
 use rocket_okapi::OpenApiError;
 use sea_orm::error::DbErr;
+use sea_orm::RuntimeErr;
 use sea_orm::SqlErr;
 use sea_orm::TransactionError;
 use serde::Serialize;
@@ -19,14 +20,15 @@ use serde::Serialize;
 pub enum ApiError {
 	DatabaseError(DbErr),
 	SqlError(SqlErr),
+	ValidationError(String),
 	ImageProcessingError,
 	ImageServingError,
 }
 
 #[derive(Serialize)]
-pub struct ErrorResponse<'s> {
+pub struct ErrorResponse {
 	pub status_code: Status,
-	pub message: &'s str,
+	pub message: String,
 }
 
 pub type ApiResult<T> = Result<Json<T>, ApiError>;
@@ -36,27 +38,43 @@ pub type ApiRawResult<T> = Result<T, ApiError>;
 impl<'r> Responder<'r, 'static> for ApiError {
 	fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
 		let response_body: ErrorResponse = match self {
+			ApiError::ValidationError(s) => ErrorResponse {
+				status_code: Status::BadRequest,
+				message: s,
+			},
 			ApiError::ImageProcessingError => ErrorResponse {
 				status_code: Status::BadRequest,
-				message: "Could not process received image.",
+				message: "Could not process received image.".to_owned(),
 			},
 			ApiError::ImageServingError => ErrorResponse {
 				status_code: Status::NotFound,
-				message: "Could not serve requested image.",
+				message: "Could not serve requested image.".to_owned(),
 			},
 			ApiError::DatabaseError(DbErr::RecordNotFound(_)) => ErrorResponse {
 				status_code: Status::NotFound,
-				message: "Resource not found.",
+				message: "Resource not found.".to_owned(),
+			},
+			ApiError::DatabaseError(DbErr::Query(RuntimeErr::SqlxError(
+				sqlx::error::Error::Database(pg_error),
+			))) => match pg_error.code().unwrap() {
+				std::borrow::Cow::Borrowed("23505") => ErrorResponse {
+					status_code: Status::Conflict,
+					message: "Resource already exists.".to_owned(),
+				},
+				_ => ErrorResponse {
+					status_code: Status::InternalServerError,
+					message: "Unhandled Database Error".to_owned(),
+				},
 			},
 			ApiError::SqlError(SqlErr::UniqueConstraintViolation(_)) => ErrorResponse {
 				status_code: Status::Conflict,
-				message: "Resource already exists.",
+				message: "Resource already exists.".to_owned(),
 			},
 			_ => {
 				// TODO: Log
 				ErrorResponse {
 					status_code: Status::InternalServerError,
-					message: "An unknown error occured",
+					message: "An unknown error occured".to_owned(),
 				}
 			}
 		};
@@ -123,9 +141,9 @@ impl OpenApiResponderInner for ApiError {
 }
 
 #[catch(404)]
-pub fn not_found() -> Json<ErrorResponse<'static>> {
+pub fn not_found() -> Json<ErrorResponse> {
 	Json(ErrorResponse {
 		status_code: Status::NotFound,
-		message: "Route not found.",
+		message: "Route not found.".to_owned(),
 	})
 }

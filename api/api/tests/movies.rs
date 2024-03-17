@@ -7,7 +7,7 @@ mod test_movie {
 
 	use crate::common::*;
 	use api::dto::{
-		chapter::NewChapter,
+		chapter::{ChapterType, NewChapter},
 		file::{NewFile, VideoQuality},
 		movie::{MovieType, NewMovie},
 	};
@@ -35,13 +35,13 @@ mod test_movie {
 					name: "Part 1".to_owned(),
 					start_timestamp: 60,
 					end_timestamp: 120,
-					types: vec![],
+					types: vec![ChapterType::Other],
 				},
 				NewChapter {
 					name: "Part 2".to_owned(),
 					start_timestamp: 120,
 					end_timestamp: 180,
-					types: vec![],
+					types: vec![ChapterType::Other],
 				},
 			],
 		};
@@ -118,5 +118,35 @@ mod test_movie {
 		assert_eq!(path, "/data/Taylor Swift/Miss Americana.mp4");
 		let quality = file_value.get("quality").unwrap().as_str().unwrap();
 		assert_eq!(quality, "1080p");
+	}
+
+	#[test]
+	fn test_movies_failure_empty_chapter_type() {
+		let client = test_client().lock().unwrap();
+		let dto = NewMovie {
+			artist_name: "Taylor Swift".to_owned(),
+			movie_name: "Miss Americana".to_owned(),
+			package_artist_name: Some("Taylor Swift".to_owned()),
+			package_name: "Miss Americana".to_owned(),
+			package_release_date: NaiveDate::from_ymd_opt(2019, 02, 01),
+			movie_type: MovieType::Documentary,
+			file: NewFile {
+				path: "/data/Taylor Swift/Miss Americana.mp4".to_owned(),
+				size: 160000,
+				quality: VideoQuality::P1080,
+			},
+			chapters: vec![NewChapter {
+				name: "Part 1".to_owned(),
+				start_timestamp: 60,
+				end_timestamp: 120,
+				types: vec![],
+			}],
+		};
+		let response = client
+			.post("/movies")
+			.header(ContentType::JSON)
+			.body(serde_json::to_value(dto).unwrap().to_string())
+			.dispatch();
+		assert_eq!(response.status(), Status::BadRequest);
 	}
 }
