@@ -21,6 +21,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  scanner:
+    build:
+      context: ./scanner
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ${DATA_DIR}:/video
+    environment:
+      - WATCH_DIR=/video
   db:
     image: postgres:alpine3.16
     healthcheck:
