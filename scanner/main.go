@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"github.com/radovskyb/watcher"
 	"log"
-	"os"
 	"time"
 )
 
 func main() {
-	c := parse_config(os.Args)
+	c := get_config()
 	w := watcher.New()
 	go func() {
 		for {
@@ -23,7 +22,7 @@ func main() {
 			}
 		}
 	}()
-	log.Println("Attempting to watch ", c.WatchDir)
+	log.Println("Attempting to watch", c.WatchDir)
 	// Watch this folder for changes.
 	if err := w.AddRecursive(c.WatchDir); err != nil {
 		log.Fatalln(err)

@@ -1,8 +1,8 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"nullprogram.com/x/optparse"
 )
 
 type Config struct {
@@ -11,25 +11,13 @@ type Config struct {
 }
 
 // Parses and return a config from the CLI args
-func parse_config(args []string) Config {
-	options := []optparse.Option{
-		{Long: "dir", Short: 'd', Kind: optparse.KindRequired},
-	}
+func get_config() Config {
 	var config Config
+	watchDir := flag.String("d", "", "the directory to watch")
+	flag.Parse()
 
-	results, _, err := optparse.Parse(options, args)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	config.WatchDir = *watchDir
+	log.Println(config.WatchDir)
 
-	for _, result := range results {
-		switch result.Long {
-		case "dir":
-			config.WatchDir = result.Optarg
-		}
-	}
-	if config.WatchDir == "" {
-		log.Fatalln("Missing --dir option")
-	}
 	return config
 }
