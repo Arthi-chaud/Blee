@@ -1,4 +1,14 @@
 services:
+  scanner:
+    build:
+      context: ./scanner
+      dockerfile: Dockerfile.dev
+    restart: on-failure
+    volumes:
+      - ./scanner:/app
+      - ${DATA_DIR}:/video
+    environment:
+      - WATCH_DIR=/video
   api:
     build:
       context: ./api
