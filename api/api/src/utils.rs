@@ -11,3 +11,9 @@ pub async fn temp_file_to_bytes_vec(mut data: TempFile<'_>) -> Result<Vec<u8>, A
 		.await
 		.map_err(|_| ApiError::ImageProcessingError)
 }
+
+/// An Identifiable is an object that has an ID.
+/// Such id could be used for cursor-based pagination
+pub trait Identifiable {
+	fn get_id(&self) -> String;
+}

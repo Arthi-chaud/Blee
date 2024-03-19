@@ -1,6 +1,8 @@
-use crate::dto::artist::{ArtistResponse, ArtistWithPosterResponse};
+use crate::dto::{
+	artist::{ArtistResponse, ArtistWithPosterResponse},
+	page::Pagination,
+};
 use entity::{artist, image};
-use migration::Expr;
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	sea_query, ActiveValue::Set, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter,
@@ -64,18 +66,27 @@ where
 	})
 }
 
-pub async fn set_poster<'s, 'a, C>(
-	poster_uuid: &Uuid,
-	artist_uuid: &Uuid,
+pub async fn find_many<'a, C>(
+	pagination: Pagination,
 	connection: &'a C,
-) -> Result<(), DbErr>
+) -> Result<Vec<ArtistWithPosterResponse>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	artist::Entity::update_many()
-		.col_expr(artist::Column::PosterId, Expr::value(*poster_uuid))
-		.filter(artist::Column::Id.eq(*artist_uuid))
-		.exec(connection)
+	artist::Entity::find()
+		.find_also_related(image::Entity)
+		.cursor_by(artist::Column::Id)
+		.after(pagination.after_id)
+		.first(pagination.page_size)
+		.all(connection)
 		.await
-		.map(|_| ())
+		.map(|items| {
+			items
+				.into_iter()
+				.map(|(artist, image)| ArtistWithPosterResponse {
+					artist: artist.into(),
+					poster: image.map(|i| i.into()),
+				})
+				.collect()
+		})
 }

@@ -5,3 +5,4 @@ pub mod file;
 pub mod image;
 pub mod movie;
 pub mod package;
+pub mod page;
