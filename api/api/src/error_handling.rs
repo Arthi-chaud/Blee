@@ -16,6 +16,8 @@ use sea_orm::SqlErr;
 use sea_orm::TransactionError;
 use serde::Serialize;
 
+use crate::dto::page::Page;
+
 #[derive(Debug)]
 pub enum ApiError {
 	DatabaseError(DbErr),
@@ -32,6 +34,8 @@ pub struct ErrorResponse {
 }
 
 pub type ApiResult<T> = Result<Json<T>, ApiError>;
+
+pub type ApiPageResult<T> = Result<Page<T>, ApiError>;
 
 pub type ApiRawResult<T> = Result<T, ApiError>;
 
@@ -145,5 +149,13 @@ pub fn not_found() -> Json<ErrorResponse> {
 	Json(ErrorResponse {
 		status_code: Status::NotFound,
 		message: "Route not found.".to_owned(),
+	})
+}
+
+#[catch(422)]
+pub fn unprocessable_entity() -> Json<ErrorResponse> {
+	Json(ErrorResponse {
+		status_code: Status::UnprocessableEntity,
+		message: "Unprocessable Entity. A form is probably semantically wrong.".to_owned(),
 	})
 }

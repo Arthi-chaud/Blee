@@ -1,5 +1,6 @@
 use super::image::ImageResponse;
 use crate::swagger_examples::*;
+use crate::utils::Identifiable;
 use chrono::NaiveDateTime;
 use entity::{artist, image};
 use rocket::serde::uuid::Uuid;
@@ -14,6 +15,12 @@ pub struct ArtistWithPosterResponse {
 	#[serde(flatten)]
 	pub artist: ArtistResponse,
 	pub poster: Option<ImageResponse>,
+}
+
+impl Identifiable for ArtistWithPosterResponse {
+	fn get_id(&self) -> String {
+		self.artist.get_id()
+	}
 }
 
 impl From<(artist::Model, Option<image::Model>)> for ArtistWithPosterResponse {
@@ -39,6 +46,12 @@ pub struct ArtistResponse {
 	pub registered_at: NaiveDateTime,
 	#[schemars(example = "example_uuid")]
 	pub poster_id: Option<Uuid>,
+}
+
+impl Identifiable for ArtistResponse {
+	fn get_id(&self) -> String {
+		self.id.to_string()
+	}
 }
 
 impl From<artist::Model> for ArtistResponse {

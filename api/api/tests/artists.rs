@@ -1,8 +1,13 @@
+#[macro_use]
 mod common;
 
 #[cfg(test)]
 mod test_artist {
+	use api::database::Db;
+	use entity::artist;
 	use rocket::http::Status;
+	use sea_orm::{EntityTrait, Set};
+	use sea_orm_rocket::Database;
 
 	use crate::common::*;
 
@@ -50,5 +55,42 @@ mod test_artist {
 
 		let unknown_artist = client.post("/artists/aretha-frankli/poster").dispatch();
 		assert_eq!(unknown_artist.status(), Status::NotFound);
+	}
+
+	#[test]
+	/// Test `/artists` Pagination
+	fn test_artist_pagination() {
+		let client = test_client().lock().unwrap();
+		let conn = &Db::fetch(client.rocket()).unwrap().conn;
+
+		let _ = aw!(
+			artist::Entity::insert_many((1..10).map(|i| artist::ActiveModel {
+				slug: Set(format!("artist-{}", i)),
+				name: Set(format!("Artist {}", i)),
+				..Default::default()
+			}))
+			.exec_without_returning(conn)
+		);
+
+		let response_first_page = client.get("/artists?page_size=5").dispatch();
+		assert_eq!(response_first_page.status(), Status::Ok);
+		let value = response_json_value(response_first_page);
+		let items = value.get("items").unwrap().as_array().unwrap();
+		let next = value
+			.get("metadata")
+			.unwrap()
+			.as_object()
+			.unwrap()
+			.get("next")
+			.unwrap()
+			.as_str()
+			.unwrap();
+		assert_eq!(items.len(), 5);
+		let last_item = items.last().unwrap().as_object().unwrap();
+		let last_item_id = last_item.get("id").unwrap().as_str().unwrap();
+		assert_eq!(
+			next,
+			format!("/artists?page_size=5&after_id={}", last_item_id)
+		);
 	}
 }

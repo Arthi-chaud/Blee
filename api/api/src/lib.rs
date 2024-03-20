@@ -1,7 +1,7 @@
 use crate::config::Config;
 use crate::controllers::index::index;
 use crate::database::Db;
-use crate::error_handling::not_found;
+use crate::error_handling::{not_found, unprocessable_entity};
 use crate::swagger::custom_openapi_spec;
 use migration::MigratorTrait;
 use rocket::fairing::{self, AdHoc};
@@ -46,7 +46,7 @@ fn create_server() -> Rocket<Build> {
 		.attach(Db::init())
 		.attach(AdHoc::config::<Config>())
 		.attach(AdHoc::try_on_ignite("Run migrations", run_migrations))
-		.register("/", catchers![not_found])
+		.register("/", catchers![not_found, unprocessable_entity])
 		.mount(
 			"/swagger",
 			make_swagger_ui(&SwaggerUIConfig {

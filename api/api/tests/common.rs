@@ -47,3 +47,9 @@ pub async fn seed_data(rocket: Rocket<Build>) -> Rocket<Build> {
 
 	rocket
 }
+
+macro_rules! aw {
+	($e:expr) => {
+		tokio_test::block_on($e)
+	};
+}

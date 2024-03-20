@@ -5,6 +5,9 @@ use crate::dto::extra::ExtraCreationResponse;
 use crate::dto::extra::ExtraResponseWithRelations;
 use crate::dto::extra::NewExtra;
 use crate::dto::image::ImageResponse;
+use crate::dto::page::Page;
+use crate::dto::page::Pagination;
+use crate::error_handling::ApiPageResult;
 use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
 use crate::services;
 use crate::utils;
@@ -21,7 +24,20 @@ use sea_orm::DbErr;
 use sea_orm::TransactionTrait;
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: new_extra, get_extra, post_extra_thumbnail]
+	openapi_get_routes_spec![settings: get_extras, new_extra, get_extra, post_extra_thumbnail]
+}
+
+/// Get many extras
+#[openapi(tag = "Extras")]
+#[get("/?<pagination..>")]
+async fn get_extras(
+	db: Database<'_>,
+	pagination: Pagination,
+) -> ApiPageResult<ExtraResponseWithRelations> {
+	services::extra::find_many(pagination, db.into_inner())
+		.await
+		.map(|items| Page::from(items))
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Create a new extra

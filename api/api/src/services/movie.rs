@@ -1,6 +1,7 @@
 use crate::dto::{
 	artist::ArtistResponse,
 	movie::{MovieResponseWithRelations, MovieType},
+	page::Pagination,
 };
 use entity::{image, movie};
 use rocket::serde::uuid::Uuid;
@@ -62,4 +63,36 @@ where
 		package: None,
 		file: None,
 	})
+}
+
+pub async fn find_many<'a, C>(
+	pagination: Pagination,
+	connection: &'a C,
+) -> Result<Vec<MovieResponseWithRelations>, DbErr>
+where
+	C: ConnectionTrait,
+{
+	let mut query = movie::Entity::find()
+		.find_also_related(image::Entity)
+		.cursor_by(movie::Column::Id);
+
+	if let Some(after_id) = pagination.after_id {
+		query.after(after_id);
+	}
+	query
+		.first(pagination.page_size)
+		.all(connection)
+		.await
+		.map(|items| {
+			items
+				.into_iter()
+				.map(|(movie, poster)| MovieResponseWithRelations {
+					movie: movie.into(),
+					poster: poster.map(|x| x.into()),
+					artist: None,
+					package: None,
+					file: None,
+				})
+				.collect()
+		})
 }

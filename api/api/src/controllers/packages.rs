@@ -2,7 +2,8 @@ use crate::config::Config;
 use crate::database::Database;
 use crate::dto::image::ImageResponse;
 use crate::dto::package::PackageResponseWithRelations;
-use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
+use crate::dto::page::{Page, Pagination};
+use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
 use crate::{services, utils};
 use entity::package;
 use rocket::fs::TempFile;
@@ -14,7 +15,7 @@ use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: get_package, post_package_poster]
+	openapi_get_routes_spec![settings: get_package, get_packages, post_package_poster]
 }
 
 /// Get a Single Package
@@ -27,6 +28,19 @@ async fn get_package(
 	services::package::find(&slug_or_uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+}
+
+/// Get many packages
+#[openapi(tag = "Movies")]
+#[get("/?<pagination..>")]
+async fn get_packages(
+	db: Database<'_>,
+	pagination: Pagination,
+) -> ApiPageResult<PackageResponseWithRelations> {
+	services::package::find_many(pagination, db.into_inner())
+		.await
+		.map(|items| Page::from(items))
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Upload a Package's Poster

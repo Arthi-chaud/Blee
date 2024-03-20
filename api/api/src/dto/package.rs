@@ -1,4 +1,5 @@
 use crate::swagger_examples::*;
+use crate::utils::Identifiable;
 use chrono::{NaiveDate, NaiveDateTime};
 use entity::package;
 use rocket::serde::uuid::Uuid;
@@ -20,6 +21,12 @@ pub struct PackageResponseWithRelations {
 	pub poster: Option<ImageResponse>,
 }
 
+impl Identifiable for PackageResponseWithRelations {
+	fn get_id(&self) -> String {
+		self.package.get_id()
+	}
+}
+
 /// A Package Data type
 #[derive(Serialize, JsonSchema)]
 pub struct PackageResponse {
@@ -37,6 +44,12 @@ pub struct PackageResponse {
 	pub artist_id: Option<Uuid>,
 	#[schemars(example = "example_uuid")]
 	pub poster_id: Option<Uuid>,
+}
+
+impl Identifiable for PackageResponse {
+	fn get_id(&self) -> String {
+		self.id.to_string()
+	}
 }
 
 impl From<package::Model> for PackageResponse {

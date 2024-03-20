@@ -2,7 +2,8 @@ use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistWithPosterResponse;
 use crate::dto::image::ImageResponse;
-use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
+use crate::dto::page::{Page, Pagination};
+use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
 use crate::{services, utils};
 use entity::artist;
 use rocket::fs::TempFile;
@@ -14,7 +15,20 @@ use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: get_artist, post_artist_image]
+	openapi_get_routes_spec![settings: get_artists, get_artist, post_artist_image]
+}
+
+/// Get many artists
+#[openapi(tag = "Artists")]
+#[get("/?<pagination..>")]
+async fn get_artists(
+	db: Database<'_>,
+	pagination: Pagination,
+) -> ApiPageResult<ArtistWithPosterResponse> {
+	services::artist::find_many(pagination, db.into_inner())
+		.await
+		.map(|items| Page::from(items))
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Find an Artist
