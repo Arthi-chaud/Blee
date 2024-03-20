@@ -77,10 +77,14 @@ pub async fn find_many<'a, C>(
 where
 	C: ConnectionTrait,
 {
-	package::Entity::find()
+	let mut query = package::Entity::find()
 		.find_also_related(image::Entity)
-		.cursor_by(package::Column::Id)
-		.after(pagination.after_id)
+		.cursor_by(package::Column::Id);
+
+	if let Some(after_id) = pagination.after_id {
+		query.after(after_id);
+	}
+	query
 		.first(pagination.page_size)
 		.all(connection)
 		.await

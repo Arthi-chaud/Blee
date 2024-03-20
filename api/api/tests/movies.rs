@@ -1,3 +1,4 @@
+#[macro_use]
 mod common;
 
 #[cfg(test)]
@@ -148,5 +149,26 @@ mod test_movie {
 			.body(serde_json::to_value(dto).unwrap().to_string())
 			.dispatch();
 		assert_eq!(response.status(), Status::BadRequest);
+	}
+
+	#[test]
+	/// Test `/movies` Pagination
+	/// Check Next is null on last page
+	fn test_movies_pagination() {
+		let client = test_client().lock().unwrap();
+
+		let response_first_page = client.get("/movies").dispatch();
+		assert_eq!(response_first_page.status(), Status::Ok);
+		let value = response_json_value(response_first_page);
+		let items = value.get("items").unwrap().as_array().unwrap();
+		assert_eq!(items.len(), 1);
+		let next = value
+			.get("metadata")
+			.unwrap()
+			.as_object()
+			.unwrap()
+			.get("next")
+			.unwrap();
+		assert_eq!(next.as_null(), Some(()));
 	}
 }

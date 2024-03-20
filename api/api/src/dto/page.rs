@@ -61,16 +61,18 @@ impl<'r, T: Identifiable + Serialize> Responder<'r, 'r> for Page<T> {
 			None
 		} else {
 			let path = r.uri().path();
-			let query_params: Vec<String> = r
+			let mut query_params: Vec<String> = r
 				.query_fields()
-				.map(|field| match field.name.as_name().as_str() {
-					"after_id" => format!("after_id={}", self.0.last().unwrap().get_id().as_str()),
-					_ => format!("{}={}", field.name.as_name().as_str(), field.value),
-				})
+				.filter(|field| field.name.as_name().ne("after_id"))
+				.map(|field| format!("{}={}", field.name.as_name().as_str(), field.value))
 				.collect();
+			query_params.push(format!(
+				"after_id={}",
+				self.0.last().unwrap().get_id().as_str()
+			));
 			let mut full_next_route = path.to_string();
 			full_next_route.push('?');
-			full_next_route.push_str(query_params.join("?").as_str());
+			full_next_route.push_str(query_params.join("&").as_str());
 			Some(full_next_route)
 		};
 

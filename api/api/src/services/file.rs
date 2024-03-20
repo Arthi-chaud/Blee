@@ -45,9 +45,12 @@ pub async fn find_many<'a, C>(
 where
 	C: ConnectionTrait,
 {
-	file::Entity::find()
-		.cursor_by(file::Column::Id)
-		.after(pagination.after_id)
+	let mut query = file::Entity::find().cursor_by(file::Column::Id);
+
+	if let Some(after_id) = pagination.after_id {
+		query.after(after_id);
+	}
+	query
 		.first(pagination.page_size)
 		.all(connection)
 		.await
