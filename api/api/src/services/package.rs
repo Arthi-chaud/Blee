@@ -1,4 +1,4 @@
-use crate::dto::{artist::ArtistResponse, package::PackageResponseWithRelations};
+use crate::dto::{artist::ArtistResponse, package::PackageResponseWithRelations, page::Pagination};
 use ::slug::slugify;
 use entity::{image, package};
 use rocket::serde::uuid::Uuid;
@@ -68,4 +68,30 @@ where
 		poster: poster.map(|x| x.into()),
 		artist: None,
 	})
+}
+
+pub async fn find_many<'a, C>(
+	pagination: Pagination,
+	connection: &'a C,
+) -> Result<Vec<PackageResponseWithRelations>, DbErr>
+where
+	C: ConnectionTrait,
+{
+	package::Entity::find()
+		.find_also_related(image::Entity)
+		.cursor_by(package::Column::Id)
+		.after(pagination.after_id)
+		.first(pagination.page_size)
+		.all(connection)
+		.await
+		.map(|items| {
+			items
+				.into_iter()
+				.map(|(package, poster)| PackageResponseWithRelations {
+					package: package.into(),
+					poster: poster.map(|x| x.into()),
+					artist: None,
+				})
+				.collect()
+		})
 }

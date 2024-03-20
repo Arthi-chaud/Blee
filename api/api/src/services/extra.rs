@@ -1,4 +1,7 @@
-use crate::dto::extra::{ExtraResponseWithRelations, ExtraType};
+use crate::dto::{
+	extra::{ExtraResponseWithRelations, ExtraType},
+	page::Pagination,
+};
 use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
@@ -54,4 +57,32 @@ where
 		package: None,
 		file: None,
 	})
+}
+
+pub async fn find_many<'a, C>(
+	pagination: Pagination,
+	connection: &'a C,
+) -> Result<Vec<ExtraResponseWithRelations>, DbErr>
+where
+	C: ConnectionTrait,
+{
+	extra::Entity::find()
+		.find_also_related(image::Entity)
+		.cursor_by(extra::Column::Id)
+		.after(pagination.after_id)
+		.first(pagination.page_size)
+		.all(connection)
+		.await
+		.map(|items| {
+			items
+				.into_iter()
+				.map(|(extra, image)| ExtraResponseWithRelations {
+					extra: extra.into(),
+					thumbnail: image.map(|i| i.into()),
+					package: None,
+					artist: None,
+					file: None,
+				})
+				.collect()
+		})
 }

@@ -2,6 +2,7 @@ use super::file::{FileResponse, NewFile};
 use super::{artist::ArtistResponse, package::PackageResponse};
 use crate::dto::image::ImageResponse;
 use crate::swagger_examples::*;
+use crate::utils::Identifiable;
 use chrono::NaiveDateTime;
 use entity::extra;
 use entity::sea_orm_active_enums::ExtraTypeEnum;
@@ -25,6 +26,12 @@ pub struct ExtraResponseWithRelations {
 	pub file: Option<FileResponse>,
 }
 
+impl Identifiable for ExtraResponseWithRelations {
+	fn get_id(&self) -> String {
+		self.extra.get_id()
+	}
+}
+
 #[derive(Serialize, JsonSchema)]
 pub struct ExtraResponse {
 	#[schemars(example = "example_uuid")]
@@ -45,6 +52,12 @@ pub struct ExtraResponse {
 	#[schemars(example = "example_index")]
 	pub track_index: Option<i32>,
 	pub r#type: Vec<ExtraType>,
+}
+
+impl Identifiable for ExtraResponse {
+	fn get_id(&self) -> String {
+		self.id.to_string()
+	}
 }
 
 impl From<extra::Model> for ExtraResponse {

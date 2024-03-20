@@ -1,4 +1,5 @@
 use crate::swagger_examples::*;
+use crate::utils::Identifiable;
 use chrono::NaiveDateTime;
 use entity::movie;
 use entity::sea_orm_active_enums::MovieTypeEnum;
@@ -30,6 +31,12 @@ pub struct MovieResponseWithRelations {
 	pub file: Option<FileResponse>,
 }
 
+impl Identifiable for MovieResponseWithRelations {
+	fn get_id(&self) -> String {
+		self.movie.get_id()
+	}
+}
+
 #[derive(Serialize, JsonSchema)]
 pub struct MovieResponse {
 	#[schemars(example = "example_uuid")]
@@ -48,6 +55,12 @@ pub struct MovieResponse {
 	#[schemars(example = "example_movie_type")]
 	#[serde(rename = "type")]
 	pub type_: MovieType,
+}
+
+impl Identifiable for MovieResponse {
+	fn get_id(&self) -> String {
+		self.id.to_string()
+	}
 }
 
 impl From<movie::Model> for MovieResponse {

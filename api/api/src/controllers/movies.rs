@@ -5,7 +5,8 @@ use crate::dto::chapter::ChapterResponseWithThumbnail;
 use crate::dto::image::ImageResponse;
 use crate::dto::movie::MovieCreationResponse;
 use crate::dto::movie::{MovieResponseWithRelations, NewMovie};
-use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
+use crate::dto::page::{Page, Pagination};
+use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
 use crate::{services, utils};
 use entity::movie;
 use rocket::fs::TempFile;
@@ -19,7 +20,7 @@ use rocket_okapi::{openapi, openapi_get_routes_spec};
 use sea_orm::{DbErr, TransactionTrait};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: new_movie, get_movie, get_movie_chapters, post_movie_thumbnail]
+	openapi_get_routes_spec![settings: new_movie, get_movie, get_movies, get_movie_chapters, post_movie_thumbnail]
 }
 
 /// Create a new movie with its chapters
@@ -103,6 +104,19 @@ async fn get_movie(
 	services::movie::find(&slug_or_uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+}
+
+/// Get many movies
+#[openapi(tag = "Movies")]
+#[get("/?<pagination..>")]
+async fn get_movies(
+	db: Database<'_>,
+	pagination: Pagination,
+) -> ApiPageResult<MovieResponseWithRelations> {
+	services::movie::find_many(pagination, db.into_inner())
+		.await
+		.map(|items| Page::from(items))
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Get a Movie's Chapters
