@@ -3,13 +3,15 @@ mod common;
 #[cfg(test)]
 mod test_extra {
 
+	use std::env;
+
 	use crate::common::*;
 	use api::dto::{
 		extra::{ExtraType, NewExtra},
 		file::{NewFile, VideoQuality},
 	};
 	use chrono::NaiveDate;
-	use rocket::http::{ContentType, Status};
+	use rocket::http::{ContentType, Header, Status};
 
 	#[test]
 	/// Test POST `/extras`
@@ -33,6 +35,10 @@ mod test_extra {
 		};
 		let response = client
 			.post("/extras")
+			.header(Header::new(
+				"X-API-Key",
+				env::var("SCANNER_API_KEY").unwrap(),
+			))
 			.header(ContentType::JSON)
 			.body(serde_json::to_value(dto).unwrap().to_string())
 			.dispatch();
@@ -115,6 +121,10 @@ mod test_extra {
 		};
 		let response = client
 			.post("/extras")
+			.header(Header::new(
+				"X-API-Key",
+				env::var("SCANNER_API_KEY").unwrap(),
+			))
 			.header(ContentType::JSON)
 			.body(serde_json::to_value(dto).unwrap().to_string())
 			.dispatch();
@@ -141,6 +151,10 @@ mod test_extra {
 		};
 		let response = client
 			.post("/extras")
+			.header(Header::new(
+				"X-API-Key",
+				env::var("SCANNER_API_KEY").unwrap(),
+			))
 			.header(ContentType::JSON)
 			.body(serde_json::to_value(dto).unwrap().to_string())
 			.dispatch();

@@ -4,7 +4,7 @@ mod common;
 #[cfg(test)]
 mod test_movie {
 
-	use std::vec;
+	use std::{env, vec};
 
 	use crate::common::*;
 	use api::dto::{
@@ -13,7 +13,7 @@ mod test_movie {
 		movie::{MovieType, NewMovie},
 	};
 	use chrono::NaiveDate;
-	use rocket::http::{ContentType, Status};
+	use rocket::http::{ContentType, Header, Status};
 
 	#[test]
 	/// Test POST `/movies`
@@ -48,6 +48,10 @@ mod test_movie {
 		};
 		let response = client
 			.post("/movies")
+			.header(Header::new(
+				"X-API-Key",
+				env::var("SCANNER_API_KEY").unwrap(),
+			))
 			.header(ContentType::JSON)
 			.body(serde_json::to_value(dto).unwrap().to_string())
 			.dispatch();
@@ -145,6 +149,10 @@ mod test_movie {
 		};
 		let response = client
 			.post("/movies")
+			.header(Header::new(
+				"X-API-Key",
+				env::var("SCANNER_API_KEY").unwrap(),
+			))
 			.header(ContentType::JSON)
 			.body(serde_json::to_value(dto).unwrap().to_string())
 			.dispatch();
