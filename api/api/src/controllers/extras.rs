@@ -47,7 +47,7 @@ async fn get_extras(
 async fn new_extra(
 	db: Database<'_>,
 	data: Json<NewExtra>,
-	_scanner: ScannerApiKey<'_>,
+	_scanner: ScannerApiKey,
 ) -> ApiRawResult<status::Created<Json<ExtraCreationResponse>>> {
 	// TODO: This should be validated before the controller is called
 	if data.types.is_empty() {

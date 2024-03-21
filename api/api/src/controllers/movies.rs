@@ -30,7 +30,7 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 async fn new_movie(
 	db: Database<'_>,
 	data: Json<NewMovie>,
-	_scanner: ScannerApiKey<'_>,
+	_scanner: ScannerApiKey,
 ) -> ApiRawResult<status::Created<Json<MovieCreationResponse>>> {
 	// TODO: This should be validated before the controller is called
 	for chapter in data.0.chapters.iter() {
