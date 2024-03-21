@@ -1,3 +1,4 @@
+use crate::api_keys::ScannerApiKey;
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
@@ -46,6 +47,7 @@ async fn get_extras(
 async fn new_extra(
 	db: Database<'_>,
 	data: Json<NewExtra>,
+	_scanner: ScannerApiKey<'_>,
 ) -> ApiRawResult<status::Created<Json<ExtraCreationResponse>>> {
 	// TODO: This should be validated before the controller is called
 	if data.types.is_empty() {
