@@ -1,3 +1,4 @@
+use crate::api_keys::ScannerApiKey;
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
@@ -29,6 +30,7 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 async fn new_movie(
 	db: Database<'_>,
 	data: Json<NewMovie>,
+	_scanner: ScannerApiKey<'_>,
 ) -> ApiRawResult<status::Created<Json<MovieCreationResponse>>> {
 	// TODO: This should be validated before the controller is called
 	for chapter in data.0.chapters.iter() {

@@ -13,6 +13,7 @@ use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 use sea_orm_rocket::Database;
 use std::env;
 
+pub(crate) mod api_keys;
 pub mod config;
 mod controllers;
 pub mod database;
@@ -39,8 +40,14 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
 
 fn create_server() -> Rocket<Build> {
 	let data_dir = env::var("CONFIG_DIR").expect("env variable `CONFIG_DIR` not set.");
+	let scanner_api_key =
+		env::var("SCANNER_API_KEY").expect("env variable `SCANNER_API_KEY` not set.");
+	if scanner_api_key.is_empty() {
+		panic!("env variable `SCANNER_API_KEY` is empty.")
+	}
 	let figment = Figment::from(rocket::Config::figment()).merge(Serialized::defaults(Config {
 		data_folder: data_dir,
+		scanner_api_key: scanner_api_key,
 	}));
 	let mut building_rocket = rocket::custom(figment)
 		.attach(Db::init())
