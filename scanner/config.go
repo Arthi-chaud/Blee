@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 )
 
 type Config struct {
@@ -17,7 +16,6 @@ func get_config() Config {
 	flag.Parse()
 
 	config.WatchDir = *watchDir
-	log.Println(config.WatchDir)
 
 	return config
 }
