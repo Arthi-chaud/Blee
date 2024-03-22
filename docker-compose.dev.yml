@@ -9,6 +9,7 @@ services:
       - ${DATA_DIR}:/video
     environment:
       - WATCH_DIR=/video
+      - SCANNER_API_KEY=${SCANNER_API_KEY}
   api:
     build:
       context: ./api
