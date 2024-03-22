@@ -1,0 +1,10 @@
+name: 'Cache (Scanner)'
+description: 'Cache for APScannerI'
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        check-latest: true
+        go-version-file: 'scanner/go.mod'
+        cache-dependency-path: scanner/go.sum
