@@ -1,10 +1,10 @@
 use crate::dto::{
-	extra::{ExtraResponseWithRelations, ExtraType},
+	extra::{ExtraFilter, ExtraResponseWithRelations, ExtraType},
 	page::Pagination,
 };
 use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
 use slug::slugify;
 
 pub async fn create<'s, 'a, C>(
@@ -60,20 +60,33 @@ where
 }
 
 pub async fn find_many<'a, C>(
-	pagination: Pagination,
+	filters: &ExtraFilter,
+	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<ExtraResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let mut query = extra::Entity::find()
+	let mut query = extra::Entity::find();
+
+	if let Some(t) = filters.r#type {
+		//TODO
+		query = query.filter(extra::Column::Type.eq(vec![ExtraTypeEnum::from(t)]));
+	}
+	if let Some(artist_uuid) = filters.artist {
+		query = query.filter(extra::Column::ArtistId.eq(artist_uuid));
+	}
+	if let Some(package_uuid) = filters.package {
+		query = query.filter(extra::Column::PackageId.eq(package_uuid));
+	}
+	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(extra::Column::Id);
 
 	if let Some(after_id) = pagination.after_id {
-		query.after(after_id);
+		joint_query.after(after_id);
 	}
-	query
+	joint_query
 		.first(pagination.page_size)
 		.all(connection)
 		.await

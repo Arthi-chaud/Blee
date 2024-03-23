@@ -188,6 +188,31 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 		MovieDummy(new_movie, vec![], new_file)
 	};
 
+	let extra_b1 = {
+		let new_file = file::Entity::insert(file::ActiveModel {
+			path: Set("/videos/MIKA/Live in Cartoon Motion/Interview.mkv".to_string()),
+			size: Set(min_to_sec(20, 0) * 1000), // 1kb per second
+			quality: Set(VideoQualityEnum::_480p),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await
+		.unwrap();
+
+		let new_extra = extra::Entity::insert(extra::ActiveModel {
+			name: Set("Interview".to_string()),
+			slug: Set(slugify("interview".to_string()).to_string()),
+			package_id: Set(package_b1.id),
+			artist_id: Set(artist_b.id),
+			file_id: Set(new_file.id),
+			r#type: Set(vec![ExtraTypeEnum::Interview]),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await?;
+		ExtraDummy(new_extra, new_file)
+	};
+
 	let package_a2 = package::Entity::insert(package::ActiveModel {
 		name: Set("I'm Going to Tell You a Secret".to_string()),
 		slug: Set("im-going-to-tell-you-a-secret".to_string()),
@@ -234,7 +259,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 			movies: vec![movie_b1],
 			package: package_b1,
 			artist: Some(artist_b),
-			extras: vec![],
+			extras: vec![extra_b1],
 		},
 		package_c: PackageDummy {
 			movies: vec![movie_a2],

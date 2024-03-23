@@ -69,9 +69,18 @@ mod test_files {
 					.as_array()
 					.unwrap();
 				assert_eq!(items.len(), 1);
-				for ExtraDummy(_, file) in &parent_package.extras {
-					assert_eq!(file.id, expected_file.id);
-				}
+				assert_eq!(
+					items
+						.first()
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("id")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					expected_file.id.to_string()
+				);
 			})
 			.is_ok());
 	}

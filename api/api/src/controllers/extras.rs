@@ -3,7 +3,9 @@ use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
 use crate::dto::extra::ExtraCreationResponse;
+use crate::dto::extra::ExtraFilter;
 use crate::dto::extra::ExtraResponseWithRelations;
+use crate::dto::extra::ExtraType;
 use crate::dto::extra::NewExtra;
 use crate::dto::image::ImageResponse;
 use crate::dto::page::Page;
@@ -29,16 +31,27 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 }
 
 /// Get many extras
-#[openapi(tag = "Extras")]
-#[get("/?<pagination..>")]
+#[openapi(tag = "Movies")]
+#[get("/?<type>&<artist>&<package>&<pagination..>")]
 async fn get_extras(
 	db: Database<'_>,
+	r#type: Option<ExtraType>,
+	artist: Option<Uuid>,
+	package: Option<Uuid>,
 	pagination: Pagination,
 ) -> ApiPageResult<ExtraResponseWithRelations> {
-	services::extra::find_many(pagination, db.into_inner())
-		.await
-		.map(|items| Page::from(items))
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
+	services::extra::find_many(
+		&ExtraFilter {
+			r#type,
+			artist,
+			package,
+		},
+		&pagination,
+		db.into_inner(),
+	)
+	.await
+	.map(|items| Page::from(items))
+	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Create a new extra
