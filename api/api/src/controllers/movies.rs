@@ -4,7 +4,7 @@ use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
 use crate::dto::chapter::ChapterResponseWithThumbnail;
 use crate::dto::image::ImageResponse;
-use crate::dto::movie::MovieCreationResponse;
+use crate::dto::movie::{MovieCreationResponse, MovieFilter, MovieType};
 use crate::dto::movie::{MovieResponseWithRelations, NewMovie};
 use crate::dto::page::{Page, Pagination};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
@@ -110,12 +110,13 @@ async fn get_movie(
 
 /// Get many movies
 #[openapi(tag = "Movies")]
-#[get("/?<pagination..>")]
+#[get("/?<type>&<pagination..>")]
 async fn get_movies(
 	db: Database<'_>,
+	r#type: Option<MovieType>,
 	pagination: Pagination,
 ) -> ApiPageResult<MovieResponseWithRelations> {
-	services::movie::find_many(pagination, db.into_inner())
+	services::movie::find_many(&MovieFilter { r#type }, &pagination, db.into_inner())
 		.await
 		.map(|items| Page::from(items))
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))

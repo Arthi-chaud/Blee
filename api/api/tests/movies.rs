@@ -179,4 +179,35 @@ mod test_movie {
 			.unwrap();
 		assert_eq!(next.as_null(), Some(()));
 	}
+
+	#[test]
+	// Test /movies?type=
+	fn test_movies_filter() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let expected_movie = &data.as_ref().unwrap().package_b.movies.first().unwrap().0;
+				let response = client
+					.get("/movies?type=concert")
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					expected_movie.id.to_string()
+				);
+			})
+			.is_ok());
+	}
 }

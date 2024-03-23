@@ -115,7 +115,7 @@ pub struct MovieCreationResponse {
 	pub chapters_id: Vec<Uuid>,
 }
 
-#[derive(Serialize, Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Serialize, Deserialize, JsonSchema, Clone, Copy, FromFormField)]
 #[serde(rename_all = "snake_case")]
 pub enum MovieType {
 	Concert,
@@ -138,4 +138,11 @@ impl From<MovieType> for MovieTypeEnum {
 			MovieType::Documentary => MovieTypeEnum::Documentary,
 		}
 	}
+}
+
+
+/// Filters for movies
+pub struct MovieFilter {
+	/// Filter by Type
+	pub r#type: Option<MovieType>,
 }
