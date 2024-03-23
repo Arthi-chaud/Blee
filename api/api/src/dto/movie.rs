@@ -140,11 +140,12 @@ impl From<MovieType> for MovieTypeEnum {
 	}
 }
 
-
 /// Filters for movies
 pub struct MovieFilter {
 	/// Filter by Type
 	pub r#type: Option<MovieType>,
 	/// Filter by Artist
 	pub artist: Option<Uuid>,
+	/// Filter by Package
+	pub package: Option<Uuid>,
 }

@@ -212,7 +212,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 		let new_movie = movie::Entity::insert(movie::ActiveModel {
 			name: Set("I'm Going to Tell You a Secret".to_string()),
 			slug: Set(slugify("madonna-im-going-to-tell-you-a-secret".to_string()).to_string()),
-			package_id: Set(package_a1.id),
+			package_id: Set(package_a2.id),
 			artist_id: Set(artist_a.id),
 			file_id: Set(new_file.id),
 			r#type: Set(MovieTypeEnum::Documentary),

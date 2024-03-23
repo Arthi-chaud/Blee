@@ -81,6 +81,9 @@ where
 	if let Some(artist_uuid) = filters.artist {
 		query = query.filter(movie::Column::ArtistId.eq(artist_uuid));
 	}
+	if let Some(package_uuid) = filters.package {
+		query = query.filter(movie::Column::PackageId.eq(package_uuid));
+	}
 	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(movie::Column::Id);

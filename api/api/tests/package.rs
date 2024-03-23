@@ -30,7 +30,12 @@ mod test_packages {
 				assert_eq!(items.len(), 2);
 				for item in items {
 					assert_eq!(
-						item.as_object().unwrap().get("artist_id").unwrap().as_str().unwrap(),
+						item.as_object()
+							.unwrap()
+							.get("artist_id")
+							.unwrap()
+							.as_str()
+							.unwrap(),
 						filtering_artist.id.to_string()
 					);
 				}
