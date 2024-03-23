@@ -6,7 +6,7 @@ mod test_artist {
 	use api::database::Db;
 	use entity::artist;
 	use rocket::http::Status;
-	use sea_orm::{EntityTrait, Set};
+	use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, Set};
 	use sea_orm_rocket::Database;
 
 	use crate::common::*;
@@ -16,7 +16,7 @@ mod test_artist {
 	fn test_artist() {
 		let client = test_client().lock().unwrap();
 
-		let response_using_slug = client.get("/artists/aretha-franklin").dispatch();
+		let response_using_slug = client.get("/artists/madonna").dispatch();
 		assert_eq!(response_using_slug.status(), Status::Ok);
 		let value = response_json_value(response_using_slug);
 
@@ -27,8 +27,8 @@ mod test_artist {
 		let id = value.get("id").unwrap().as_str();
 
 		// Check retuened values
-		assert_eq!(name, Some("Aretha Franklin"));
-		assert_eq!(slug, Some("aretha-franklin"));
+		assert_eq!(name, Some("Madonna"));
+		assert_eq!(slug, Some("madonna"));
 		assert_eq!(poster_id, None);
 		assert_eq!(poster, None);
 		assert_ne!(id, None);
@@ -42,7 +42,7 @@ mod test_artist {
 	fn test_artist_failure() {
 		let client = test_client().lock().unwrap();
 
-		let bad_slug = client.get("/artists/aretha-frankli").dispatch();
+		let bad_slug = client.get("/artists/madonn").dispatch();
 		let bad_uuid = client.get("/artists/00000000").dispatch();
 		assert_eq!(bad_slug.status(), Status::NotFound);
 		assert_eq!(bad_uuid.status(), Status::NotFound);
@@ -53,7 +53,7 @@ mod test_artist {
 	fn test_artist_poster_failures() {
 		let client = test_client().lock().unwrap();
 
-		let unknown_artist = client.post("/artists/aretha-frankli/poster").dispatch();
+		let unknown_artist = client.post("/artists/madonn/poster").dispatch();
 		assert_eq!(unknown_artist.status(), Status::NotFound);
 	}
 
@@ -62,7 +62,6 @@ mod test_artist {
 	fn test_artist_pagination() {
 		let client = test_client().lock().unwrap();
 		let conn = &Db::fetch(client.rocket()).unwrap().conn;
-
 		let _ = aw!(
 			artist::Entity::insert_many((1..10).map(|i| artist::ActiveModel {
 				slug: Set(format!("artist-{}", i)),
@@ -92,5 +91,10 @@ mod test_artist {
 			next,
 			format!("/artists?page_size=5&after_id={}", last_item_id)
 		);
+
+		//teardown
+		aw!(artist::Entity::delete_many()
+			.filter(artist::Column::Slug.starts_with("artist-"))
+			.exec(conn));
 	}
 }

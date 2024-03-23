@@ -17,7 +17,7 @@ mod test_images {
 		let client = test_client().lock().unwrap();
 
 		let response = client
-			.post("/artists/aretha-franklin/poster")
+			.post("/artists/madonna/poster")
 			.body(fs::read("./tests/assets/poster.png").unwrap())
 			.dispatch();
 		assert_eq!(response.status(), Status::Created);
@@ -42,7 +42,7 @@ mod test_images {
 	fn test_image_upload_2() {
 		let client = test_client().lock().unwrap();
 
-		let first_response = client.get("/artists/aretha-franklin").dispatch();
+		let first_response = client.get("/artists/madonna").dispatch();
 		assert_eq!(first_response.status(), Status::Ok);
 		let previousposter = response_json_value(first_response);
 		let previousposter_id = previousposter.get("poster_id").unwrap().as_str().unwrap();
@@ -52,7 +52,7 @@ mod test_images {
 			.join(previousposter_id);
 
 		let response = client
-			.post("/artists/aretha-franklin/poster")
+			.post("/artists/madonna/poster")
 			.body(fs::read("./tests/assets/poster2.jpg").unwrap())
 			.dispatch();
 		assert_eq!(response.status(), Status::Created);
@@ -80,10 +80,10 @@ mod test_images {
 	fn test_image_upload_failures() {
 		let client = test_client().lock().unwrap();
 
-		let missing_attached_file = client.post("/artists/aretha-franklin/poster").dispatch();
+		let missing_attached_file = client.post("/artists/madonna/poster").dispatch();
 		assert_eq!(missing_attached_file.status(), Status::BadRequest);
 		let not_an_image = client
-			.post("/artists/aretha-franklin/poster")
+			.post("/artists/madonna/poster")
 			.body(
 				fs::read(
 					PathBuf::from(env!("CARGO_MANIFEST_DIR"))

@@ -18,16 +18,16 @@ mod test_extra {
 	fn test_new_extra() {
 		let client = test_client().lock().unwrap();
 		let dto = NewExtra {
-			artist_name: "Madonna".to_owned(),
-			extra_name: "Secret (Music Video)".to_owned(),
-			package_artist_name: Some("Madonna".to_owned()),
-			package_name: "The Video Collection 93:99".to_owned(),
+			artist_name: "Depeche Mode".to_owned(),
+			extra_name: "Enjoy the Silence (Music Video)".to_owned(),
+			package_artist_name: Some("Depeche Mode".to_owned()),
+			package_name: "The Best Of".to_owned(),
 			disc_index: Some(1),
 			track_index: Some(8),
-			package_release_date: NaiveDate::from_ymd_opt(1999, 01, 02),
+			package_release_date: NaiveDate::from_ymd_opt(2007, 01, 02),
 			types: vec![ExtraType::MusicVideo],
 			file: NewFile {
-				path: "/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4"
+				path: "/data/Depeche Mode/The Best Of/1-08 Enjoy the Silence (Music Video).mp4"
 					.to_owned(),
 				size: 160000,
 				quality: VideoQuality::P480,
@@ -61,7 +61,7 @@ mod test_extra {
 		assert_eq!(extra_response.status(), Status::Ok);
 		let extra_value = response_json_value(extra_response);
 		let name = extra_value.get("name").unwrap().as_str().unwrap();
-		assert_eq!(name, "Secret (Music Video)");
+		assert_eq!(name, "Enjoy the Silence (Music Video)");
 		let disc_index = extra_value.get("disc_index").unwrap().as_i64().unwrap();
 		assert_eq!(disc_index, 1);
 		let track_index = extra_value.get("track_index").unwrap().as_i64().unwrap();
@@ -76,14 +76,14 @@ mod test_extra {
 		assert_eq!(artist_response.status(), Status::Ok);
 		let artist_value = response_json_value(artist_response);
 		let name = artist_value.get("name").unwrap().as_str().unwrap();
-		assert_eq!(name, "Madonna");
+		assert_eq!(name, "Depeche Mode");
 
 		// Check Package Exists
 		let package_response = client.get(format!("/packages/{}", package_id)).dispatch();
 		assert_eq!(package_response.status(), Status::Ok);
 		let package_value = response_json_value(package_response);
 		let name = package_value.get("name").unwrap().as_str().unwrap();
-		assert_eq!(name, "The Video Collection 93:99");
+		assert_eq!(name, "The Best Of");
 		let package_artist_id = package_value.get("artist_id").unwrap().as_str().unwrap();
 		assert_eq!(package_artist_id, artist_id);
 
@@ -94,7 +94,7 @@ mod test_extra {
 		let path = file_value.get("path").unwrap().as_str().unwrap();
 		assert_eq!(
 			path,
-			"/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4"
+			"/data/Depeche Mode/The Best Of/1-08 Enjoy the Silence (Music Video).mp4"
 		);
 		let quality = file_value.get("quality").unwrap().as_str().unwrap();
 		assert_eq!(quality, "480p");
@@ -103,32 +103,45 @@ mod test_extra {
 	#[test]
 	fn test_new_extra_failure_already_exists() {
 		let client = test_client().lock().unwrap();
-		let dto = NewExtra {
-			artist_name: "Madonna".to_owned(),
-			extra_name: "Secret (Music Video)".to_owned(),
-			package_artist_name: Some("Madonna".to_owned()),
-			package_name: "The Video Collection 93:99".to_owned(),
-			disc_index: Some(1),
-			track_index: Some(8),
-			package_release_date: NaiveDate::from_ymd_opt(1999, 01, 02),
-			types: vec![ExtraType::MusicVideo],
-			file: NewFile {
-				path: "/data/Madonna/The Video Collection 93_99/1-08 Secret (Music Video).mp4"
-					.to_owned(),
-				size: 160000,
-				quality: VideoQuality::P480,
-			},
-		};
-		let response = client
-			.post("/extras")
-			.header(Header::new(
-				"X-API-Key",
-				env::var("SCANNER_API_KEY").unwrap(),
-			))
-			.header(ContentType::JSON)
-			.body(serde_json::to_value(dto).unwrap().to_string())
-			.dispatch();
-		assert_eq!(response.status(), Status::Conflict);
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let source_package = &data.as_ref().unwrap().package_a;
+				let dto = NewExtra {
+					artist_name: source_package.artist.as_ref().unwrap().name.clone(),
+					extra_name: source_package.extras.first().unwrap().0 .0.name.clone(),
+					package_artist_name: Some("Madonna".to_owned()),
+					package_name: "The Video Collection 93:99".to_owned(),
+					disc_index: Some(1),
+					track_index: Some(8),
+					package_release_date: NaiveDate::from_ymd_opt(1999, 01, 02),
+					types: vec![ExtraType::MusicVideo],
+					file: NewFile {
+						path: source_package
+							.extras
+							.first()
+							.unwrap()
+							.0
+							 .1
+							.path
+							.clone()
+							.to_owned(),
+						size: 160000,
+						quality: VideoQuality::P480,
+					},
+				};
+				let response = client
+					.post("/extras")
+					.header(Header::new(
+						"X-API-Key",
+						env::var("SCANNER_API_KEY").unwrap(),
+					))
+					.header(ContentType::JSON)
+					.body(serde_json::to_value(dto).unwrap().to_string())
+					.dispatch();
+				assert_eq!(response.status(), Status::Conflict);
+			})
+			.is_ok());
 	}
 
 	#[test]
