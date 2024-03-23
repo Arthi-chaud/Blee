@@ -1,4 +1,4 @@
-use crate::dto::{artist::ArtistResponse, package::PackageResponseWithRelations, page::Pagination};
+use crate::dto::{artist::ArtistResponse, package::{PackageFilter, PackageResponseWithRelations}, page::Pagination};
 use ::slug::slugify;
 use entity::{image, package};
 use rocket::serde::uuid::Uuid;
@@ -71,20 +71,25 @@ where
 }
 
 pub async fn find_many<'a, C>(
+	filters: PackageFilter,
 	pagination: Pagination,
 	connection: &'a C,
 ) -> Result<Vec<PackageResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let mut query = package::Entity::find()
-		.find_also_related(image::Entity)
-		.cursor_by(package::Column::Id);
+	let mut query = package::Entity::find();
 
-	if let Some(after_id) = pagination.after_id {
-		query.after(after_id);
+	if let Some(artist_uuid) = filters.artist {
+		query = query.filter(package::Column::ArtistId.eq(artist_uuid));
 	}
-	query
+	let mut joint_query = query.find_also_related(image::Entity)
+		.cursor_by(package::Column::Id);
+	
+	if let Some(after_id) = pagination.after_id {
+		joint_query.after(after_id);
+	}
+	joint_query
 		.first(pagination.page_size)
 		.all(connection)
 		.await

@@ -5,7 +5,7 @@ use entity::package;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::artist::ArtistResponse;
 use super::image::ImageResponse;
@@ -65,4 +65,11 @@ impl From<package::Model> for PackageResponse {
 			poster_id: value.poster_id,
 		}
 	}
+}
+
+/// Filters for packages
+#[derive(Serialize, Deserialize, JsonSchema, FromForm)]
+pub struct PackageFilter {
+	/// Filter by Artist
+	pub artist: Option<Uuid>
 }
