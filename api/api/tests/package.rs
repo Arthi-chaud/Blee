@@ -27,12 +27,13 @@ mod test_packages {
 					.unwrap()
 					.as_array()
 					.unwrap();
-				assert_eq!(items.len(), 1);
-				let item = items.first().unwrap().as_object().unwrap();
-				assert_eq!(
-					item.get("artist_id").unwrap().as_str().unwrap(),
-					filtering_artist.id.to_string()
-				);
+				assert_eq!(items.len(), 2);
+				for item in items {
+					assert_eq!(
+						item.as_object().unwrap().get("artist_id").unwrap().as_str().unwrap(),
+						filtering_artist.id.to_string()
+					);
+				}
 			})
 			.is_ok());
 	}

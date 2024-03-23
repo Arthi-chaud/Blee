@@ -30,6 +30,7 @@ pub struct PackageDummy {
 pub struct DummyData {
 	pub package_a: PackageDummy,
 	pub package_b: PackageDummy,
+	pub package_c: PackageDummy,
 }
 
 macro_rules! aw {
@@ -176,10 +177,45 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 		let new_movie = movie::Entity::insert(movie::ActiveModel {
 			name: Set("Live in Cartoon Motion".to_string()),
 			slug: Set(slugify("mika-live-in-cartoon-motion".to_string()).to_string()),
+			package_id: Set(package_b1.id),
+			artist_id: Set(artist_b.id),
+			file_id: Set(new_file.id),
+			r#type: Set(MovieTypeEnum::Concert),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await?;
+		MovieDummy(new_movie, vec![], new_file)
+	};
+
+	let package_a2 = package::Entity::insert(package::ActiveModel {
+		name: Set("I'm Going to Tell You a Secret".to_string()),
+		slug: Set("im-going-to-tell-you-a-secret".to_string()),
+		release_year: Set(NaiveDate::from_ymd_opt(2005, 1, 1)),
+		artist_id: Set(Some(artist_a.id)),
+		..Default::default()
+	})
+	.exec_with_returning(db)
+	.await?;
+
+	let movie_a2 = {
+		let new_file = file::Entity::insert(file::ActiveModel {
+			path: Set("/videos/Madonna/I'm Going to Tell You a Secret.mp4".to_string()),
+			size: Set(min_to_sec(150, 0) * 1000), // 1kb per second
+			quality: Set(VideoQualityEnum::_480p),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await
+		.unwrap();
+
+		let new_movie = movie::Entity::insert(movie::ActiveModel {
+			name: Set("I'm Going to Tell You a Secret".to_string()),
+			slug: Set(slugify("madonna-im-going-to-tell-you-a-secret".to_string()).to_string()),
 			package_id: Set(package_a1.id),
 			artist_id: Set(artist_a.id),
 			file_id: Set(new_file.id),
-			r#type: Set(MovieTypeEnum::Concert),
+			r#type: Set(MovieTypeEnum::Documentary),
 			..Default::default()
 		})
 		.exec_with_returning(db)
@@ -191,13 +227,19 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 		package_a: PackageDummy {
 			movies: vec![],
 			package: package_a1,
-			artist: Some(artist_a),
+			artist: Some(artist_a.clone()),
 			extras: package_a1_extra,
 		},
 		package_b: PackageDummy {
 			movies: vec![movie_b1],
 			package: package_b1,
 			artist: Some(artist_b),
+			extras: vec![],
+		},
+		package_c: PackageDummy {
+			movies: vec![movie_a2],
+			package: package_a2,
+			artist: Some(artist_a),
 			extras: vec![],
 		},
 	})

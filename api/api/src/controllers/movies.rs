@@ -110,13 +110,14 @@ async fn get_movie(
 
 /// Get many movies
 #[openapi(tag = "Movies")]
-#[get("/?<type>&<pagination..>")]
+#[get("/?<type>&<artist>&<pagination..>")]
 async fn get_movies(
 	db: Database<'_>,
 	r#type: Option<MovieType>,
+	artist: Option<Uuid>,
 	pagination: Pagination,
 ) -> ApiPageResult<MovieResponseWithRelations> {
-	services::movie::find_many(&MovieFilter { r#type }, &pagination, db.into_inner())
+	services::movie::find_many(&MovieFilter { r#type, artist }, &pagination, db.into_inner())
 		.await
 		.map(|items| Page::from(items))
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))

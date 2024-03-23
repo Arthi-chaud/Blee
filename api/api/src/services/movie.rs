@@ -78,6 +78,9 @@ where
 	if let Some(t) = filters.r#type {
 		query = query.filter(movie::Column::Type.eq(MovieTypeEnum::from(t)));
 	}
+	if let Some(artist_uuid) = filters.artist {
+		query = query.filter(movie::Column::ArtistId.eq(artist_uuid));
+	}
 	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(movie::Column::Id);
