@@ -13,6 +13,7 @@ use rocket::State;
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
+use sqlx::types::Uuid;
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
 	openapi_get_routes_spec![settings: get_package, get_packages, post_package_poster]
@@ -32,13 +33,13 @@ async fn get_package(
 
 /// Get many packages
 #[openapi(tag = "Packages")]
-#[get("/?<filters>&<pagination>")]
+#[get("/?<artist>&<pagination..>")]
 async fn get_packages(
 	db: Database<'_>,
-	filters: PackageFilter,
+	artist: Option<Uuid>,
 	pagination: Pagination,
 ) -> ApiPageResult<PackageResponseWithRelations> {
-	services::package::find_many(filters, pagination, db.into_inner())
+	services::package::find_many(&PackageFilter { artist }, &pagination, db.into_inner())
 		.await
 		.map(|items| Page::from(items))
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))

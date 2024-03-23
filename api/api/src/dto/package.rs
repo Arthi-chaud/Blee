@@ -71,5 +71,5 @@ impl From<package::Model> for PackageResponse {
 #[derive(Serialize, Deserialize, JsonSchema, FromForm)]
 pub struct PackageFilter {
 	/// Filter by Artist
-	pub artist: Option<Uuid>
+	pub artist: Option<Uuid>,
 }

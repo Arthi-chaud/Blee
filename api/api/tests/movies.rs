@@ -169,7 +169,7 @@ mod test_movie {
 		assert_eq!(response_first_page.status(), Status::Ok);
 		let value = response_json_value(response_first_page);
 		let items = value.get("items").unwrap().as_array().unwrap();
-		assert_eq!(items.len(), 1);
+		assert_eq!(items.len(), 2);
 		let next = value
 			.get("metadata")
 			.unwrap()

@@ -104,3 +104,10 @@ impl From<VideoQuality> for VideoQualityEnum {
 		}
 	}
 }
+
+/// Filters for Files
+#[derive(Serialize, Deserialize, JsonSchema, FromForm)]
+pub struct FileFilter {
+	/// Filter by Path (starts with)
+	pub path: Option<String>,
+}

@@ -109,7 +109,7 @@ mod test_extra {
 				let source_package = &data.as_ref().unwrap().package_a;
 				let dto = NewExtra {
 					artist_name: source_package.artist.as_ref().unwrap().name.clone(),
-					extra_name: source_package.extras.first().unwrap().0 .0.name.clone(),
+					extra_name: source_package.extras.first().unwrap().0.name.clone(),
 					package_artist_name: Some("Madonna".to_owned()),
 					package_name: "The Video Collection 93:99".to_owned(),
 					disc_index: Some(1),
@@ -121,8 +121,7 @@ mod test_extra {
 							.extras
 							.first()
 							.unwrap()
-							.0
-							 .1
+							.1
 							.path
 							.clone()
 							.to_owned(),
