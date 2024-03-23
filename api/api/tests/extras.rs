@@ -235,6 +235,36 @@ mod test_extra {
 	}
 
 	#[test]
+	// Test /extra?type=&artist=
+	fn test_extra_filter_by_type_and_artist() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let filtering_artist = &data.as_ref().unwrap().package_a.package.artist_id.unwrap();
+				let response = client
+					.get(format!(
+						"/extras?type=interview&artist={}",
+						filtering_artist
+					))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				println!("{:?}", value);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 0);
+			})
+			.is_ok());
+	}
+
+	#[test]
 	// Test /extra?package=
 	fn test_extra_filter_by_package() {
 		let client = test_client().lock().unwrap();

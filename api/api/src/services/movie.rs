@@ -5,7 +5,7 @@ use crate::dto::{
 };
 use entity::{image, movie, sea_orm_active_enums::MovieTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
 use slug::slugify;
 
 pub async fn create<'s, 'a, C>(
@@ -73,17 +73,17 @@ pub async fn find_many<'a, C>(
 where
 	C: ConnectionTrait,
 {
-	let mut query = movie::Entity::find();
+	let query = movie::Entity::find()
+		.apply_if(filters.r#type, |q, r#type| {
+			q.filter(movie::Column::Type.eq(MovieTypeEnum::from(r#type)))
+		})
+		.apply_if(filters.artist, |q, artist_uuid| {
+			q.filter(movie::Column::ArtistId.eq(artist_uuid))
+		})
+		.apply_if(filters.package, |q, package_uuid| {
+			q.filter(movie::Column::PackageId.eq(package_uuid))
+		});
 
-	if let Some(t) = filters.r#type {
-		query = query.filter(movie::Column::Type.eq(MovieTypeEnum::from(t)));
-	}
-	if let Some(artist_uuid) = filters.artist {
-		query = query.filter(movie::Column::ArtistId.eq(artist_uuid));
-	}
-	if let Some(package_uuid) = filters.package {
-		query = query.filter(movie::Column::PackageId.eq(package_uuid));
-	}
 	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(movie::Column::Id);

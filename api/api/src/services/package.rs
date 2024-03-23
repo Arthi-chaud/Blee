@@ -6,7 +6,9 @@ use crate::dto::{
 use ::slug::slugify;
 use entity::{image, package};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{
+	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set,
+};
 
 pub async fn create_or_find<'s, 'a, C>(
 	artist: &Option<ArtistResponse>,
@@ -82,11 +84,10 @@ pub async fn find_many<'a, C>(
 where
 	C: ConnectionTrait,
 {
-	let mut query = package::Entity::find();
+	let query = package::Entity::find().apply_if(filters.artist, |q, artist_uuid| {
+		q.filter(package::Column::ArtistId.eq(artist_uuid))
+	});
 
-	if let Some(artist_uuid) = filters.artist {
-		query = query.filter(package::Column::ArtistId.eq(artist_uuid));
-	}
 	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(package::Column::Id);

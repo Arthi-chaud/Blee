@@ -4,7 +4,7 @@ use crate::dto::{
 };
 use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
 use slug::slugify;
 
 pub async fn create<'s, 'a, C>(
@@ -67,18 +67,17 @@ pub async fn find_many<'a, C>(
 where
 	C: ConnectionTrait,
 {
-	let mut query = extra::Entity::find();
-
-	if let Some(t) = filters.r#type {
-		//TODO
-		query = query.filter(extra::Column::Type.eq(vec![ExtraTypeEnum::from(t)]));
-	}
-	if let Some(artist_uuid) = filters.artist {
-		query = query.filter(extra::Column::ArtistId.eq(artist_uuid));
-	}
-	if let Some(package_uuid) = filters.package {
-		query = query.filter(extra::Column::PackageId.eq(package_uuid));
-	}
+	let query = extra::Entity::find()
+		.apply_if(filters.r#type, |q, r#type| {
+			//TODO
+			q.filter(extra::Column::Type.eq(vec![ExtraTypeEnum::from(r#type)]))
+		})
+		.apply_if(filters.artist, |q, artist_uuid| {
+			q.filter(extra::Column::ArtistId.eq(artist_uuid))
+		})
+		.apply_if(filters.package, |q, package_uuid| {
+			q.filter(extra::Column::PackageId.eq(package_uuid))
+		});
 	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(extra::Column::Id);
