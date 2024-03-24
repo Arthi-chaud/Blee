@@ -109,7 +109,7 @@ mod test_extra {
 				let source_package = &data.as_ref().unwrap().package_a;
 				let dto = NewExtra {
 					artist_name: source_package.artist.as_ref().unwrap().name.clone(),
-					extra_name: source_package.extras.first().unwrap().0 .0.name.clone(),
+					extra_name: source_package.extras.first().unwrap().0.name.clone(),
 					package_artist_name: Some("Madonna".to_owned()),
 					package_name: "The Video Collection 93:99".to_owned(),
 					disc_index: Some(1),
@@ -121,8 +121,7 @@ mod test_extra {
 							.extras
 							.first()
 							.unwrap()
-							.0
-							 .1
+							.1
 							.path
 							.clone()
 							.to_owned(),
@@ -172,5 +171,133 @@ mod test_extra {
 			.body(serde_json::to_value(dto).unwrap().to_string())
 			.dispatch();
 		assert_eq!(response.status(), Status::BadRequest);
+	}
+
+	#[test]
+	// Test /extra?artist=
+	fn test_extra_filter_by_artist() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let expected_extra = &data.as_ref().unwrap().package_b.extras.first().unwrap().0;
+				let filtering_artist = data.as_ref().unwrap().package_b.artist.as_ref().unwrap();
+				let response = client
+					.get(format!("/extras?artist={}", filtering_artist.id))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					expected_extra.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /extra?type=
+	fn test_extra_filter_by_type() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let expected_extra = &data.as_ref().unwrap().package_b.extras.first().unwrap().0;
+				let response = client.get("/extras?type=interview").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					expected_extra.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /extra?type=&artist=
+	fn test_extra_filter_by_type_and_artist() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let filtering_artist = &data.as_ref().unwrap().package_a.package.artist_id.unwrap();
+				let response = client
+					.get(format!(
+						"/extras?type=interview&artist={}",
+						filtering_artist
+					))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				println!("{:?}", value);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 0);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /extra?package=
+	fn test_extra_filter_by_package() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let filtering_package = &data.as_ref().unwrap().package_a;
+				let response = client
+					.get(format!("/extras?package={}", filtering_package.package.id))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), filtering_package.extras.len());
+				for item in items {
+					assert_eq!(
+						item.as_object()
+							.unwrap()
+							.get("package_id")
+							.unwrap()
+							.as_str()
+							.unwrap(),
+						filtering_package.package.id.to_string()
+					);
+				}
+			})
+			.is_ok());
 	}
 }

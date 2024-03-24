@@ -65,10 +65,14 @@ impl<'r> Responder<'r, 'static> for ApiError {
 					status_code: Status::Conflict,
 					message: "Resource already exists.".to_owned(),
 				},
-				_ => ErrorResponse {
-					status_code: Status::InternalServerError,
-					message: "Unhandled Database Error".to_owned(),
-				},
+				x => {
+					// TODO: Log
+					println!("{:?}", x);
+					ErrorResponse {
+						status_code: Status::InternalServerError,
+						message: "Unhandled Database Error".to_owned(),
+					}
+				}
 			},
 			ApiError::SqlError(SqlErr::UniqueConstraintViolation(_)) => ErrorResponse {
 				status_code: Status::Conflict,

@@ -1,9 +1,9 @@
 use entity::file;
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
 
 use crate::dto::{
-	file::{FileResponse, VideoQuality},
+	file::{FileFilter, FileResponse, VideoQuality},
 	page::Pagination,
 };
 
@@ -39,18 +39,23 @@ where
 }
 
 pub async fn find_many<'a, C>(
-	pagination: Pagination,
+	filter: &FileFilter,
+	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<FileResponse>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let mut query = file::Entity::find().cursor_by(file::Column::Id);
+	let query = file::Entity::find().apply_if(filter.path.clone(), |q, path| {
+		q.filter(file::Column::Path.starts_with(path))
+	});
+
+	let mut cursor = query.cursor_by(file::Column::Id);
 
 	if let Some(after_id) = pagination.after_id {
-		query.after(after_id);
+		cursor.after(after_id);
 	}
-	query
+	cursor
 		.first(pagination.page_size)
 		.all(connection)
 		.await

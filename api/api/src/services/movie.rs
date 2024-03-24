@@ -1,11 +1,11 @@
 use crate::dto::{
 	artist::ArtistResponse,
-	movie::{MovieResponseWithRelations, MovieType},
+	movie::{MovieFilter, MovieResponseWithRelations, MovieType},
 	page::Pagination,
 };
-use entity::{image, movie};
+use entity::{image, movie, sea_orm_active_enums::MovieTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
 use slug::slugify;
 
 pub async fn create<'s, 'a, C>(
@@ -66,20 +66,31 @@ where
 }
 
 pub async fn find_many<'a, C>(
-	pagination: Pagination,
+	filters: &MovieFilter,
+	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<MovieResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let mut query = movie::Entity::find()
+	let query = movie::Entity::find()
+		.apply_if(filters.r#type, |q, r#type| {
+			q.filter(movie::Column::Type.eq(MovieTypeEnum::from(r#type)))
+		})
+		.apply_if(filters.artist, |q, artist_uuid| {
+			q.filter(movie::Column::ArtistId.eq(artist_uuid))
+		})
+		.apply_if(filters.package, |q, package_uuid| {
+			q.filter(movie::Column::PackageId.eq(package_uuid))
+		});
+
+	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(movie::Column::Id);
-
 	if let Some(after_id) = pagination.after_id {
-		query.after(after_id);
+		joint_query.after(after_id);
 	}
-	query
+	joint_query
 		.first(pagination.page_size)
 		.all(connection)
 		.await

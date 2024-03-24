@@ -2,23 +2,23 @@ use api::{self, database::Db};
 use chrono::NaiveDate;
 use entity::{
 	artist, chapter, extra, file, image, movie, package,
-	sea_orm_active_enums::{ExtraTypeEnum, VideoQualityEnum},
+	sea_orm_active_enums::{ExtraTypeEnum, MovieTypeEnum, VideoQualityEnum},
 };
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::OnceCell;
 use rocket::{
 	fairing::AdHoc,
 	futures::future::join_all,
 	local::blocking::{Client, LocalResponse},
 	Build, Rocket,
 };
-use sea_orm::{DatabaseConnection, EntityTrait, Set};
+use sea_orm::{DatabaseTransaction, DbErr, EntityTrait, Set, TransactionTrait};
 use sea_orm_rocket::Database;
 use serde_json::Value;
 use slug::slugify;
-use std::sync::Mutex;
+use std::{sync::Mutex, vec};
 
-pub struct MovieDummy((movie::Model, Vec<chapter::Model>, file::Model));
-pub struct ExtraDummy(pub (extra::Model, file::Model));
+pub struct MovieDummy(pub movie::Model, pub Vec<chapter::Model>, pub file::Model);
+pub struct ExtraDummy(pub extra::Model, pub file::Model);
 
 pub struct PackageDummy {
 	pub package: package::Model,
@@ -29,6 +29,8 @@ pub struct PackageDummy {
 
 pub struct DummyData {
 	pub package_a: PackageDummy,
+	pub package_b: PackageDummy,
+	pub package_c: PackageDummy,
 }
 
 macro_rules! aw {
@@ -66,20 +68,23 @@ pub async fn setup_test_database(rocket: Rocket<Build>) -> Rocket<Build> {
 	let _ = file::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = image::Entity::delete_many().exec(conn).await.unwrap();
 
-	let seed = seed_data(conn).await;
-	GLOBAL_DATA.lock().unwrap().insert(seed);
+	let seed = conn
+		.transaction::<_, DummyData, DbErr>(|txn| Box::pin(async move { seed_data(txn).await }))
+		.await
+		.unwrap();
+	let _ = GLOBAL_DATA.lock().unwrap().insert(seed);
 	rocket
 }
 
-pub async fn seed_data(db: &DatabaseConnection) -> DummyData {
+pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
+	let min_to_sec = |min: i64, sec: i64| -> i64 { min * 60 + sec };
 	let artist_a = artist::Entity::insert(artist::ActiveModel {
 		name: Set("Madonna".to_string()),
 		slug: Set("madonna".to_string()),
 		..Default::default()
 	})
 	.exec_with_returning(db)
-	.await
-	.unwrap();
+	.await?;
 
 	let package_a1 = package::Entity::insert(package::ActiveModel {
 		name: Set("The Video Collection 93:99".to_string()),
@@ -89,10 +94,7 @@ pub async fn seed_data(db: &DatabaseConnection) -> DummyData {
 		..Default::default()
 	})
 	.exec_with_returning(db)
-	.await
-	.unwrap();
-
-	let min_to_sec = |min: i64, sec: i64| -> i64 { min * 60 + sec };
+	.await?;
 
 	let package_tracks = vec![
 		("Bad Girl", min_to_sec(6, 10)),
@@ -139,16 +141,131 @@ pub async fn seed_data(db: &DatabaseConnection) -> DummyData {
 		.exec_with_returning(db)
 		.await
 		.unwrap();
-		ExtraDummy((new_extra, new_file))
+		ExtraDummy(new_extra, new_file)
 	}))
 	.await;
 
-	DummyData {
+	let artist_b = artist::Entity::insert(artist::ActiveModel {
+		name: Set("MIKA".to_string()),
+		slug: Set("mika".to_string()),
+		..Default::default()
+	})
+	.exec_with_returning(db)
+	.await?;
+
+	let package_b1 = package::Entity::insert(package::ActiveModel {
+		name: Set("Live in Cartoon Motion".to_string()),
+		slug: Set("mika-live-in-cartoon-motion".to_string()),
+		release_year: Set(NaiveDate::from_ymd_opt(2006, 1, 1)),
+		artist_id: Set(Some(artist_b.id)),
+		..Default::default()
+	})
+	.exec_with_returning(db)
+	.await?;
+
+	let movie_b1 = {
+		let new_file = file::Entity::insert(file::ActiveModel {
+			path: Set("/videos/MIKA/Live in Cartoon Motion/Live in Cartoon Motion.mkv".to_string()),
+			size: Set(min_to_sec(120, 0) * 1000), // 1kb per second
+			quality: Set(VideoQualityEnum::_720p),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await
+		.unwrap();
+
+		let new_movie = movie::Entity::insert(movie::ActiveModel {
+			name: Set("Live in Cartoon Motion".to_string()),
+			slug: Set(slugify("mika-live-in-cartoon-motion".to_string()).to_string()),
+			package_id: Set(package_b1.id),
+			artist_id: Set(artist_b.id),
+			file_id: Set(new_file.id),
+			r#type: Set(MovieTypeEnum::Concert),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await?;
+		MovieDummy(new_movie, vec![], new_file)
+	};
+
+	let extra_b1 = {
+		let new_file = file::Entity::insert(file::ActiveModel {
+			path: Set("/videos/MIKA/Live in Cartoon Motion/Interview.mkv".to_string()),
+			size: Set(min_to_sec(20, 0) * 1000), // 1kb per second
+			quality: Set(VideoQualityEnum::_480p),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await
+		.unwrap();
+
+		let new_extra = extra::Entity::insert(extra::ActiveModel {
+			name: Set("Interview".to_string()),
+			slug: Set(slugify("interview".to_string()).to_string()),
+			package_id: Set(package_b1.id),
+			artist_id: Set(artist_b.id),
+			file_id: Set(new_file.id),
+			r#type: Set(vec![ExtraTypeEnum::Interview]),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await?;
+		ExtraDummy(new_extra, new_file)
+	};
+
+	let package_a2 = package::Entity::insert(package::ActiveModel {
+		name: Set("I'm Going to Tell You a Secret".to_string()),
+		slug: Set("im-going-to-tell-you-a-secret".to_string()),
+		release_year: Set(NaiveDate::from_ymd_opt(2005, 1, 1)),
+		artist_id: Set(Some(artist_a.id)),
+		..Default::default()
+	})
+	.exec_with_returning(db)
+	.await?;
+
+	let movie_a2 = {
+		let new_file = file::Entity::insert(file::ActiveModel {
+			path: Set("/videos/Madonna/I'm Going to Tell You a Secret.mp4".to_string()),
+			size: Set(min_to_sec(150, 0) * 1000), // 1kb per second
+			quality: Set(VideoQualityEnum::_480p),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await
+		.unwrap();
+
+		let new_movie = movie::Entity::insert(movie::ActiveModel {
+			name: Set("I'm Going to Tell You a Secret".to_string()),
+			slug: Set(slugify("madonna-im-going-to-tell-you-a-secret".to_string()).to_string()),
+			package_id: Set(package_a2.id),
+			artist_id: Set(artist_a.id),
+			file_id: Set(new_file.id),
+			r#type: Set(MovieTypeEnum::Documentary),
+			..Default::default()
+		})
+		.exec_with_returning(db)
+		.await?;
+		MovieDummy(new_movie, vec![], new_file)
+	};
+
+	Ok(DummyData {
 		package_a: PackageDummy {
 			movies: vec![],
 			package: package_a1,
-			artist: Some(artist_a),
+			artist: Some(artist_a.clone()),
 			extras: package_a1_extra,
 		},
-	}
+		package_b: PackageDummy {
+			movies: vec![movie_b1],
+			package: package_b1,
+			artist: Some(artist_b),
+			extras: vec![extra_b1],
+		},
+		package_c: PackageDummy {
+			movies: vec![movie_a2],
+			package: package_a2,
+			artist: Some(artist_a),
+			extras: vec![],
+		},
+	})
 }

@@ -66,3 +66,9 @@ impl From<package::Model> for PackageResponse {
 		}
 	}
 }
+
+/// Filters for packages
+pub struct PackageFilter {
+	/// Filter by Artist
+	pub artist: Option<Uuid>,
+}

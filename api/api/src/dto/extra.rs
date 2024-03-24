@@ -78,7 +78,7 @@ impl From<extra::Model> for ExtraResponse {
 	}
 }
 
-#[derive(Serialize, Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Serialize, Deserialize, JsonSchema, Clone, Copy, FromFormField)]
 #[serde(rename_all = "snake_case")]
 pub enum ExtraType {
 	AlternateView,
@@ -158,4 +158,14 @@ pub struct NewExtra {
 	/// Must Not Be Empty
 	pub types: Vec<ExtraType>,
 	pub file: NewFile,
+}
+
+/// Filters for movies
+pub struct ExtraFilter {
+	/// Filter by Type
+	pub r#type: Option<ExtraType>,
+	/// Filter by Artist
+	pub artist: Option<Uuid>,
+	/// Filter by Package
+	pub package: Option<Uuid>,
 }

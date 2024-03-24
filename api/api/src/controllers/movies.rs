@@ -1,13 +1,13 @@
-use crate::api_keys::ScannerApiKey;
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
 use crate::dto::chapter::ChapterResponseWithThumbnail;
 use crate::dto::image::ImageResponse;
-use crate::dto::movie::MovieCreationResponse;
+use crate::dto::movie::{MovieCreationResponse, MovieFilter, MovieType};
 use crate::dto::movie::{MovieResponseWithRelations, NewMovie};
 use crate::dto::page::{Page, Pagination};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
+use crate::guards::ScannerAuthGuard;
 use crate::{services, utils};
 use entity::movie;
 use rocket::fs::TempFile;
@@ -30,7 +30,7 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 async fn new_movie(
 	db: Database<'_>,
 	data: Json<NewMovie>,
-	_scanner: ScannerApiKey,
+	_scanner: ScannerAuthGuard,
 ) -> ApiRawResult<status::Created<Json<MovieCreationResponse>>> {
 	// TODO: This should be validated before the controller is called
 	for chapter in data.0.chapters.iter() {
@@ -110,15 +110,26 @@ async fn get_movie(
 
 /// Get many movies
 #[openapi(tag = "Movies")]
-#[get("/?<pagination..>")]
+#[get("/?<type>&<artist>&<package>&<pagination..>")]
 async fn get_movies(
 	db: Database<'_>,
+	r#type: Option<MovieType>,
+	artist: Option<Uuid>,
+	package: Option<Uuid>,
 	pagination: Pagination,
 ) -> ApiPageResult<MovieResponseWithRelations> {
-	services::movie::find_many(pagination, db.into_inner())
-		.await
-		.map(|items| Page::from(items))
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
+	services::movie::find_many(
+		&MovieFilter {
+			r#type,
+			artist,
+			package,
+		},
+		&pagination,
+		db.into_inner(),
+	)
+	.await
+	.map(|items| Page::from(items))
+	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Get a Movie's Chapters

@@ -10,7 +10,7 @@ use rocket_okapi::request::{OpenApiFromRequest, RequestHeaderInput};
 use crate::config::Config;
 
 /// The Request Guard for API Key, used by the Scanner to authenticate itself
-pub struct ScannerApiKey;
+pub struct ScannerAuthGuard;
 
 #[derive(Debug)]
 pub enum ApiKeyError {
@@ -19,7 +19,7 @@ pub enum ApiKeyError {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for ScannerApiKey {
+impl<'r> FromRequest<'r> for ScannerAuthGuard {
 	type Error = ApiKeyError;
 
 	async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -32,13 +32,13 @@ impl<'r> FromRequest<'r> for ScannerApiKey {
 
 		match req.headers().get_one("x-api-key") {
 			None => Outcome::Error((Status::Unauthorized, ApiKeyError::Missing)),
-			Some(key) if key == scanner_api_key => Outcome::Success(ScannerApiKey),
+			Some(key) if key == scanner_api_key => Outcome::Success(ScannerAuthGuard),
 			Some(_) => Outcome::Error((Status::BadRequest, ApiKeyError::Invalid)),
 		}
 	}
 }
 
-impl<'r> OpenApiFromRequest<'r> for ScannerApiKey {
+impl<'r> OpenApiFromRequest<'r> for ScannerAuthGuard {
 	fn from_request_input(
 		_gen: &mut OpenApiGenerator,
 		_name: String,

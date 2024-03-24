@@ -165,18 +165,156 @@ mod test_movie {
 	fn test_movies_pagination() {
 		let client = test_client().lock().unwrap();
 
-		let response_first_page = client.get("/movies").dispatch();
+		let response_first_page = client.get("/movies?page_size=2").dispatch();
 		assert_eq!(response_first_page.status(), Status::Ok);
 		let value = response_json_value(response_first_page);
 		let items = value.get("items").unwrap().as_array().unwrap();
-		assert_eq!(items.len(), 1);
+		let last_item_id = items
+			.last()
+			.unwrap()
+			.as_object()
+			.unwrap()
+			.get("id")
+			.unwrap()
+			.as_str()
+			.unwrap();
+		assert_eq!(items.len(), 2);
 		let next = value
 			.get("metadata")
 			.unwrap()
 			.as_object()
 			.unwrap()
 			.get("next")
+			.unwrap()
+			.as_str()
 			.unwrap();
-		assert_eq!(next.as_null(), Some(()));
+		assert_eq!(
+			next,
+			format!("/movies?page_size=2&after_id={}", last_item_id)
+		);
+		let response_second_page = client.get(next).dispatch();
+		assert_eq!(response_second_page.status(), Status::Ok);
+		let value = response_json_value(response_second_page);
+		let items = value.get("items").unwrap().as_array().unwrap();
+		assert_eq!(items.len(), 1);
+	}
+
+	#[test]
+	// Test /movies?type=
+	fn test_movies_filter_by_type() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let expected_movie = &data.as_ref().unwrap().package_b.movies.first().unwrap().0;
+				let response = client.get("/movies?type=concert").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					expected_movie.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /movies?artist=
+	fn test_movies_filter_by_artist() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let filtering_artist = data.as_ref().unwrap().package_c.artist.as_ref().unwrap();
+				let expected_movie = &data.as_ref().unwrap().package_c.movies.first().unwrap().0;
+				let response = client
+					.get(format!("/movies?artist={}", filtering_artist.id))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					expected_movie.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /movies?package=
+	fn test_movies_filter_by_package() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let filtering_package = &data.as_ref().unwrap().package_c.package;
+				let expected_movie = &data.as_ref().unwrap().package_c.movies.first().unwrap().0;
+				let response = client
+					.get(format!("/movies?package={}", filtering_package.id))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					expected_movie.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /movies?package=
+	fn test_movies_filter_by_package_expect_empty() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let filtering_package = &data.as_ref().unwrap().package_a.package;
+				let response = client
+					.get(format!("/movies?package={}", filtering_package.id))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 0);
+			})
+			.is_ok());
 	}
 }

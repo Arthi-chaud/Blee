@@ -66,3 +66,8 @@ impl From<artist::Model> for ArtistResponse {
 		}
 	}
 }
+
+// Filter for Artist
+pub struct ArtistFilter {
+	pub package: Option<Uuid>,
+}

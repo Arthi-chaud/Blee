@@ -1,7 +1,7 @@
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::image::ImageResponse;
-use crate::dto::package::PackageResponseWithRelations;
+use crate::dto::package::{PackageFilter, PackageResponseWithRelations};
 use crate::dto::page::{Page, Pagination};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
 use crate::{services, utils};
@@ -13,13 +13,14 @@ use rocket::State;
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
+use sqlx::types::Uuid;
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
 	openapi_get_routes_spec![settings: get_package, get_packages, post_package_poster]
 }
 
 /// Get a Single Package
-#[openapi(tag = "Package")]
+#[openapi(tag = "Packages")]
 #[get("/<slug_or_uuid>")]
 async fn get_package(
 	db: Database<'_>,
@@ -31,13 +32,14 @@ async fn get_package(
 }
 
 /// Get many packages
-#[openapi(tag = "Movies")]
-#[get("/?<pagination..>")]
+#[openapi(tag = "Packages")]
+#[get("/?<artist>&<pagination..>")]
 async fn get_packages(
 	db: Database<'_>,
+	artist: Option<Uuid>,
 	pagination: Pagination,
 ) -> ApiPageResult<PackageResponseWithRelations> {
-	services::package::find_many(pagination, db.into_inner())
+	services::package::find_many(&PackageFilter { artist }, &pagination, db.into_inner())
 		.await
 		.map(|items| Page::from(items))
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))

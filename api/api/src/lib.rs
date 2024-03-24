@@ -13,12 +13,12 @@ use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 use sea_orm_rocket::Database;
 use std::env;
 
-pub(crate) mod api_keys;
 pub mod config;
 mod controllers;
 pub mod database;
 pub mod dto;
 mod error_handling;
+pub(crate) mod guards;
 pub mod services;
 mod swagger;
 mod swagger_examples;

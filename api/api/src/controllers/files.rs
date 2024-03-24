@@ -1,4 +1,5 @@
 use crate::database::Database;
+use crate::dto::file::FileFilter;
 use crate::dto::file::FileResponse;
 use crate::dto::page::Page;
 use crate::dto::page::Pagination;
@@ -25,9 +26,13 @@ async fn get_file(db: Database<'_>, uuid: Uuid) -> ApiResult<FileResponse> {
 
 /// Get many Files
 #[openapi(tag = "Files")]
-#[get("/?<pagination..>")]
-async fn get_files(db: Database<'_>, pagination: Pagination) -> ApiPageResult<FileResponse> {
-	services::file::find_many(pagination, db.into_inner())
+#[get("/?<path>&<pagination..>")]
+async fn get_files(
+	db: Database<'_>,
+	path: Option<String>,
+	pagination: Pagination,
+) -> ApiPageResult<FileResponse> {
+	services::file::find_many(&FileFilter { path }, &pagination, db.into_inner())
 		.await
 		.map(|items| Page::from(items))
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))

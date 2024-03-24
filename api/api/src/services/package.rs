@@ -1,8 +1,14 @@
-use crate::dto::{artist::ArtistResponse, package::PackageResponseWithRelations, page::Pagination};
+use crate::dto::{
+	artist::ArtistResponse,
+	package::{PackageFilter, PackageResponseWithRelations},
+	page::Pagination,
+};
 use ::slug::slugify;
 use entity::{image, package};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{
+	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set,
+};
 
 pub async fn create_or_find<'s, 'a, C>(
 	artist: &Option<ArtistResponse>,
@@ -71,20 +77,25 @@ where
 }
 
 pub async fn find_many<'a, C>(
-	pagination: Pagination,
+	filters: &PackageFilter,
+	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<PackageResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let mut query = package::Entity::find()
+	let query = package::Entity::find().apply_if(filters.artist, |q, artist_uuid| {
+		q.filter(package::Column::ArtistId.eq(artist_uuid))
+	});
+
+	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(package::Column::Id);
 
 	if let Some(after_id) = pagination.after_id {
-		query.after(after_id);
+		joint_query.after(after_id);
 	}
-	query
+	joint_query
 		.first(pagination.page_size)
 		.all(connection)
 		.await

@@ -163,6 +163,7 @@ dependencies = [
  "sqlx",
  "tempfile",
  "tokio-test",
+ "urlencoding",
  "webp",
 ]
 

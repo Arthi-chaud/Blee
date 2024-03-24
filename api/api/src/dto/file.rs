@@ -104,3 +104,9 @@ impl From<VideoQuality> for VideoQualityEnum {
 		}
 	}
 }
+
+/// Filters for Files
+pub struct FileFilter {
+	/// Filter by Path (starts with)
+	pub path: Option<String>,
+}
