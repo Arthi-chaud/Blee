@@ -8,4 +8,4 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o ./scanner
 FROM debian:bullseye-slim as runner
 WORKDIR /app
 COPY --from=builder /app/scanner ./
-CMD ./scanner -d "${WATCH_DIR}"
+CMD ./scanner -d "${WATCH_DIR}" -c "$CONFIG_DIR"/scanner.json

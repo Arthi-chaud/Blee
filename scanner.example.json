@@ -1,0 +1,6 @@
+{
+	"regexes": {
+		"movies": ["b"],
+		"extras": ["a"]
+	}
+}

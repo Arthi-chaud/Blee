@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"github.com/goccy/go-json"
 	"github.com/kpango/glg"
+	"gopkg.in/go-playground/validator.v9"
 	"os"
 )
 
@@ -11,13 +13,53 @@ type Config struct {
 	WatchDir string
 	// Secret API Key to authenticate
 	ApiKey string
+	// User configuration from `scanner.json`
+	UserConfig UserConfiguration
+}
+
+type UserConfiguration struct {
+	Regexes struct {
+		// Regexes of the extras to match
+		Extra []string `json:"extras" validate:"required"`
+		// Regexes of the movies to match
+		Movie []string `json:"movies" validate:"required"`
+	} `json:"regexes" validate:"required,dive,required"`
+}
+
+func parse_config_file(file string) UserConfiguration {
+	bytes, err := os.ReadFile(file)
+
+	if err != nil {
+		glg.Fatalf("Could not read configuration file: %s", err)
+		os.Exit(1)
+	}
+
+	var config UserConfiguration
+
+	json.Unmarshal(bytes, &config)
+	validation_error := validator.New().Struct(config)
+	if validation_error != nil {
+		glg.Fatalf("An error occured while validating configuration file: %s", validation_error)
+		os.Exit(1)
+	}
+	if len(config.Regexes.Extra) == 0 || len(config.Regexes.Movie) == 0 {
+		glg.Fatalf("Configuration File: Regex lists cannot be empty")
+		os.Exit(1)
+	}
+	return config
 }
 
 // Parses and return a config from the CLI args and env args
 func get_config() Config {
 	var config Config
 	watchDir := flag.String("d", "", "the directory to watch")
+	configFilePath := flag.String("c", "", "the path to the `scanner.json`")
 	flag.Parse()
+
+	if len(*watchDir) == 0 || len(*configFilePath) == 0 {
+		glg.Fatalf("Missing argument. Run with `-h` for usage.")
+		os.Exit(1)
+	}
 
 	apiKey, is_present := os.LookupEnv("SCANNER_API_KEY")
 
@@ -26,8 +68,10 @@ func get_config() Config {
 		os.Exit(1)
 	}
 
+
 	config.ApiKey = apiKey
 	config.WatchDir = *watchDir
-
+	config.UserConfig = parse_config_file(*configFilePath)
+	glg.Log("Configuration parsed successfully")
 	return config
 }
