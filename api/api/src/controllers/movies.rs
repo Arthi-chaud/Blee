@@ -1,4 +1,3 @@
-use crate::guards::ScannerAuthGuard;
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
@@ -8,6 +7,7 @@ use crate::dto::movie::{MovieCreationResponse, MovieFilter, MovieType};
 use crate::dto::movie::{MovieResponseWithRelations, NewMovie};
 use crate::dto::page::{Page, Pagination};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
+use crate::guards::ScannerAuthGuard;
 use crate::{services, utils};
 use entity::movie;
 use rocket::fs::TempFile;

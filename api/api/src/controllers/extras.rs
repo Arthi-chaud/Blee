@@ -1,4 +1,3 @@
-use crate::guards::ScannerAuthGuard;
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
@@ -12,6 +11,7 @@ use crate::dto::page::Page;
 use crate::dto::page::Pagination;
 use crate::error_handling::ApiPageResult;
 use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
+use crate::guards::ScannerAuthGuard;
 use crate::services;
 use crate::utils;
 use entity::extra;
