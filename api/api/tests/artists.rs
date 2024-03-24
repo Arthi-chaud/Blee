@@ -97,4 +97,37 @@ mod test_artist {
 			.filter(artist::Column::Slug.starts_with("artist-"))
 			.exec(conn));
 	}
+
+	#[test]
+	// Test /artists?package=
+	fn test_artist_filtered_by_package() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let filtering_package = &data.as_ref().unwrap().package_a.package.id;
+				let expected_artist = &data.as_ref().unwrap().package_a.package.artist_id.unwrap();
+				let response = client
+					.get(format!("/artists?package={}", filtering_package))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				println!("{:?}", value);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					expected_artist.to_string()
+				);
+			})
+			.is_ok());
+	}
 }

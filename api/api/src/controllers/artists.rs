@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::database::Database;
-use crate::dto::artist::ArtistWithPosterResponse;
+use crate::dto::artist::{ArtistFilter, ArtistWithPosterResponse};
 use crate::dto::image::ImageResponse;
 use crate::dto::page::{Page, Pagination};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
@@ -9,6 +9,7 @@ use entity::artist;
 use rocket::fs::TempFile;
 use rocket::response::status;
 use rocket::serde::json::Json;
+use rocket::serde::uuid::Uuid;
 use rocket::State;
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
@@ -20,12 +21,13 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 
 /// Get many artists
 #[openapi(tag = "Artists")]
-#[get("/?<pagination..>")]
+#[get("/?<package>&<pagination..>")]
 async fn get_artists(
 	db: Database<'_>,
+	package: Option<Uuid>,
 	pagination: Pagination,
 ) -> ApiPageResult<ArtistWithPosterResponse> {
-	services::artist::find_many(pagination, db.into_inner())
+	services::artist::find_many(&ArtistFilter { package }, &pagination, db.into_inner())
 		.await
 		.map(|items| Page::from(items))
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
