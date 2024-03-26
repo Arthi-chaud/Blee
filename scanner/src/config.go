@@ -1,4 +1,4 @@
-package main
+package src
 
 import (
 	"flag"
@@ -26,7 +26,7 @@ type UserConfiguration struct {
 	} `json:"regexes" validate:"required,dive,required"`
 }
 
-func parse_config_file(file string) UserConfiguration {
+func parseConfigFile(file string) UserConfiguration {
 	bytes, err := os.ReadFile(file)
 
 	if err != nil {
@@ -50,7 +50,7 @@ func parse_config_file(file string) UserConfiguration {
 }
 
 // Parses and return a config from the CLI args and env args
-func get_config() Config {
+func GetConfig() Config {
 	var config Config
 	watchDir := flag.String("d", "", "the directory to watch")
 	configFilePath := flag.String("c", "", "the path to the `scanner.json`")
@@ -71,7 +71,7 @@ func get_config() Config {
 
 	config.ApiKey = apiKey
 	config.WatchDir = *watchDir
-	config.UserConfig = parse_config_file(*configFilePath)
+	config.UserConfig = parseConfigFile(*configFilePath)
 	glg.Log("Configuration parsed successfully")
 	return config
 }
