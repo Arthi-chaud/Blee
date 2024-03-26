@@ -16,8 +16,8 @@ func getTestConfig() *src.UserConfiguration {
 		"(?!^)[\\/\\\\]((?P<PackageArtist>[^\\/\\\\]+)((\\s+-\\s+)|([\\/\\\\]+))(([^\\/\\\\]+)\\s+-\\s+)?((?P<Package>[^\\/\\\\]+?)))(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+(Extra(s)?[\\/\\\\]+)?(((?P<Disc>\\d+)-)?(?P<Index>\\d+))?(?P<Extra>(?!\\1)(?!\\8)[^\\/\\\\]+?)(?P<PlexExtraType>-[a-z]+)?\\..+",
 	}
 	config.Regexes.Movie = []string{
-		"(?!^)[\\/\\\\](?P<PackageArtist>[^\\/\\\\]+)((\\s+-\\s+)|([\\/\\\\]+))(([^\\/\\\\]+)\\s+-\\s+)?(?P<Package>[^\\/\\\\]+?)(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+((?P<Artist>[^\\/\\\\]+)\\s+-\\s+)?(?P<Movie>[^\\/\\\\]+?)(\\s+\\((?P<Year>\\d+)\\))?\\..+",
-		"(?!^)[\\/\\\\](?P<PackageArtist>(?P<Artist>[^\\/\\\\]+))((\\s+-\\s+)|([\\/\\\\]+))(?P<Package>(?P<Movie>[^\\/\\\\]+?))(\\s+\\((?P<PackageYear>(?P<Year>\\d+))\\))?\\..+",
+		"[\\/\\\\](?P<PackageArtist>[^\\/\\\\]+)((\\s+-\\s+)|([\\/\\\\]+))(([^\\/\\\\]+)\\s+-\\s+)?(?P<Package>[^\\/\\\\]+?)(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+((?P<Artist>[^\\/\\\\]+)\\s+-\\s+)?(?P<Movie>[^\\/\\\\]+?)(\\s+\\((?P<Year>\\d+)\\))?\\..+",
+		"[\\/\\\\](?P<PackageArtist>(?P<Artist>[^\\/\\\\]+))((\\s+-\\s+)|([\\/\\\\]+))(?P<Package>(?P<Movie>[^\\/\\\\]+?))(\\s+\\((?P<PackageYear>(?P<Year>\\d+))\\))?\\..+",
 	}
 	return &config
 }
