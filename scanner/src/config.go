@@ -42,10 +42,6 @@ func parseConfigFile(file string) UserConfiguration {
 		glg.Fatalf("An error occured while validating configuration file: %s", validation_error)
 		os.Exit(1)
 	}
-	if len(config.Regexes.Extra) == 0 || len(config.Regexes.Movie) == 0 {
-		glg.Fatalf("Configuration File: Regex lists cannot be empty")
-		os.Exit(1)
-	}
 	return config
 }
 
@@ -67,7 +63,6 @@ func GetConfig() Config {
 		glg.Fatalf("SCANNER_API_KEY is missing or empty.")
 		os.Exit(1)
 	}
-
 
 	config.ApiKey = apiKey
 	config.WatchDir = *watchDir

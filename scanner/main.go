@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/Arthi-chaud/Blee/scanner/src"
 	"github.com/kpango/glg"
 	"github.com/radovskyb/watcher"
 	"os"
-	"github.com/Arthi-chaud/Blee/scanner/src"
 	"time"
 )
 

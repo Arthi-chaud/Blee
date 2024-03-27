@@ -2,12 +2,14 @@ package src
 
 import (
 	"errors"
-	"github.com/Arthi-chaud/Blee/scanner/src"
-	models "github.com/Arthi-chaud/Blee/scanner/src/models"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Arthi-chaud/Blee/scanner/src"
+	models "github.com/Arthi-chaud/Blee/scanner/src/models"
+	"github.com/kpango/glg"
 )
 
 // Metadata Extracted from the path of a file
@@ -62,14 +64,6 @@ type PathMetadataParsingResult struct {
 }
 
 func ParseMetadataFromPath(filePath string, userConfig *src.UserConfiguration) (PathMetadataParsingResult, error) {
-	for _, trackRegex := range userConfig.Regexes.Movie {
-		regex := regexp.MustCompile(trackRegex)
-		matches := regex.FindStringSubmatch(filePath)
-		if len(matches) == 0 {
-			continue
-		}
-		return PathMetadataParsingResult{movie: parseMovieMetadataFromMatches(matches, regex)}, nil
-	}
 	for _, trackRegex := range userConfig.Regexes.Extra {
 		regex := regexp.MustCompile(trackRegex)
 		matches := regex.FindStringSubmatch(filePath)
@@ -78,23 +72,30 @@ func ParseMetadataFromPath(filePath string, userConfig *src.UserConfiguration) (
 		}
 		return PathMetadataParsingResult{extra: parseExtraMetadataFromMatches(matches, regex)}, nil
 	}
+	for _, movieRegex := range userConfig.Regexes.Movie {
+		regex := regexp.MustCompile(movieRegex)
+		matches := regex.FindStringSubmatch(filePath)
+		if len(matches) == 0 {
+			continue
+		}
+		glg.Debugf("%s %s", movieRegex, filePath)
+		return PathMetadataParsingResult{movie: parseMovieMetadataFromMatches(matches, regex)}, nil
+	}
 	return PathMetadataParsingResult{}, errors.New("No match")
 }
 
 func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) *MovieMetadataFromPath {
 	res := MovieMetadataFromPath{}
 
-	res.artist_name = matches[regex.SubexpIndex("Artist")]
-	if len(res.artist_name) == 0 {
-		res.artist_name = matches[regex.SubexpIndex("PackageArtist")]
+	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
+		res.artist_name = matches[artist_index]
+	} else if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
+		res.artist_name = matches[package_artist]
 	}
 	res.name = matches[regex.SubexpIndex("Movie")]
 	res.type_ = parseMovieTypeFromName(res.name)
 	res.package_.name = matches[regex.SubexpIndex("Package")]
-	parsed_date, err := time.Parse(time.RFC3339, matches[regex.SubexpIndex("Package")])
-	if err == nil {
-		res.package_.release_year = parsed_date
-	}
+	parseYearFromRegex(matches, regex, &res.package_)
 	res.package_.artist_name = matches[regex.SubexpIndex("PackageArtist")]
 	if len(res.package_.artist_name) == 0 {
 		res.package_.artist_name = res.artist_name
@@ -102,9 +103,24 @@ func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) *Movi
 	return &res
 }
 
+func parseYearFromRegex(matches []string, regex *regexp.Regexp, p *PackageMetadataFromPath) {
+	for _, group_name := range []string {"PackageYear", "Year"} {
+		if group_index := regex.SubexpIndex(group_name); group_index != -1 {
+			if parsed_year, err := strconv.Atoi(matches[group_index]); err == nil {
+				p.release_year = time.Date(parsed_year, 1, 1, 1, 1, 1, 1, time.UTC)
+				return
+			}
+		}
+	}
+}
+
 func parseMovieTypeFromName(movieName string) models.MovieType {
 	movieName = strings.ToLower(movieName)
-	if strings.Contains(movieName, "live") || strings.Contains(movieName, "concert") || strings.Contains(movieName, "tour") || strings.Contains(movieName, "show") {
+	if strings.Contains(movieName, "live") ||
+		strings.Contains(movieName, "concert") ||
+		strings.Contains(movieName, "tour") ||
+		strings.Contains(movieName, "show") ||
+		strings.Contains(movieName, "unplugged") {
 		return models.Concert
 	}
 	return models.Documentary
@@ -113,9 +129,10 @@ func parseMovieTypeFromName(movieName string) models.MovieType {
 func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) *ExtraMetadataFromPath {
 	res := ExtraMetadataFromPath{}
 
-	res.artist_name = matches[regex.SubexpIndex("Artist")]
-	if len(res.artist_name) == 0 {
-		res.artist_name = matches[regex.SubexpIndex("PackageArtist")]
+	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
+		res.artist_name = matches[artist_index]
+	} else if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
+		res.artist_name = matches[package_artist]
 	}
 	disc_index, err := strconv.Atoi(matches[regex.SubexpIndex("Disc")])
 	if err == nil {
@@ -126,8 +143,16 @@ func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) *Extr
 		res.track_index = index
 	}
 	res.name = matches[regex.SubexpIndex("Extra")]
-	res.types = []models.ExtraType{parseExtraTypeFromPlexRegexGroup(matches[regex.SubexpIndex("PlexExtraType")])}
-
+	if plexExtraType := parseExtraTypeFromPlexRegexGroup(matches[regex.SubexpIndex("PlexExtraType")]); plexExtraType != models.Other {
+		res.types = []models.ExtraType{plexExtraType}
+	}
+	if extraType := parseExtraTypeFromName(res.name); extraType != models.Other {
+		res.types = append(res.types, extraType)
+	}
+	if len(res.types) == 0 {
+		res.types = append(res.types, models.Other)
+	}
+	parseYearFromRegex(matches, regex, &res.package_)
 	res.package_.name = matches[regex.SubexpIndex("Package")]
 	parsed_date, err := time.Parse(time.RFC3339, matches[regex.SubexpIndex("Package")])
 	if err == nil {
@@ -156,6 +181,49 @@ func parseExtraTypeFromPlexRegexGroup(group string) models.ExtraType {
 		return models.Performance
 	case group == "trailer":
 		return models.Trailer
+	}
+	return models.Other
+}
+
+func parseExtraTypeFromName(extraName string) models.ExtraType {
+	extraName = strings.ToLower(extraName)
+	if strings.Contains(extraName, "document") {
+		return models.ExtraType(models.Documentary)
+	}
+	if strings.Contains(extraName, "music video") {
+		return models.ExtraType(models.MusicVideo)
+	}
+	if strings.Contains(extraName, " angle") {
+		return models.ExtraType(models.AlternateView)
+	}
+	if strings.Contains(extraName, "backdrop") ||
+		strings.Contains(extraName, "visuals") {
+		return models.ExtraType(models.Backdrops)
+	}
+	if strings.Contains(extraName, "trailer") ||
+		strings.Contains(extraName, "teaser") {
+		return models.ExtraType(models.Trailer)
+	}
+	if strings.Contains(extraName, "making of") ||
+		strings.Contains(extraName, "behind the") ||
+		strings.Contains(extraName, "making the") {
+		return models.ExtraType(models.BehindTheScenes)
+	}
+	if strings.Contains(extraName, "interview") ||
+		strings.Contains(extraName, "chat ") ||
+		strings.HasSuffix(extraName, " chat") {
+		return models.ExtraType(models.Interview)
+	}
+	if strings.Contains(extraName, "interview") ||
+		strings.Contains(extraName, "chat ") ||
+		strings.HasSuffix(extraName, " chat") {
+		return models.ExtraType(models.Interview)
+	}
+	if strings.Contains(extraName, "video") {
+		return models.ExtraType(models.MusicVideo)
+	}
+	if strings.Contains(extraName, "live") {
+		return models.ExtraType(models.Performance)
 	}
 	return models.Other
 }
