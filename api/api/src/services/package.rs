@@ -7,7 +7,8 @@ use ::slug::slugify;
 use entity::{image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set,
+	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QuerySelect,
+	QueryTrait, Set,
 };
 
 pub async fn create_or_find<'s, 'a, C>(
@@ -84,29 +85,25 @@ pub async fn find_many<'a, C>(
 where
 	C: ConnectionTrait,
 {
-	let query = package::Entity::find().apply_if(filters.artist, |q, artist_uuid| {
-		q.filter(package::Column::ArtistId.eq(artist_uuid))
-	});
+	let query = package::Entity::find()
+		.apply_if(filters.artist, |q, artist_uuid| {
+			q.filter(package::Column::ArtistId.eq(artist_uuid))
+		})
+		.offset(pagination.skip)
+		.limit(pagination.take);
 
 	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(package::Column::Id);
 
-	if let Some(after_id) = pagination.after_id {
-		joint_query.after(after_id);
-	}
-	joint_query
-		.first(pagination.page_size)
-		.all(connection)
-		.await
-		.map(|items| {
-			items
-				.into_iter()
-				.map(|(package, poster)| PackageResponseWithRelations {
-					package: package.into(),
-					poster: poster.map(|x| x.into()),
-					artist: None,
-				})
-				.collect()
-		})
+	joint_query.all(connection).await.map(|items| {
+		items
+			.into_iter()
+			.map(|(package, poster)| PackageResponseWithRelations {
+				package: package.into(),
+				poster: poster.map(|x| x.into()),
+				artist: None,
+			})
+			.collect()
+	})
 }

@@ -1,12 +1,13 @@
 use crate::dto::{
-	artist::{ArtistFilter, ArtistResponse, ArtistWithPosterResponse},
+	artist::{ArtistFilter, ArtistResponse, ArtistSort, ArtistWithPosterResponse},
 	page::Pagination,
+	sort::{Sort, SortOrder},
 };
 use entity::{artist, extra, image, movie, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	sea_query, ActiveValue::Set, ColumnTrait, Condition, ConnectionTrait, DbErr, EntityTrait,
-	QueryFilter, QuerySelect, QueryTrait, RelationTrait,
+	PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait,
 };
 use slug::slugify;
 
@@ -69,46 +70,46 @@ where
 
 pub async fn find_many<'a, C>(
 	filters: &ArtistFilter,
+	sort: Option<Sort<ArtistSort>>,
 	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<ArtistWithPosterResponse>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let query = artist::Entity::find().apply_if(filters.package, |q, package_uuid| {
-		q.join(sea_orm::JoinType::RightJoin, artist::Relation::Extra.def())
-			.join(
-				sea_orm::JoinType::RightJoin,
-				artist::Relation::Package.def(),
-			)
-			.join(sea_orm::JoinType::RightJoin, artist::Relation::Movie.def())
-			.filter(
-				Condition::any()
-					.add(extra::Column::PackageId.eq(package_uuid))
-					.add(movie::Column::PackageId.eq(package_uuid))
-					.add(package::Column::Id.eq(package_uuid)),
-			)
-			.distinct()
-	});
-
-	let mut joint_query = query
-		.find_also_related(image::Entity)
-		.cursor_by(artist::Column::Id);
-
-	if let Some(after_id) = pagination.after_id {
-		joint_query.after(after_id);
-	}
-	joint_query
-		.first(pagination.page_size)
-		.all(connection)
-		.await
-		.map(|items| {
-			items
-				.into_iter()
-				.map(|(artist, image)| ArtistWithPosterResponse {
-					artist: artist.into(),
-					poster: image.map(|i| i.into()),
-				})
-				.collect()
+	let mut query = artist::Entity::find()
+		.apply_if(filters.package, |q, package_uuid| {
+			q.join(sea_orm::JoinType::RightJoin, artist::Relation::Extra.def())
+				.join(
+					sea_orm::JoinType::RightJoin,
+					artist::Relation::Package.def(),
+				)
+				.join(sea_orm::JoinType::RightJoin, artist::Relation::Movie.def())
+				.filter(
+					Condition::any()
+						.add(extra::Column::PackageId.eq(package_uuid))
+						.add(movie::Column::PackageId.eq(package_uuid))
+						.add(package::Column::Id.eq(package_uuid)),
+				)
+				.distinct()
 		})
+		.offset(pagination.skip)
+		.limit(pagination.take)
+		.find_also_related(image::Entity);
+
+	if let Some(s) = sort {
+		query = match s.sort_by {
+			ArtistSort::Name => query.order_by(artist::Column::Slug, s.order.into()),
+		}
+	}
+
+	query.all(connection).await.map(|items| {
+		items
+			.into_iter()
+			.map(|(artist, image)| ArtistWithPosterResponse {
+				artist: artist.into(),
+				poster: image.map(|i| i.into()),
+			})
+			.collect()
+	})
 }

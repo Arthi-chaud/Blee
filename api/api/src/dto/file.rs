@@ -1,4 +1,4 @@
-use crate::{swagger_examples::*, utils::Identifiable};
+use crate::swagger_examples::*;
 use entity::{file, sea_orm_active_enums::VideoQualityEnum};
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
@@ -31,12 +31,6 @@ pub struct FileResponse {
 	pub quality: VideoQuality,
 	#[schemars(example = "example_uuid")]
 	pub scrubber_id: Option<Uuid>,
-}
-
-impl Identifiable for FileResponse {
-	fn get_id(&self) -> String {
-		self.id.to_string()
-	}
 }
 
 impl From<file::Model> for FileResponse {

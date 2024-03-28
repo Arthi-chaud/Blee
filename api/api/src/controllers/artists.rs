@@ -1,8 +1,9 @@
 use crate::config::Config;
 use crate::database::Database;
-use crate::dto::artist::{ArtistFilter, ArtistWithPosterResponse};
+use crate::dto::artist::{ArtistFilter, ArtistSort, ArtistWithPosterResponse};
 use crate::dto::image::ImageResponse;
 use crate::dto::page::{Page, Pagination};
+use crate::dto::sort::{build_sort, SortOrder};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
 use crate::{services, utils};
 use entity::artist;
@@ -21,16 +22,23 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 
 /// Get many artists
 #[openapi(tag = "Artists")]
-#[get("/?<package>&<pagination..>")]
+#[get("/?<package>&<sort>&<order>&<pagination..>")]
 async fn get_artists(
 	db: Database<'_>,
 	package: Option<Uuid>,
+	sort: Option<ArtistSort>,
+	order: Option<SortOrder>,
 	pagination: Pagination,
 ) -> ApiPageResult<ArtistWithPosterResponse> {
-	services::artist::find_many(&ArtistFilter { package }, &pagination, db.into_inner())
-		.await
-		.map(|items| Page::from(items))
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
+	services::artist::find_many(
+		&ArtistFilter { package },
+		build_sort(sort, order),
+		&pagination,
+		db.into_inner(),
+	)
+	.await
+	.map(|items| Page::from(items))
+	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Find an Artist

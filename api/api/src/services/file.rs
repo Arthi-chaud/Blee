@@ -1,6 +1,8 @@
 use entity::file;
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
+use sea_orm::{
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QuerySelect, QueryTrait, Set,
+};
 
 use crate::dto::{
 	file::{FileFilter, FileResponse, VideoQuality},
@@ -46,17 +48,16 @@ pub async fn find_many<'a, C>(
 where
 	C: ConnectionTrait,
 {
-	let query = file::Entity::find().apply_if(filter.path.clone(), |q, path| {
-		q.filter(file::Column::Path.starts_with(path))
-	});
+	let query = file::Entity::find()
+		.apply_if(filter.path.clone(), |q, path| {
+			q.filter(file::Column::Path.starts_with(path))
+		})
+		.offset(pagination.skip)
+		.limit(pagination.take);
 
 	let mut cursor = query.cursor_by(file::Column::Id);
 
-	if let Some(after_id) = pagination.after_id {
-		cursor.after(after_id);
-	}
 	cursor
-		.first(pagination.page_size)
 		.all(connection)
 		.await
 		.map(|items| items.into_iter().map(|file| file.into()).collect())

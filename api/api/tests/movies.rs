@@ -165,19 +165,10 @@ mod test_movie {
 	fn test_movies_pagination() {
 		let client = test_client().lock().unwrap();
 
-		let response_first_page = client.get("/movies?page_size=2").dispatch();
+		let response_first_page = client.get("/movies?take=2").dispatch();
 		assert_eq!(response_first_page.status(), Status::Ok);
 		let value = response_json_value(response_first_page);
 		let items = value.get("items").unwrap().as_array().unwrap();
-		let last_item_id = items
-			.last()
-			.unwrap()
-			.as_object()
-			.unwrap()
-			.get("id")
-			.unwrap()
-			.as_str()
-			.unwrap();
 		assert_eq!(items.len(), 2);
 		let next = value
 			.get("metadata")
@@ -188,10 +179,7 @@ mod test_movie {
 			.unwrap()
 			.as_str()
 			.unwrap();
-		assert_eq!(
-			next,
-			format!("/movies?page_size=2&after_id={}", last_item_id)
-		);
+		assert_eq!(next, "/movies?take=2&skip=2");
 		let response_second_page = client.get(next).dispatch();
 		assert_eq!(response_second_page.status(), Status::Ok);
 		let value = response_json_value(response_second_page);

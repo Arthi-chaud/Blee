@@ -5,7 +5,9 @@ use crate::dto::{
 };
 use entity::{image, movie, sea_orm_active_enums::MovieTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
+use sea_orm::{
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QuerySelect, QueryTrait, Set,
+};
 use slug::slugify;
 
 pub async fn create<'s, 'a, C>(
@@ -82,28 +84,23 @@ where
 		})
 		.apply_if(filters.package, |q, package_uuid| {
 			q.filter(movie::Column::PackageId.eq(package_uuid))
-		});
+		})
+		.offset(pagination.skip)
+		.limit(pagination.take);
 
 	let mut joint_query = query
 		.find_also_related(image::Entity)
 		.cursor_by(movie::Column::Id);
-	if let Some(after_id) = pagination.after_id {
-		joint_query.after(after_id);
-	}
-	joint_query
-		.first(pagination.page_size)
-		.all(connection)
-		.await
-		.map(|items| {
-			items
-				.into_iter()
-				.map(|(movie, poster)| MovieResponseWithRelations {
-					movie: movie.into(),
-					poster: poster.map(|x| x.into()),
-					artist: None,
-					package: None,
-					file: None,
-				})
-				.collect()
-		})
+	joint_query.all(connection).await.map(|items| {
+		items
+			.into_iter()
+			.map(|(movie, poster)| MovieResponseWithRelations {
+				movie: movie.into(),
+				poster: poster.map(|x| x.into()),
+				artist: None,
+				package: None,
+				file: None,
+			})
+			.collect()
+	})
 }

@@ -63,5 +63,5 @@ pub struct ArtistFilter {
 #[derive(Deserialize, FromFormField, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ArtistSort {
-	Name
+	Name,
 }
