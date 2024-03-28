@@ -39,7 +39,7 @@ jobs:
       - name: Setup Go
         uses: ./.github/actions/cache-scanner
       - name: Install Dependencies and Build
-        run: go build
+        run: go build -o scanner ./app
   Format:
     if: ${{ needs.changes.outputs.scanner == 'true' && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest

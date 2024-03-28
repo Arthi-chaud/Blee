@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
 )
 
 // Metadata Extracted from the path of a file
@@ -102,7 +102,7 @@ func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) *Movi
 }
 
 func parseYearFromRegex(matches []string, regex *regexp.Regexp, p *PackageMetadataFromPath) {
-	for _, group_name := range []string {"PackageYear", "Year"} {
+	for _, group_name := range []string{"PackageYear", "Year"} {
 		if group_index := regex.SubexpIndex(group_name); group_index != -1 {
 			if parsed_year, err := strconv.Atoi(matches[group_index]); err == nil {
 				p.release_year = time.Date(parsed_year, 1, 1, 1, 1, 1, 1, time.UTC)
