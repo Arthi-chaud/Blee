@@ -6,10 +6,12 @@ services:
     restart: on-failure
     volumes:
       - ./scanner:/app
+      - ./scanner.example.json:/config/scanner.json
       - ${DATA_DIR}:/video
     environment:
       - WATCH_DIR=/video
       - SCANNER_API_KEY=${SCANNER_API_KEY}
+      - CONFIG_DIR=/config
   api:
     build:
       context: ./api

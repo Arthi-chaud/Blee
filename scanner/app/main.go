@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	"github.com/kpango/glg"
 	"github.com/radovskyb/watcher"
 	"os"
 	"time"
 )
 
-func setup_logger() {
+func setupLogger() {
 	glg.Get().
 		SetMode(glg.STD).
 		// We will be watching the logs through docker-compose
@@ -18,8 +19,8 @@ func setup_logger() {
 }
 
 func main() {
-	setup_logger()
-	c := get_config()
+	setupLogger()
+	c := config.GetConfig()
 	w := watcher.New()
 	go func() {
 		for {

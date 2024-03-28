@@ -1,0 +1,13 @@
+{
+	"regexes": {
+		"movies": [
+			"[\\/\\\\]videos[\\/\\\\](?P<PackageArtist>[^\\/\\\\]+)([\\/\\\\]+|(\\s+-\\s+))(?P<Package>[^\\/\\\\]+?)(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+((?P<Artist>[^\\/\\\\]+)\\s+-\\s+)?(?P<Movie>[^\\/\\\\]+?)(\\s+\\((?P<Year>\\d+)\\))?\\..+",
+			"[\\/\\\\]videos[\\/\\\\](?P<PackageArtist>(?P<Artist>[^\\/\\\\]+))(\\s+-\\s+)(?P<Package>(?P<Movie>[^\\/\\\\]+?))(\\s+\\((?P<PackageYear>(?P<Year>\\d+))\\))?\\..+"
+		],
+		"extras": [
+			"[\\/\\\\]videos[\\/\\\\]((?P<PackageArtist>[^\\/\\\\]+)((\\s+-\\s+)|([\\/\\\\]+))(([^\\/\\\\]+)\\s+-\\s+)?((?P<Package>[^\\/\\\\]+?)))(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+(Extra(s)?[\\/\\\\]+)(((?P<Disc>\\d+)-)?(?P<Index>\\d+)\\s+)?(?P<Extra>[^\\/\\\\]+?)(?P<PlexExtraType>-[a-z]+)?\\..+",
+			"[\\/\\\\]videos[\\/\\\\]((?P<PackageArtist>[^\\/\\\\]+)((\\s+-\\s+)|([\\/\\\\]+))(([^\\/\\\\]+)\\s+-\\s+)?((?P<Package>[^\\/\\\\]+?)))(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+(Extra(s)?[\\/\\\\]+)?(((?P<Disc>\\d+)-)?(?P<Index>\\d+)\\s+)?(?P<Extra>[^\\/\\\\]+?)(?P<PlexExtraType>-[a-z]+)\\..+",
+			"[\\/\\\\]videos[\\/\\\\]((?P<PackageArtist>[^\\/\\\\]+)((\\s+-\\s+)|([\\/\\\\]+))(([^\\/\\\\]+)\\s+-\\s+)?((?P<Package>[^\\/\\\\]+?)))(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+(Extra(s)?[\\/\\\\]+)?(((?P<Disc>\\d+)-)?(?P<Index>\\d+)\\s+)(?P<Extra>[^\\/\\\\]+?)(?P<PlexExtraType>-[a-z]+)?\\..+"
+		]
+	}
+}

@@ -29,9 +29,11 @@ services:
         condition: service_healthy
     volumes:
       - ${DATA_DIR}:/video
+      - ./scanner.json:/app/scanner.json
     environment:
       - WATCH_DIR=/video
       - SCANNER_API_KEY=${SCANNER_API_KEY}
+      - CONFIG_DIR=/app
   db:
     image: postgres:alpine3.16
     healthcheck:
