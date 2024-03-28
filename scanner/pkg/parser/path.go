@@ -2,59 +2,50 @@ package parser
 
 import (
 	"errors"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
+	validator "github.com/go-playground/validator/v10"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
-	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
 )
 
 // Metadata Extracted from the path of a file
 type PackageMetadataFromPath struct {
 	// Name of the package
-	// Required
-	name string
+	name string `validate:"required"`
 	// Name of the artist of the package
 	// Optional
 	artist_name string
 	// Release Year of the package
-	// Required
 	release_year time.Time
 }
 
 // Metadata Extracted from the path of an Extra file
 type ExtraMetadataFromPath struct {
 	// Name of the extra
-	// Required
-	name string
+	name string `validate:"required"`
 	// Name of the artist of the extra
-	// Required
-	artist_name string
+	artist_name string `validate:"required"`
 	// Index of the disc of the extra
-	// Optional
-	disc_index int
+	disc_index int `validate:"gte=0"`
 	// Index of the track of the extra
-	// Optional
-	track_index int
+	track_index int `validate:"gte=0"`
 	// Types of the extra
-	// Cannot be empty
-	types    [](models.ExtraType)
-	package_ PackageMetadataFromPath
+	types    [](models.ExtraType)    `validate:"min=1"`
+	package_ PackageMetadataFromPath `validate:"required,dive,required"`
 }
 
 // Metadata Extracted from the path of a Movie file
 type MovieMetadataFromPath struct {
 	// Name of the movie
-	// Required
-	name string
+	name string `validate:"required"`
 	// Name of the artist of the movie
-	// Required
-	artist_name string
+	artist_name string `validate:"required"`
 	// Type of movie
-	type_    models.MovieType
-	package_ PackageMetadataFromPath
+	type_    models.MovieType        `validate:"required"`
+	package_ PackageMetadataFromPath `validate:"required,dive,required"`
 }
 
 type PathMetadataParsingResult struct {
@@ -69,7 +60,8 @@ func ParseMetadataFromPath(filePath string, userConfig *config.UserConfiguration
 		if len(matches) == 0 {
 			continue
 		}
-		return PathMetadataParsingResult{extra: parseExtraMetadataFromMatches(matches, regex)}, nil
+		extra, err := parseExtraMetadataFromMatches(matches, regex)
+		return PathMetadataParsingResult{extra: extra}, err
 	}
 	for _, movieRegex := range userConfig.Regexes.Movie {
 		regex := regexp.MustCompile(movieRegex)
@@ -77,12 +69,13 @@ func ParseMetadataFromPath(filePath string, userConfig *config.UserConfiguration
 		if len(matches) == 0 {
 			continue
 		}
-		return PathMetadataParsingResult{movie: parseMovieMetadataFromMatches(matches, regex)}, nil
+		movie, err := parseMovieMetadataFromMatches(matches, regex)
+		return PathMetadataParsingResult{movie: movie}, err
 	}
 	return PathMetadataParsingResult{}, errors.New("No match")
 }
 
-func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) *MovieMetadataFromPath {
+func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) (*MovieMetadataFromPath, error) {
 	res := MovieMetadataFromPath{}
 
 	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
@@ -103,7 +96,9 @@ func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) *Movi
 	}
 	res.type_ = parseMovieTypeFromName(res.name)
 	parseYearFromRegex(matches, regex, &res.package_)
-	return &res
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	err := validate.Struct(res)
+	return &res, err
 }
 
 func parseYearFromRegex(matches []string, regex *regexp.Regexp, p *PackageMetadataFromPath) {
@@ -129,7 +124,7 @@ func parseMovieTypeFromName(movieName string) models.MovieType {
 	return models.Documentary
 }
 
-func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) *ExtraMetadataFromPath {
+func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) (*ExtraMetadataFromPath, error) {
 	res := ExtraMetadataFromPath{}
 
 	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
@@ -161,12 +156,12 @@ func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) *Extr
 		res.types = append(res.types, models.Other)
 	}
 	parseYearFromRegex(matches, regex, &res.package_)
-	res.package_.name = matches[regex.SubexpIndex("Package")]
-	parsed_date, err := time.Parse(time.RFC3339, matches[regex.SubexpIndex("Package")])
-	if err == nil {
-		res.package_.release_year = parsed_date
+	if package_index := regex.SubexpIndex("Package"); package_index != -1 {
+		res.package_.name = matches[package_index]
 	}
-	return &res
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	err := validate.Struct(res)
+	return &res, err
 }
 
 func parseExtraTypeFromPlexRegexGroup(group string) models.ExtraType {

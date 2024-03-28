@@ -136,3 +136,20 @@ func TestExtraParsingWithPackageFolderWithoutArtistFolderWithIndexesWithoutTypes
 	assert.Equal(t, res.extra.package_.name, "Package")
 	assert.Equal(t, res.extra.package_.release_year.Year(), 2000)
 }
+
+func TestExtraWithoutDisc(t *testing.T) {
+	config := getTestConfig()
+	path := "/videos/Artist - Package (2000)/02 Extra1.mkv"
+	res, err := ParseMetadataFromPath(path, config)
+
+	assert.Nil(t, err)
+	assert.Nil(t, res.movie)
+	assert.Equal(t, res.extra.artist_name, "Artist")
+	assert.Equal(t, res.extra.disc_index, 0)
+	assert.Equal(t, res.extra.track_index, 2)
+	assert.Equal(t, res.extra.name, "Extra1")
+	assert.Equal(t, res.extra.types, []models.ExtraType{models.Other})
+	assert.Equal(t, res.extra.package_.artist_name, "Artist")
+	assert.Equal(t, res.extra.package_.name, "Package")
+	assert.Equal(t, res.extra.package_.release_year.Year(), 2000)
+}
