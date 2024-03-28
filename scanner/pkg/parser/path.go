@@ -87,17 +87,22 @@ func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) *Movi
 
 	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
 		res.artist_name = matches[artist_index]
-	} else if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
-		res.artist_name = matches[package_artist]
-	}
-	res.name = matches[regex.SubexpIndex("Movie")]
-	res.type_ = parseMovieTypeFromName(res.name)
-	res.package_.name = matches[regex.SubexpIndex("Package")]
-	parseYearFromRegex(matches, regex, &res.package_)
-	res.package_.artist_name = matches[regex.SubexpIndex("PackageArtist")]
-	if len(res.package_.artist_name) == 0 {
 		res.package_.artist_name = res.artist_name
 	}
+	if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
+		res.package_.artist_name = matches[package_artist]
+		if len(res.artist_name) == 0 {
+			res.artist_name = res.package_.artist_name
+		}
+	}
+	if name_index := regex.SubexpIndex("Movie"); name_index != -1 {
+		res.name = matches[name_index]
+	}
+	if package_index := regex.SubexpIndex("Package"); package_index != -1 {
+		res.package_.name = matches[package_index]
+	}
+	res.type_ = parseMovieTypeFromName(res.name)
+	parseYearFromRegex(matches, regex, &res.package_)
 	return &res
 }
 
@@ -129,18 +134,23 @@ func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) *Extr
 
 	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
 		res.artist_name = matches[artist_index]
-	} else if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
-		res.artist_name = matches[package_artist]
+		res.package_.artist_name = res.artist_name
 	}
-	disc_index, err := strconv.Atoi(matches[regex.SubexpIndex("Disc")])
-	if err == nil {
+	if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
+		res.package_.artist_name = matches[package_artist]
+		if len(res.artist_name) == 0 {
+			res.artist_name = res.package_.artist_name
+		}
+	}
+	if disc_index, err := strconv.Atoi(matches[regex.SubexpIndex("Disc")]); err == nil {
 		res.disc_index = disc_index
 	}
-	index, err := strconv.Atoi(matches[regex.SubexpIndex("Index")])
-	if err == nil {
+	if index, err := strconv.Atoi(matches[regex.SubexpIndex("Index")]); err == nil {
 		res.track_index = index
 	}
-	res.name = matches[regex.SubexpIndex("Extra")]
+	if name_index := regex.SubexpIndex("Extra"); name_index != -1 {
+		res.name = matches[name_index]
+	}
 	if plexExtraType := parseExtraTypeFromPlexRegexGroup(matches[regex.SubexpIndex("PlexExtraType")]); plexExtraType != models.Other {
 		res.types = []models.ExtraType{plexExtraType}
 	}
@@ -155,10 +165,6 @@ func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) *Extr
 	parsed_date, err := time.Parse(time.RFC3339, matches[regex.SubexpIndex("Package")])
 	if err == nil {
 		res.package_.release_year = parsed_date
-	}
-	res.package_.artist_name = matches[regex.SubexpIndex("PackageArtist")]
-	if len(res.package_.artist_name) == 0 {
-		res.package_.artist_name = res.artist_name
 	}
 	return &res
 }
