@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/Arthi-chaud/Blee/scanner/src"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	"github.com/kpango/glg"
 	"github.com/radovskyb/watcher"
 	"os"
@@ -20,7 +20,7 @@ func setupLogger() {
 
 func main() {
 	setupLogger()
-	c := src.GetConfig()
+	c := config.GetConfig()
 	w := watcher.New()
 	go func() {
 		for {

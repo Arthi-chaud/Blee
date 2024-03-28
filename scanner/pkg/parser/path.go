@@ -1,4 +1,4 @@
-package src
+package parser
 
 import (
 	"errors"
@@ -7,9 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Arthi-chaud/Blee/scanner/src"
-	models "github.com/Arthi-chaud/Blee/scanner/src/models"
-	"github.com/kpango/glg"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 )
 
 // Metadata Extracted from the path of a file
@@ -63,7 +62,7 @@ type PathMetadataParsingResult struct {
 	extra *ExtraMetadataFromPath
 }
 
-func ParseMetadataFromPath(filePath string, userConfig *src.UserConfiguration) (PathMetadataParsingResult, error) {
+func ParseMetadataFromPath(filePath string, userConfig *config.UserConfiguration) (PathMetadataParsingResult, error) {
 	for _, trackRegex := range userConfig.Regexes.Extra {
 		regex := regexp.MustCompile(trackRegex)
 		matches := regex.FindStringSubmatch(filePath)
@@ -78,7 +77,6 @@ func ParseMetadataFromPath(filePath string, userConfig *src.UserConfiguration) (
 		if len(matches) == 0 {
 			continue
 		}
-		glg.Debugf("%s %s", movieRegex, filePath)
 		return PathMetadataParsingResult{movie: parseMovieMetadataFromMatches(matches, regex)}, nil
 	}
 	return PathMetadataParsingResult{}, errors.New("No match")

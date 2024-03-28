@@ -1,16 +1,16 @@
-package src
+package parser
 
 import (
 	"testing"
 	"time"
 
-	src "github.com/Arthi-chaud/Blee/scanner/src"
-	models "github.com/Arthi-chaud/Blee/scanner/src/models"
+	config "github.com/Arthi-chaud/Blee/scanner/pkg/config"
+	models "github.com/Arthi-chaud/Blee/scanner/pkg/models"
 	"github.com/stretchr/testify/assert"
 )
 
-func getTestConfig() *src.UserConfiguration {
-	var config src.UserConfiguration
+func getTestConfig() *config.UserConfiguration {
+	var config config.UserConfiguration
 
 	config.Regexes.Extra = []string{
 		"[\\/\\\\]videos[\\/\\\\]((?P<PackageArtist>[^\\/\\\\]+)((\\s+-\\s+)|([\\/\\\\]+))(([^\\/\\\\]+)\\s+-\\s+)?((?P<Package>[^\\/\\\\]+?)))(\\s+\\((?P<PackageYear>\\d+)\\))?[\\/\\\\]+(Extra(s)?[\\/\\\\]+)(((?P<Disc>\\d+)-)?(?P<Index>\\d+)\\s+)?(?P<Extra>[^\\/\\\\]+?)(?P<PlexExtraType>-[a-z]+)?\\..+",
