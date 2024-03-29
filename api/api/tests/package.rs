@@ -124,4 +124,45 @@ mod test_packages {
 			})
 			.is_ok());
 	}
+
+	#[test]
+	// Test /packages?sort=artist_name
+	fn test_package_sort_artist_name() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let response = client.get(format!("/packages?sort=artist_name")).dispatch();
+				let first_expected_package = &data.as_ref().unwrap().package_c.package.id;
+				let second_expected_package = &data.as_ref().unwrap().package_a.package.id;
+				let third_expected_package = &data.as_ref().unwrap().package_b.package.id;
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				println!("{:?}", value);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					first_expected_package.to_string()
+				);
+				let item = items.get(1).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					second_expected_package.to_string()
+				);
+				let item = items.get(2).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					third_expected_package.to_string()
+				);
+			})
+			.is_ok());
+	}
 }

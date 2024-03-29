@@ -70,4 +70,6 @@ pub enum PackageSort {
 	AddDate,
 	#[field(value = "release_date")]
 	ReleaseDate,
+	#[field(value = "artist_name")]
+	ArtistName,
 }

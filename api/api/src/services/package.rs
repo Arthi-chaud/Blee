@@ -1,15 +1,16 @@
 use crate::dto::{
 	artist::ArtistResponse,
-	package::{PackageFilter, PackageResponseWithRelations, PackageSort},
+	package::{PackageFilter, PackageResponse, PackageResponseWithRelations, PackageSort},
 	page::Pagination,
 	sort::Sort,
 };
 use ::slug::slugify;
-use entity::{image, package};
+use entity::{artist, image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder,
-	QuerySelect, QueryTrait, Set,
+	sea_query::{self, *},
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, Iterable, QueryFilter, QueryOrder,
+	QuerySelect, QueryTrait, RelationTrait, Set,
 };
 
 pub async fn create_or_find<'s, 'a, C>(
@@ -89,6 +90,11 @@ where
 	C: ConnectionTrait,
 {
 	let mut query = package::Entity::find()
+		.join_as(
+			JoinType::LeftJoin,
+			package::Relation::Artist.def(),
+			Alias::new("artist"),
+		)
 		.apply_if(filters.artist, |q, artist_uuid| {
 			q.filter(package::Column::ArtistId.eq(artist_uuid))
 		})
@@ -103,12 +109,16 @@ where
 				//TODO: Handle nulls
 				query.order_by(package::Column::ReleaseYear, s.order.into())
 			}
+			PackageSort::ArtistName => query
+				.order_by(
+					Expr::col((Alias::new("artist"), artist::Column::UniqueSlug)),
+					s.order.into(),
+				)
+				.order_by(package::Column::NameSlug, sea_orm::Order::Asc),
 		}
 	}
 
-	let mut joint_query = query
-		.find_also_related(image::Entity)
-		.cursor_by(package::Column::Id);
+	let joint_query = query.find_also_related(image::Entity);
 
 	joint_query.all(connection).await.map(|items| {
 		items
