@@ -1,13 +1,13 @@
 use crate::dto::{
 	artist::{ArtistFilter, ArtistResponse, ArtistSort, ArtistWithPosterResponse},
 	page::Pagination,
-	sort::{Sort, SortOrder},
+	sort::Sort,
 };
 use entity::{artist, extra, image, movie, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	sea_query, ActiveValue::Set, ColumnTrait, Condition, ConnectionTrait, DbErr, EntityTrait,
-	PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait,
+	QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait,
 };
 use slug::slugify;
 
@@ -21,13 +21,13 @@ where
 	let artist_slug = slugify(artist_name.to_owned());
 	let new_artist = artist::ActiveModel {
 		name: Set(artist_name.to_owned()),
-		slug: Set(artist_slug.clone()),
+		unique_slug: Set(artist_slug.clone()),
 		..Default::default()
 	};
 
 	let _ = artist::Entity::insert(new_artist.clone())
 		.on_conflict(
-			sea_query::OnConflict::column(artist::Column::Slug)
+			sea_query::OnConflict::column(artist::Column::UniqueSlug)
 				.do_nothing()
 				.to_owned(),
 		)
@@ -35,7 +35,7 @@ where
 		.await;
 
 	artist::Entity::find()
-		.filter(artist::Column::Slug.eq(artist_slug))
+		.filter(artist::Column::UniqueSlug.eq(artist_slug))
 		.one(connection)
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("".to_string())), |r| Ok(r.into()))
@@ -54,7 +54,7 @@ where
 	if let Ok(uuid) = uuid_parse_result {
 		query = query.filter(artist::Column::Id.eq(uuid));
 	} else {
-		query = query.filter(artist::Column::Slug.eq(slug_or_uuid));
+		query = query.filter(artist::Column::UniqueSlug.eq(slug_or_uuid));
 	}
 	let (artist, image) = query
 		.find_also_related(image::Entity)
@@ -99,7 +99,7 @@ where
 
 	if let Some(s) = sort {
 		query = match s.sort_by {
-			ArtistSort::Name => query.order_by(artist::Column::Slug, s.order.into()),
+			ArtistSort::Name => query.order_by(artist::Column::UniqueSlug, s.order.into()),
 		}
 	}
 

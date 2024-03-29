@@ -25,7 +25,7 @@ pub enum Relation {
 		from = "Column::ScrubberId",
 		to = "super::image::Column::Id",
 		on_update = "NoAction",
-		on_delete = "NoAction"
+		on_delete = "SetNull"
 	)]
 	Image,
 	#[sea_orm(has_many = "super::movie::Entity")]

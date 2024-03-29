@@ -9,8 +9,9 @@ pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false)]
 	pub id: Uuid,
 	pub name: String,
+	pub name_slug: String,
 	#[sea_orm(unique)]
-	pub slug: String,
+	pub unique_slug: String,
 	pub release_year: Option<Date>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub description: Option<String>,
@@ -36,7 +37,7 @@ pub enum Relation {
 		from = "Column::PosterId",
 		to = "super::image::Column::Id",
 		on_update = "NoAction",
-		on_delete = "NoAction"
+		on_delete = "SetNull"
 	)]
 	Image,
 	#[sea_orm(has_many = "super::movie::Entity")]

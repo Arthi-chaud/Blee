@@ -30,7 +30,6 @@ pub struct ExtraResponse {
 	#[schemars(example = "example_uuid")]
 	pub id: Uuid,
 	pub name: String,
-	pub slug: String,
 	#[schemars(example = "example_uuid")]
 	pub thumbnail_id: Option<Uuid>,
 	pub registered_at: NaiveDateTime,
@@ -52,7 +51,6 @@ impl From<extra::Model> for ExtraResponse {
 		ExtraResponse {
 			id: value.id,
 			name: value.name,
-			slug: value.slug,
 			thumbnail_id: value.thumbnail_id,
 			registered_at: value.registered_at.into(),
 			package_id: value.package_id,

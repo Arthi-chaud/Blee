@@ -23,7 +23,8 @@ where
 {
 	let new_movie = movie::ActiveModel {
 		name: Set(movie_name.to_string()),
-		slug: Set(slugify(format!("{} {}", artist.name, movie_name))),
+		unique_slug: Set(slugify(format!("{} {}", artist.name, movie_name))),
+		name_slug: Set(slugify(movie_name)),
 		package_id: Set(*package_uuid),
 		r#type: Set(movie_type.into()),
 		artist_id: Set(artist.id),
@@ -49,7 +50,7 @@ where
 	if let Ok(uuid) = uuid_parse_result {
 		query = query.filter(movie::Column::Id.eq(uuid));
 	} else {
-		query = query.filter(movie::Column::Slug.eq(slug_or_uuid));
+		query = query.filter(movie::Column::UniqueSlug.eq(slug_or_uuid));
 	}
 
 	let (movie, poster) = query

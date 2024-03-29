@@ -80,7 +80,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 	let min_to_sec = |min: i64, sec: i64| -> i64 { min * 60 + sec };
 	let artist_a = artist::Entity::insert(artist::ActiveModel {
 		name: Set("Madonna".to_string()),
-		slug: Set("madonna".to_string()),
+		unique_slug: Set("madonna".to_string()),
 		..Default::default()
 	})
 	.exec_with_returning(db)
@@ -88,7 +88,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 	let package_a1 = package::Entity::insert(package::ActiveModel {
 		name: Set("The Video Collection 93:99".to_string()),
-		slug: Set("madonna-the-video-collection-93-99".to_string()),
+		unique_slug: Set("madonna-the-video-collection-93-99".to_string()),
+		name_slug: Set("the-video-collection-93-99".to_string()),
 		release_year: Set(NaiveDate::from_ymd_opt(1999, 1, 1)),
 		artist_id: Set(Some(artist_a.id)),
 		..Default::default()
@@ -129,7 +130,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 		let new_extra = extra::Entity::insert(extra::ActiveModel {
 			name: Set(track_name.to_string()),
-			slug: Set(slugify(track_name.to_string()).to_string()),
+			name_slug: Set(slugify(track_name.to_string()).to_string()),
 			package_id: Set(package_a1.id),
 			artist_id: Set(artist_a.id),
 			disc_index: Set(Some(1)),
@@ -147,7 +148,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 	let artist_b = artist::Entity::insert(artist::ActiveModel {
 		name: Set("MIKA".to_string()),
-		slug: Set("mika".to_string()),
+		unique_slug: Set("mika".to_string()),
 		..Default::default()
 	})
 	.exec_with_returning(db)
@@ -155,7 +156,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 	let package_b1 = package::Entity::insert(package::ActiveModel {
 		name: Set("Live in Cartoon Motion".to_string()),
-		slug: Set("mika-live-in-cartoon-motion".to_string()),
+		unique_slug: Set("mika-live-in-cartoon-motion".to_string()),
+		name_slug: Set("live-in-cartoon-motion".to_string()),
 		release_year: Set(NaiveDate::from_ymd_opt(2006, 1, 1)),
 		artist_id: Set(Some(artist_b.id)),
 		..Default::default()
@@ -176,7 +178,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 		let new_movie = movie::Entity::insert(movie::ActiveModel {
 			name: Set("Live in Cartoon Motion".to_string()),
-			slug: Set(slugify("mika-live-in-cartoon-motion".to_string()).to_string()),
+			unique_slug: Set(slugify("mika-live-in-cartoon-motion".to_string()).to_string()),
+			name_slug: Set(slugify("live-in-cartoon-motion".to_string()).to_string()),
 			package_id: Set(package_b1.id),
 			artist_id: Set(artist_b.id),
 			file_id: Set(new_file.id),
@@ -201,7 +204,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 		let new_extra = extra::Entity::insert(extra::ActiveModel {
 			name: Set("Interview".to_string()),
-			slug: Set(slugify("interview".to_string()).to_string()),
+			name_slug: Set(slugify("interview".to_string()).to_string()),
 			package_id: Set(package_b1.id),
 			artist_id: Set(artist_b.id),
 			file_id: Set(new_file.id),
@@ -215,7 +218,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 	let package_a2 = package::Entity::insert(package::ActiveModel {
 		name: Set("I'm Going to Tell You a Secret".to_string()),
-		slug: Set("im-going-to-tell-you-a-secret".to_string()),
+		unique_slug: Set("madonna-im-going-to-tell-you-a-secret".to_string()),
+		name_slug: Set("im-going-to-tell-you-a-secret".to_string()),
 		release_year: Set(NaiveDate::from_ymd_opt(2005, 1, 1)),
 		artist_id: Set(Some(artist_a.id)),
 		..Default::default()
@@ -236,7 +240,10 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 		let new_movie = movie::Entity::insert(movie::ActiveModel {
 			name: Set("I'm Going to Tell You a Secret".to_string()),
-			slug: Set(slugify("madonna-im-going-to-tell-you-a-secret".to_string()).to_string()),
+			unique_slug: Set(
+				slugify("madonna-im-going-to-tell-you-a-secret".to_string()).to_string()
+			),
+			name_slug: Set("im-going-to-tell-you-a-secret".to_owned()),
 			package_id: Set(package_a2.id),
 			artist_id: Set(artist_a.id),
 			file_id: Set(new_file.id),

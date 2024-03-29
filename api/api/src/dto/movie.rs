@@ -55,7 +55,7 @@ impl From<movie::Model> for MovieResponse {
 		MovieResponse {
 			id: value.id,
 			name: value.name,
-			slug: value.slug,
+			slug: value.unique_slug,
 			poster_id: value.poster_id,
 			registered_at: value.registered_at.into(),
 			package_id: value.package_id,

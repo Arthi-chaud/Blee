@@ -46,7 +46,7 @@ impl From<artist::Model> for ArtistResponse {
 		ArtistResponse {
 			id: value.id,
 			name: value.name,
-			slug: value.slug,
+			slug: value.unique_slug,
 			description: value.description,
 			registered_at: value.registered_at.into(),
 			poster_id: value.poster_id,

@@ -23,10 +23,11 @@ where
 	let artist_name = artist
 		.as_ref()
 		.map_or(String::from("Various Artist"), |a| a.name.clone());
-	let package_slug = slugify(format!("{} {}", artist_name, package_name));
+	let unique_slug = slugify(format!("{} {}", artist_name, package_name));
 	let new_package = package::ActiveModel {
 		name: Set(package_name.to_string()),
-		slug: Set(package_slug.to_owned()),
+		unique_slug: Set(unique_slug.to_owned()),
+		name_slug: Set(slugify(package_name)),
 		release_year: Set(release_date),
 		artist_id: Set(artist.as_ref().map(|a| a.id)),
 		..Default::default()
@@ -34,7 +35,7 @@ where
 
 	let _ = package::Entity::insert(new_package.clone())
 		.on_conflict(
-			sea_query::OnConflict::column(package::Column::Slug)
+			sea_query::OnConflict::column(package::Column::UniqueSlug)
 				.do_nothing()
 				.to_owned(),
 		)
@@ -42,7 +43,7 @@ where
 		.await;
 
 	package::Entity::find()
-		.filter(package::Column::Slug.eq(package_slug))
+		.filter(package::Column::UniqueSlug.eq(unique_slug))
 		.one(connection)
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))
@@ -61,7 +62,7 @@ where
 	if let Ok(uuid) = uuid_parse_result {
 		query = query.filter(package::Column::Id.eq(uuid));
 	} else {
-		query = query.filter(package::Column::Slug.eq(slug_or_uuid));
+		query = query.filter(package::Column::UniqueSlug.eq(slug_or_uuid));
 	}
 
 	let (package, poster) = query

@@ -64,7 +64,7 @@ mod test_artist {
 		let conn = &Db::fetch(client.rocket()).unwrap().conn;
 		let _ = aw!(
 			artist::Entity::insert_many((1..10).map(|i| artist::ActiveModel {
-				slug: Set(format!("artist-{}", i)),
+				unique_slug: Set(format!("artist-{}", i)),
 				name: Set(format!("Artist {}", i)),
 				..Default::default()
 			}))
@@ -89,7 +89,7 @@ mod test_artist {
 
 		//teardown
 		aw!(artist::Entity::delete_many()
-			.filter(artist::Column::Slug.starts_with("artist-"))
+			.filter(artist::Column::UniqueSlug.starts_with("artist-"))
 			.exec(conn));
 	}
 

@@ -44,7 +44,7 @@ impl From<package::Model> for PackageResponse {
 		PackageResponse {
 			id: value.id,
 			name: value.name,
-			slug: value.slug,
+			slug: value.unique_slug,
 			description: value.description,
 			release_year: value.release_year,
 			registered_at: value.registered_at.into(),

@@ -24,7 +24,7 @@ where
 {
 	let creation_dto = extra::ActiveModel {
 		name: Set(extra_name.to_string()),
-		slug: Set(slugify(extra_name)),
+		name_slug: Set(slugify(extra_name)),
 		package_id: Set(*package_uuid),
 		artist_id: Set(*artist_uuid),
 		file_id: Set(*file_uuid),
