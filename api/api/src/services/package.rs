@@ -1,14 +1,15 @@
 use crate::dto::{
 	artist::ArtistResponse,
-	package::{PackageFilter, PackageResponseWithRelations},
+	package::{PackageFilter, PackageResponseWithRelations, PackageSort},
 	page::Pagination,
+	sort::Sort,
 };
 use ::slug::slugify;
 use entity::{image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QuerySelect,
-	QueryTrait, Set,
+	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder,
+	QuerySelect, QueryTrait, Set,
 };
 
 pub async fn create_or_find<'s, 'a, C>(
@@ -80,18 +81,30 @@ where
 
 pub async fn find_many<'a, C>(
 	filters: &PackageFilter,
+	sort: Option<Sort<PackageSort>>,
 	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<PackageResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let query = package::Entity::find()
+	let mut query = package::Entity::find()
 		.apply_if(filters.artist, |q, artist_uuid| {
 			q.filter(package::Column::ArtistId.eq(artist_uuid))
 		})
 		.offset(pagination.skip)
 		.limit(pagination.take);
+
+	if let Some(s) = sort {
+		query = match s.sort_by {
+			PackageSort::Name => query.order_by(package::Column::NameSlug, s.order.into()),
+			PackageSort::AddDate => query.order_by(package::Column::RegisteredAt, s.order.into()),
+			PackageSort::ReleaseDate => {
+				//TODO: Handle nulls
+				query.order_by(package::Column::ReleaseYear, s.order.into())
+			}
+		}
+	}
 
 	let mut joint_query = query
 		.find_also_related(image::Entity)

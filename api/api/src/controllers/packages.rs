@@ -1,8 +1,9 @@
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::image::ImageResponse;
-use crate::dto::package::{PackageFilter, PackageResponseWithRelations};
+use crate::dto::package::{PackageFilter, PackageResponseWithRelations, PackageSort};
 use crate::dto::page::{Page, Pagination};
+use crate::dto::sort::{build_sort, SortOrder};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
 use crate::{services, utils};
 use entity::package;
@@ -33,16 +34,23 @@ async fn get_package(
 
 /// Get many packages
 #[openapi(tag = "Packages")]
-#[get("/?<artist>&<pagination..>")]
+#[get("/?<artist>&<sort>&<order>&<pagination..>")]
 async fn get_packages(
 	db: Database<'_>,
+	sort: Option<PackageSort>,
+	order: Option<SortOrder>,
 	artist: Option<Uuid>,
 	pagination: Pagination,
 ) -> ApiPageResult<PackageResponseWithRelations> {
-	services::package::find_many(&PackageFilter { artist }, &pagination, db.into_inner())
-		.await
-		.map(|items| Page::from(items))
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
+	services::package::find_many(
+		&PackageFilter { artist },
+		build_sort(sort, order),
+		&pagination,
+		db.into_inner(),
+	)
+	.await
+	.map(|items| Page::from(items))
+	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Upload a Package's Poster

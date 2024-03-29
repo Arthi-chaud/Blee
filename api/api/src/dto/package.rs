@@ -4,7 +4,7 @@ use entity::package;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::artist::ArtistResponse;
 use super::image::ImageResponse;
@@ -58,4 +58,16 @@ impl From<package::Model> for PackageResponse {
 pub struct PackageFilter {
 	/// Filter by Artist
 	pub artist: Option<Uuid>,
+}
+
+// Sorting for Packages
+#[derive(Deserialize, FromFormField, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum PackageSort {
+	#[field(value = "name")]
+	Name,
+	#[field(value = "add_date")]
+	AddDate,
+	#[field(value = "release_date")]
+	ReleaseDate,
 }
