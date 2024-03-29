@@ -199,4 +199,5 @@ mod test_artist {
 			})
 			.is_ok())
 	}
+
 }

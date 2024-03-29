@@ -100,8 +100,14 @@ where
 	if let Some(s) = sort {
 		query = match s.sort_by {
 			ArtistSort::Name => query.order_by(artist::Column::UniqueSlug, s.order.into()),
+			ArtistSort::AddDate => {
+				println!("AAA");
+				query.order_by(artist::Column::RegisteredAt, s.order.into())
+			},
 		}
 	}
+
+	println!("{}", query.build(sea_orm::DatabaseBackend::Postgres).to_string());
 
 	query.all(connection).await.map(|items| {
 		items
