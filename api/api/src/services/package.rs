@@ -9,8 +9,8 @@ use entity::{artist, image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	sea_query::{self, *},
-	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder,
-	QuerySelect, QueryTrait, RelationTrait, Set,
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+	QueryTrait, RelationTrait, Set,
 };
 
 pub async fn create_or_find<'s, 'a, C>(

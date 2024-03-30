@@ -1,11 +1,13 @@
 use crate::dto::{
-	extra::{ExtraFilter, ExtraResponseWithRelations, ExtraType},
+	extra::{ExtraFilter, ExtraResponseWithRelations, ExtraSort, ExtraType},
 	page::Pagination,
+	sort::Sort,
 };
 use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QuerySelect, QueryTrait, Set,
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+	QueryTrait, Set,
 };
 use slug::slugify;
 
@@ -63,13 +65,14 @@ where
 
 pub async fn find_many<'a, C>(
 	filters: &ExtraFilter,
+	sort: Option<Sort<ExtraSort>>,
 	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<ExtraResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let query = extra::Entity::find()
+	let mut query = extra::Entity::find()
 		.apply_if(filters.r#type, |q, r#type| {
 			//TODO
 			q.filter(extra::Column::Type.eq(vec![ExtraTypeEnum::from(r#type)]))
@@ -82,20 +85,27 @@ where
 		})
 		.offset(pagination.skip)
 		.limit(pagination.take);
-	let mut joint_query = query
-		.find_also_related(image::Entity)
-		.cursor_by(extra::Column::Id);
 
-	joint_query.all(connection).await.map(|items| {
-		items
-			.into_iter()
-			.map(|(extra, image)| ExtraResponseWithRelations {
-				extra: extra.into(),
-				thumbnail: image.map(|i| i.into()),
-				package: None,
-				artist: None,
-				file: None,
-			})
-			.collect()
-	})
+	if let Some(s) = sort {
+		query = match s.sort_by {
+			ExtraSort::Name => query.order_by(extra::Column::NameSlug, s.order.into()),
+			ExtraSort::AddDate => query.order_by(extra::Column::RegisteredAt, s.order.into()),
+		}
+	}
+	query
+		.find_also_related(image::Entity)
+		.all(connection)
+		.await
+		.map(|items| {
+			items
+				.into_iter()
+				.map(|(extra, image)| ExtraResponseWithRelations {
+					extra: extra.into(),
+					thumbnail: image.map(|i| i.into()),
+					package: None,
+					artist: None,
+					file: None,
+				})
+				.collect()
+		})
 }

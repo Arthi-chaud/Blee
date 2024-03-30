@@ -154,3 +154,13 @@ pub struct ExtraFilter {
 	/// Filter by Package
 	pub package: Option<Uuid>,
 }
+
+// Sorting for Extras
+#[derive(Deserialize, FromFormField, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ExtraSort {
+	#[field(value = "name")]
+	Name,
+	#[field(value = "add_date")]
+	AddDate,
+}
