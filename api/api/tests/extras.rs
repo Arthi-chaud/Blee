@@ -352,7 +352,8 @@ mod test_extra {
 			.inspect(|data| {
 				let first_expected_extra =
 					&data.as_ref().unwrap().package_a.extras.get(11).unwrap();
-				let second_expected_extra = &data.as_ref().unwrap().package_b.extras.get(0).unwrap();
+				let second_expected_extra =
+					&data.as_ref().unwrap().package_b.extras.get(0).unwrap();
 				let response = client.get("/extras?sort=artist_name").dispatch();
 				assert_eq!(response.status(), Status::Ok);
 				let value = response_json_value(response);

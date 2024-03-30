@@ -167,4 +167,6 @@ pub enum ExtraSort {
 	PackageName,
 	#[field(value = "add_date")]
 	AddDate,
+	#[field(value = "release_date")]
+	ReleaseDate,
 }

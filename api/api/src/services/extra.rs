@@ -113,6 +113,13 @@ where
 				)
 				.order_by(extra::Column::DiscIndex, sea_orm::Order::Asc)
 				.order_by(extra::Column::TrackIndex, sea_orm::Order::Asc),
+			ExtraSort::ReleaseDate => query
+				.order_by(
+					Expr::col((Alias::new("package"), package::Column::ReleaseYear)),
+					s.order.into(),
+				)
+				.order_by(extra::Column::DiscIndex, sea_orm::Order::Asc)
+				.order_by(extra::Column::TrackIndex, sea_orm::Order::Asc),
 		}
 	}
 	query
