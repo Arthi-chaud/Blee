@@ -342,4 +342,102 @@ mod test_extra {
 			})
 			.is_ok());
 	}
+	#[test]
+	// Test /extra?sort=artist_name=
+	fn test_extra_sort_artist_name() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_extra =
+					&data.as_ref().unwrap().package_a.extras.get(11).unwrap();
+				let second_expected_extra = &data.as_ref().unwrap().package_b.extras.get(0).unwrap();
+				let response = client.get("/extras?sort=artist_name").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(
+					items
+						.get(13)
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("id")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					first_expected_extra.0.id.to_string()
+				);
+				assert_eq!(
+					items
+						.get(14)
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("id")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					second_expected_extra.0.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /extra?sort=package_name=&order=asc
+	fn test_extra_sort_package_name() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_extra = &data.as_ref().unwrap().package_b.extras.get(0).unwrap();
+				let second_expected_extra =
+					&data.as_ref().unwrap().package_a.extras.get(0).unwrap();
+				let response = client.get("/extras?sort=package_name").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				println!("{}", value);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(
+					items
+						.first()
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("id")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					first_expected_extra.0.id.to_string()
+				);
+				assert_eq!(
+					items
+						.get(1)
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("id")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					second_expected_extra.0.id.to_string()
+				);
+			})
+			.is_ok());
+	}
 }

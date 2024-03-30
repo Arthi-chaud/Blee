@@ -161,6 +161,10 @@ pub struct ExtraFilter {
 pub enum ExtraSort {
 	#[field(value = "name")]
 	Name,
+	#[field(value = "artist_name")]
+	ArtistName,
+	#[field(value = "package_name")]
+	PackageName,
 	#[field(value = "add_date")]
 	AddDate,
 }

@@ -3,11 +3,11 @@ use crate::dto::{
 	page::Pagination,
 	sort::Sort,
 };
-use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
+use entity::{artist, extra, image, package, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
-	QueryTrait, Set,
+	sea_query::*, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, JoinType, QueryFilter,
+	QueryOrder, QuerySelect, QueryTrait, RelationTrait, Set,
 };
 use slug::slugify;
 
@@ -73,6 +73,16 @@ where
 	C: ConnectionTrait,
 {
 	let mut query = extra::Entity::find()
+		.join_as(
+			JoinType::LeftJoin,
+			extra::Relation::Artist.def(),
+			Alias::new("artist"),
+		)
+		.join_as(
+			JoinType::LeftJoin,
+			extra::Relation::Package.def(),
+			Alias::new("package"),
+		)
 		.apply_if(filters.r#type, |q, r#type| {
 			//TODO
 			q.filter(extra::Column::Type.eq(vec![ExtraTypeEnum::from(r#type)]))
@@ -90,6 +100,19 @@ where
 		query = match s.sort_by {
 			ExtraSort::Name => query.order_by(extra::Column::NameSlug, s.order.into()),
 			ExtraSort::AddDate => query.order_by(extra::Column::RegisteredAt, s.order.into()),
+			ExtraSort::ArtistName => query
+				.order_by(
+					Expr::col((Alias::new("artist"), artist::Column::UniqueSlug)),
+					s.order.into(),
+				)
+				.order_by(extra::Column::NameSlug, sea_orm::Order::Asc),
+			ExtraSort::PackageName => query
+				.order_by(
+					Expr::col((Alias::new("package"), package::Column::NameSlug)),
+					s.order.into(),
+				)
+				.order_by(extra::Column::DiscIndex, sea_orm::Order::Asc)
+				.order_by(extra::Column::TrackIndex, sea_orm::Order::Asc),
 		}
 	}
 	query
