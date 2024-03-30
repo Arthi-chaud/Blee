@@ -1,3 +1,4 @@
+#[macro_use]
 mod common;
 
 #[cfg(test)]
@@ -251,7 +252,6 @@ mod test_extra {
 					.dispatch();
 				assert_eq!(response.status(), Status::Ok);
 				let value = response_json_value(response);
-				println!("{:?}", value);
 				let items = value
 					.as_object()
 					.unwrap()

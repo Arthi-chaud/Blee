@@ -35,6 +35,7 @@ enum File {
 	Size,
 	Path,
 	Quality,
+	RegisteredAt,
 	ScrubberId,
 }
 
@@ -188,6 +189,12 @@ impl MigrationTrait for Migration {
 							.from(File::Table, File::ScrubberId)
 							.to(Image::Table, Image::Id)
 							.on_delete(ForeignKeyAction::SetNull),
+					)
+					.col(
+						ColumnDef::new(File::RegisteredAt)
+							.date()
+							.not_null()
+							.default(Expr::current_date()),
 					)
 					.to_owned(),
 			)

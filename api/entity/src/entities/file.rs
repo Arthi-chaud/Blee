@@ -14,6 +14,7 @@ pub struct Model {
 	pub size: i64,
 	pub quality: VideoQualityEnum,
 	pub scrubber_id: Option<Uuid>,
+	pub registered_at: Date,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

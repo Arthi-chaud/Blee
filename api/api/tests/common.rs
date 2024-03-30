@@ -98,52 +98,55 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 	.await?;
 
 	let package_tracks = vec![
-		("Bad Girl", min_to_sec(6, 10)),
-		("Fever", min_to_sec(4, 7)),
-		("Rain", min_to_sec(4, 33)),
-		("Secret", min_to_sec(4, 22)),
-		("Take A Bow", min_to_sec(4, 33)),
-		("Bedtime Story", min_to_sec(4, 25)),
-		("Human Nature", min_to_sec(4, 33)),
-		("Love Don't Live Here Anymore", min_to_sec(4, 39)),
-		("Frozen", min_to_sec(5, 21)),
-		("Ray Of Light", min_to_sec(5, 05)),
-		("Drowned World", min_to_sec(4, 57)),
-		("The Power Of Good-Bye", min_to_sec(4, 10)),
-		("Nothing Really Matters", min_to_sec(4, 25)),
-		("Beautiful Stranger", min_to_sec(4, 34)),
+		(1, "Bad Girl", min_to_sec(6, 10)),
+		(2, "Fever", min_to_sec(4, 7)),
+		(3, "Rain", min_to_sec(4, 33)),
+		(4, "Secret", min_to_sec(4, 22)),
+		(5, "Take A Bow", min_to_sec(4, 33)),
+		(6, "Bedtime Story", min_to_sec(4, 25)),
+		(7, "Human Nature", min_to_sec(4, 33)),
+		(8, "Love Don't Live Here Anymore", min_to_sec(4, 39)),
+		(9, "Frozen", min_to_sec(5, 21)),
+		(10, "Ray Of Light", min_to_sec(5, 05)),
+		(11, "Drowned World", min_to_sec(4, 57)),
+		(12, "The Power Of Good-Bye", min_to_sec(4, 10)),
+		(13, "Nothing Really Matters", min_to_sec(4, 25)),
+		(14, "Beautiful Stranger", min_to_sec(4, 34)),
 	];
 
-	let package_a1_extra = join_all(package_tracks.iter().map(|(track_name, duration)| async {
-		let new_file = file::Entity::insert(file::ActiveModel {
-			path: Set(format!(
-				"/videos/Madonna/The Video Collection 93:99/01 {}.mp4",
-				track_name.to_string()
-			)),
-			size: Set(*duration * 1000), // 1kb per second
-			quality: Set(VideoQualityEnum::_480p),
-			..Default::default()
-		})
-		.exec_with_returning(db)
-		.await
-		.unwrap();
+	let package_a1_extra = join_all(package_tracks.iter().map(
+		|(i, track_name, duration)| async move {
+			let new_file = file::Entity::insert(file::ActiveModel {
+				path: Set(format!(
+					"/videos/Madonna/The Video Collection 93:99/{:02} {}.mp4",
+					i,
+					track_name.to_string()
+				)),
+				size: Set(*duration * 1000), // 1kb per second
+				quality: Set(VideoQualityEnum::_480p),
+				..Default::default()
+			})
+			.exec_with_returning(db)
+			.await
+			.unwrap();
 
-		let new_extra = extra::Entity::insert(extra::ActiveModel {
-			name: Set(track_name.to_string()),
-			name_slug: Set(slugify(track_name.to_string()).to_string()),
-			package_id: Set(package_a1.id),
-			artist_id: Set(artist_a.id),
-			disc_index: Set(Some(1)),
-			track_index: Set(Some(1)),
-			r#type: Set(vec![ExtraTypeEnum::MusicVideo]),
-			file_id: Set(new_file.id),
-			..Default::default()
-		})
-		.exec_with_returning(db)
-		.await
-		.unwrap();
-		ExtraDummy(new_extra, new_file)
-	}))
+			let new_extra = extra::Entity::insert(extra::ActiveModel {
+				name: Set(track_name.to_string()),
+				name_slug: Set(slugify(track_name.to_string()).to_string()),
+				package_id: Set(package_a1.id),
+				artist_id: Set(artist_a.id),
+				disc_index: Set(Some(1)),
+				track_index: Set(Some(*i)),
+				r#type: Set(vec![ExtraTypeEnum::MusicVideo]),
+				file_id: Set(new_file.id),
+				..Default::default()
+			})
+			.exec_with_returning(db)
+			.await
+			.unwrap();
+			ExtraDummy(new_extra, new_file)
+		},
+	))
 	.await;
 
 	let artist_b = artist::Entity::insert(artist::ActiveModel {

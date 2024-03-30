@@ -104,3 +104,15 @@ pub struct FileFilter {
 	/// Filter by Path (starts with)
 	pub path: Option<String>,
 }
+
+// Sorting for Files
+#[derive(Deserialize, FromFormField, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum FileSort {
+	#[field(value = "path")]
+	Path,
+	#[field(value = "add_date")]
+	AddDate,
+	#[field(value = "size")]
+	Size,
+}

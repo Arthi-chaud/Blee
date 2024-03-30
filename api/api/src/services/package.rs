@@ -1,6 +1,6 @@
 use crate::dto::{
 	artist::ArtistResponse,
-	package::{PackageFilter, PackageResponse, PackageResponseWithRelations, PackageSort},
+	package::{PackageFilter, PackageResponseWithRelations, PackageSort},
 	page::Pagination,
 	sort::Sort,
 };
@@ -9,7 +9,7 @@ use entity::{artist, image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	sea_query::{self, *},
-	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, Iterable, QueryFilter, QueryOrder,
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder,
 	QuerySelect, QueryTrait, RelationTrait, Set,
 };
 

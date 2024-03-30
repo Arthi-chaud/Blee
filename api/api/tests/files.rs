@@ -1,9 +1,11 @@
+#[macro_use]
 mod common;
 
 #[cfg(test)]
 mod test_files {
 
 	use crate::common::*;
+	use entity::{extra, file};
 	use rocket::http::Status;
 	use urlencoding::encode;
 
@@ -81,6 +83,50 @@ mod test_files {
 						.unwrap(),
 					expected_file.id.to_string()
 				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	fn test_files_path_filter_and_sort() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let expected_tracks = &data.as_ref().unwrap().package_a.extras;
+				let response = client
+					.get(format!(
+						"/files?path={}&sort=path",
+						encode("/videos/Madonna/The Video Collection 93:99")
+					))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				println!("{}", value);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), expected_tracks.len());
+				for (pos, f) in expected_tracks.iter().enumerate() {
+					assert!(items
+						.get(pos)
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("path")
+						.unwrap()
+						.as_str()
+						.unwrap()
+						.starts_with(
+							format!("/videos/Madonna/The Video Collection 93:99/{:02} ", pos + 1)
+								.as_str()
+						));
+				}
 			})
 			.is_ok());
 	}

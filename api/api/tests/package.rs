@@ -139,7 +139,6 @@ mod test_packages {
 				let third_expected_package = &data.as_ref().unwrap().package_b.package.id;
 				assert_eq!(response.status(), Status::Ok);
 				let value = response_json_value(response);
-				println!("{:?}", value);
 				let items = value
 					.as_object()
 					.unwrap()

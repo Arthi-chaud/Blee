@@ -1,6 +1,6 @@
 use common::*;
 use rocket::{form::validate::Contains, http::Status};
-
+#[macro_use]
 mod common;
 
 #[test]

@@ -104,11 +104,6 @@ where
 		}
 	}
 
-	println!(
-		"{}",
-		query.build(sea_orm::DatabaseBackend::Postgres).to_string()
-	);
-
 	query.all(connection).await.map(|items| {
 		items
 			.into_iter()

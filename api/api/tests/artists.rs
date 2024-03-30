@@ -177,7 +177,6 @@ mod test_artist {
 				let response = client.get("/artists?sort=name&order=desc").dispatch();
 				assert_eq!(response.status(), Status::Ok);
 				let value = response_json_value(response);
-				println!("{:?}", value);
 				let items = value
 					.as_object()
 					.unwrap()

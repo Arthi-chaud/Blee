@@ -1,8 +1,11 @@
 use crate::database::Database;
 use crate::dto::file::FileFilter;
 use crate::dto::file::FileResponse;
+use crate::dto::file::FileSort;
 use crate::dto::page::Page;
 use crate::dto::page::Pagination;
+use crate::dto::sort::build_sort;
+use crate::dto::sort::SortOrder;
 use crate::error_handling::{ApiError, ApiPageResult, ApiResult};
 use crate::services;
 use rocket::serde::json::Json;
@@ -26,14 +29,21 @@ async fn get_file(db: Database<'_>, uuid: Uuid) -> ApiResult<FileResponse> {
 
 /// Get many Files
 #[openapi(tag = "Files")]
-#[get("/?<path>&<pagination..>")]
+#[get("/?<path>&<sort>&<order>&<pagination..>")]
 async fn get_files(
 	db: Database<'_>,
+	sort: Option<FileSort>,
+	order: Option<SortOrder>,
 	path: Option<String>,
 	pagination: Pagination,
 ) -> ApiPageResult<FileResponse> {
-	services::file::find_many(&FileFilter { path }, &pagination, db.into_inner())
-		.await
-		.map(|items| Page::from(items))
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
+	services::file::find_many(
+		&FileFilter { path },
+		build_sort(sort, order),
+		&pagination,
+		db.into_inner(),
+	)
+	.await
+	.map(|items| Page::from(items))
+	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
