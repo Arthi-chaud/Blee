@@ -4,11 +4,15 @@ services:
       context: ./scanner
       dockerfile: Dockerfile.dev
     restart: on-failure
+    depends_on:
+      api:
+        condition: service_healthy
     volumes:
       - ./scanner:/app
       - ./scanner.example.json:/config/scanner.json
       - ${DATA_DIR}:/video
     environment:
+      - API_URL=http://api:8000
       - WATCH_DIR=/video
       - SCANNER_API_KEY=${SCANNER_API_KEY}
       - CONFIG_DIR=/config
@@ -22,6 +26,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: curl --fail http://localhost:8000/ || exit 1
+      interval: 5s
+      retries: 3
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
@@ -31,6 +39,8 @@ services:
     volumes:
       - ./api:/app
       - ./data:/data
+      - api_target:/app/target
+      - api_cargo:/usr/local/cargo
   db:
     image: postgres:alpine3.16
     healthcheck:
@@ -42,3 +52,5 @@ services:
       - .env
 volumes:
   db:
+  api_target:
+  api_cargo:

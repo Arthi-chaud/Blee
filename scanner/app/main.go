@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"time"
+
+	"github.com/Arthi-chaud/Blee/scanner/pkg/api"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	"github.com/kpango/glg"
 	"github.com/radovskyb/watcher"
-	"os"
-	"time"
 )
 
 func setupLogger() {
@@ -22,6 +24,10 @@ func main() {
 	setupLogger()
 	c := config.GetConfig()
 	w := watcher.New()
+	if err := api.HealthCheck(c); err != nil {
+		glg.Fatalf("Failed connecting to API: %s", err)
+		os.Exit(1)
+	}
 	go func() {
 		for {
 			select {

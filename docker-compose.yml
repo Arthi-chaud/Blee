@@ -19,8 +19,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- localhost:8000"]
       interval: 5s
-      timeout: 5s
-      retries: 5
+      retries: 3
   scanner:
     build:
       context: ./scanner
@@ -29,8 +28,9 @@ services:
         condition: service_healthy
     volumes:
       - ${DATA_DIR}:/video
-      - ./scanner.json:/app/scanner.json
+      - ./scanner.example.json:/app/scanner.json
     environment:
+      - API_URL=http://api:8000
       - WATCH_DIR=/video
       - SCANNER_API_KEY=${SCANNER_API_KEY}
       - CONFIG_DIR=/app

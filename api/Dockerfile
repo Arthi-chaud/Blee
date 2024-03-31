@@ -1,4 +1,5 @@
 FROM rust:1.76-slim-buster as builder
+RUN apt update -y && apt install curl -y
 WORKDIR /usr/src/api
 COPY . .
 RUN cargo install --path api
