@@ -1,15 +1,20 @@
-use entity::file;
+use entity::{chapter, extra, file, movie};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
 	QueryTrait, Set,
 };
 
-use crate::dto::{
-	file::{FileFilter, FileResponse, FileSort, VideoQuality},
-	page::Pagination,
-	sort::Sort,
+use crate::{
+	config::Config,
+	dto::{
+		file::{FileFilter, FileResponse, FileSort, VideoQuality},
+		page::Pagination,
+		sort::Sort,
+	},
 };
+
+use super::{housekeeping, image};
 
 pub async fn create_or_find<'s, 'a, C>(
 	file_path: &'s str,
@@ -69,4 +74,48 @@ where
 		.all(connection)
 		.await
 		.map(|items| items.into_iter().map(|file| file.into()).collect())
+}
+
+pub async fn delete<'a, C>(uuid: &Uuid, connection: &'a C, config: &Config) -> Result<(), DbErr>
+where
+	C: ConnectionTrait,
+{
+	let file_to_delete = find(uuid, connection).await?;
+
+	let related_extras = extra::Entity::find()
+		.filter(extra::Column::FileId.eq(file_to_delete.id))
+		.all(connection)
+		.await?;
+	if let Some(related_extra) = related_extras.first() {
+		if let Some(extra_poster) = related_extra.thumbnail_id {
+			image::delete(&extra_poster, connection, config).await?;
+		}
+		extra::Entity::delete_by_id(related_extra.id)
+			.exec(connection)
+			.await?;
+	} else {
+		let related_movies = movie::Entity::find()
+			.filter(movie::Column::FileId.eq(file_to_delete.id))
+			.all(connection)
+			.await?;
+		if let Some(related_movie) = related_movies.first() {
+			if let Some(movie_poster) = related_movie.poster_id {
+				image::delete(&movie_poster, connection, config).await?;
+			}
+			chapter::Entity::delete_many()
+				.filter(chapter::Column::MovieId.eq(related_movie.id))
+				.exec(connection)
+				.await?;
+			movie::Entity::delete_by_id(related_movie.id)
+				.exec(connection)
+				.await?;
+		}
+	}
+	if let Some(scrubber_id) = file_to_delete.scrubber_id {
+		image::delete(&scrubber_id, connection, config).await?;
+	}
+	file::Entity::delete_by_id(file_to_delete.id)
+		.exec(connection)
+		.await?;
+	housekeeping::housekeeping(connection).await
 }

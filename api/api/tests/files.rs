@@ -5,7 +5,6 @@ mod common;
 mod test_files {
 
 	use crate::common::*;
-	use entity::{extra, file};
 	use rocket::http::Status;
 	use urlencoding::encode;
 
@@ -112,7 +111,7 @@ mod test_files {
 					.as_array()
 					.unwrap();
 				assert_eq!(items.len(), expected_tracks.len());
-				for (pos, f) in expected_tracks.iter().enumerate() {
+				for (pos, _) in expected_tracks.iter().enumerate() {
 					assert!(items
 						.get(pos)
 						.unwrap()

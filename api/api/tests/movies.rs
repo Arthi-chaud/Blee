@@ -7,26 +7,18 @@ mod test_movie {
 	use std::{env, vec};
 
 	use crate::common::*;
-	use api::{
-		database::Db,
-		dto::{
-			chapter::{ChapterType, NewChapter},
-			file::{NewFile, VideoQuality},
-			movie::{MovieType, NewMovie},
-		},
+	use api::dto::{
+		chapter::{ChapterType, NewChapter},
+		file::{NewFile, VideoQuality},
+		movie::{MovieType, NewMovie},
 	};
 	use chrono::NaiveDate;
-	use entity::{artist, chapter, file, movie, package};
 	use rocket::http::{ContentType, Header, Status};
-	use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-	use sea_orm_rocket::Database;
-	use sqlx::types::Uuid;
 
 	#[test]
 	/// Test POST `/movies`
 	fn test_movies() {
 		let client = test_client().lock().unwrap();
-		let conn = &Db::fetch(client.rocket()).unwrap().conn;
 		let dto = NewMovie {
 			artist_name: "Taylor Swift".to_owned(),
 			movie_name: "Miss Americana".to_owned(),
@@ -131,22 +123,15 @@ mod test_movie {
 		assert_eq!(path, "/data/Taylor Swift/Miss Americana.mp4");
 		let quality = file_value.get("quality").unwrap().as_str().unwrap();
 		assert_eq!(quality, "1080p");
-		let _ = aw!(chapter::Entity::delete_many()
-			.filter(chapter::Column::MovieId.eq(Uuid::parse_str(movie_id).unwrap()))
-			.exec(conn))
-		.unwrap();
-		let _ = aw!(movie::Entity::delete_many()
-			.filter(movie::Column::Id.eq(Uuid::parse_str(movie_id).unwrap()))
-			.exec(conn))
-		.unwrap();
-		let _ = aw!(package::Entity::delete_many()
-			.filter(package::Column::NameSlug.starts_with("miss-americana"))
-			.exec(conn))
-		.unwrap();
-		let _ = aw!(artist::Entity::delete_many()
-			.filter(artist::Column::UniqueSlug.eq("taylor-swift"))
-			.exec(conn))
-		.unwrap();
+		// Teardown
+		let deletion_response = client
+			.delete(format!("/files/{}", file_id))
+			.header(Header::new(
+				"X-API-Key",
+				env::var("SCANNER_API_KEY").unwrap(),
+			))
+			.dispatch();
+		assert_eq!(deletion_response.status(), Status::Ok);
 	}
 
 	#[test]
