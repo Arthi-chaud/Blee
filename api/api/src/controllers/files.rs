@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::database::Database;
 use crate::dto::file::FileFilter;
 use crate::dto::file::FileResponse;
@@ -7,15 +8,17 @@ use crate::dto::page::Pagination;
 use crate::dto::sort::build_sort;
 use crate::dto::sort::SortOrder;
 use crate::error_handling::{ApiError, ApiPageResult, ApiResult};
+use crate::guards::ScannerAuthGuard;
 use crate::services;
 use rocket::serde::json::Json;
 use rocket::serde::uuid::Uuid;
+use rocket::State;
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: get_file, get_files]
+	openapi_get_routes_spec![settings: get_file, delete_file, get_files]
 }
 
 /// Get a Single File
@@ -25,6 +28,21 @@ async fn get_file(db: Database<'_>, uuid: Uuid) -> ApiResult<FileResponse> {
 	services::file::find(&uuid, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+}
+
+/// Get delete a File, along with the related resources if needed (images,
+/// chapers, extra, package, ...)
+#[openapi(tag = "Files")]
+#[delete("/<uuid>")]
+async fn delete_file(
+	db: Database<'_>,
+	uuid: Uuid,
+	config: &State<Config>,
+	_scanner: ScannerAuthGuard,
+) -> Result<(), ApiError> {
+	services::file::delete(&uuid, db.into_inner(), config)
+		.await
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Get many Files
