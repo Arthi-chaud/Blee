@@ -7,18 +7,26 @@ mod test_movie {
 	use std::{env, vec};
 
 	use crate::common::*;
-	use api::dto::{
-		chapter::{ChapterType, NewChapter},
-		file::{NewFile, VideoQuality},
-		movie::{MovieType, NewMovie},
+	use api::{
+		database::Db,
+		dto::{
+			chapter::{ChapterType, NewChapter},
+			file::{NewFile, VideoQuality},
+			movie::{MovieType, NewMovie},
+		},
 	};
 	use chrono::NaiveDate;
+	use entity::{artist, chapter, file, movie, package};
 	use rocket::http::{ContentType, Header, Status};
+	use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+	use sea_orm_rocket::Database;
+	use sqlx::types::Uuid;
 
 	#[test]
 	/// Test POST `/movies`
 	fn test_movies() {
 		let client = test_client().lock().unwrap();
+		let conn = &Db::fetch(client.rocket()).unwrap().conn;
 		let dto = NewMovie {
 			artist_name: "Taylor Swift".to_owned(),
 			movie_name: "Miss Americana".to_owned(),
@@ -123,6 +131,22 @@ mod test_movie {
 		assert_eq!(path, "/data/Taylor Swift/Miss Americana.mp4");
 		let quality = file_value.get("quality").unwrap().as_str().unwrap();
 		assert_eq!(quality, "1080p");
+		let _ = aw!(chapter::Entity::delete_many()
+			.filter(chapter::Column::MovieId.eq(Uuid::parse_str(movie_id).unwrap()))
+			.exec(conn))
+		.unwrap();
+		let _ = aw!(movie::Entity::delete_many()
+			.filter(movie::Column::Id.eq(Uuid::parse_str(movie_id).unwrap()))
+			.exec(conn))
+		.unwrap();
+		let _ = aw!(package::Entity::delete_many()
+			.filter(package::Column::NameSlug.starts_with("miss-americana"))
+			.exec(conn))
+		.unwrap();
+		let _ = aw!(artist::Entity::delete_many()
+			.filter(artist::Column::UniqueSlug.eq("taylor-swift"))
+			.exec(conn))
+		.unwrap();
 	}
 
 	#[test]
@@ -165,20 +189,11 @@ mod test_movie {
 	fn test_movies_pagination() {
 		let client = test_client().lock().unwrap();
 
-		let response_first_page = client.get("/movies?page_size=2").dispatch();
+		let response_first_page = client.get("/movies?take=1").dispatch();
 		assert_eq!(response_first_page.status(), Status::Ok);
 		let value = response_json_value(response_first_page);
 		let items = value.get("items").unwrap().as_array().unwrap();
-		let last_item_id = items
-			.last()
-			.unwrap()
-			.as_object()
-			.unwrap()
-			.get("id")
-			.unwrap()
-			.as_str()
-			.unwrap();
-		assert_eq!(items.len(), 2);
+		assert_eq!(items.len(), 1);
 		let next = value
 			.get("metadata")
 			.unwrap()
@@ -188,15 +203,22 @@ mod test_movie {
 			.unwrap()
 			.as_str()
 			.unwrap();
-		assert_eq!(
-			next,
-			format!("/movies?page_size=2&after_id={}", last_item_id)
-		);
-		let response_second_page = client.get(next).dispatch();
+		assert_eq!(next, "/movies?take=1&skip=1");
+		let response_second_page = client.get("/movies?take=2&skip=1").dispatch();
 		assert_eq!(response_second_page.status(), Status::Ok);
 		let value = response_json_value(response_second_page);
 		let items = value.get("items").unwrap().as_array().unwrap();
 		assert_eq!(items.len(), 1);
+		let next = value
+			.get("metadata")
+			.unwrap()
+			.as_object()
+			.unwrap()
+			.get("next")
+			.unwrap()
+			.as_null()
+			.unwrap();
+		assert_eq!(next, ());
 	}
 
 	#[test]
@@ -314,6 +336,156 @@ mod test_movie {
 					.as_array()
 					.unwrap();
 				assert_eq!(items.len(), 0);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /movies?sort=
+	fn test_movies_sort_by_name() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_movie =
+					&data.as_ref().unwrap().package_b.movies.first().unwrap().0;
+				let second_expected_movie =
+					&data.as_ref().unwrap().package_c.movies.first().unwrap().0;
+				let response = client.get("/movies?sort=name&order=desc").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 2);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					first_expected_movie.id.to_string()
+				);
+				let item = items.get(1).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					second_expected_movie.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /movies?sort=
+	fn test_movies_sort_by_year() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_movie =
+					&data.as_ref().unwrap().package_c.movies.first().unwrap().0;
+				let second_expected_movie =
+					&data.as_ref().unwrap().package_b.movies.first().unwrap().0;
+				let response = client.get("/movies?sort=release_date").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 2);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					first_expected_movie.id.to_string()
+				);
+				let item = items.get(1).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					second_expected_movie.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /movies?sort=
+	fn test_movies_sort_by_package_name() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_movie =
+					&data.as_ref().unwrap().package_b.movies.first().unwrap().0;
+				let second_expected_movie =
+					&data.as_ref().unwrap().package_c.movies.first().unwrap().0;
+				let response = client
+					.get("/movies?sort=package_name&order=desc")
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 2);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					first_expected_movie.id.to_string()
+				);
+				let item = items.get(1).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					second_expected_movie.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /movies?sort=
+	fn test_movies_sort_by_artist_name() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_movie =
+					&data.as_ref().unwrap().package_c.movies.first().unwrap().0;
+				let second_expected_movie =
+					&data.as_ref().unwrap().package_b.movies.first().unwrap().0;
+				let response = client.get("/movies?sort=artist_name").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 2);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					first_expected_movie.id.to_string()
+				);
+				let item = items.get(1).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					second_expected_movie.id.to_string()
+				);
 			})
 			.is_ok());
 	}

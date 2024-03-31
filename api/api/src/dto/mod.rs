@@ -6,3 +6,4 @@ pub mod image;
 pub mod movie;
 pub mod package;
 pub mod page;
+pub mod sort;

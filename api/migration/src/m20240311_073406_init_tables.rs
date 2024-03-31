@@ -23,7 +23,7 @@ enum Artist {
 	Id,
 	Name,
 	Description,
-	Slug,
+	UniqueSlug,
 	RegisteredAt,
 	PosterId,
 }
@@ -35,6 +35,7 @@ enum File {
 	Size,
 	Path,
 	Quality,
+	RegisteredAt,
 	ScrubberId,
 }
 
@@ -43,7 +44,8 @@ enum Package {
 	Table,
 	Id,
 	Name,
-	Slug,
+	NameSlug,
+	UniqueSlug,
 	Description,
 	ReleaseYear,
 	RegisteredAt,
@@ -56,7 +58,7 @@ enum Extra {
 	Table,
 	Id,
 	Name,
-	Slug,
+	NameSlug,
 	ThumbnailId,
 	RegisteredAt,
 	PackageId,
@@ -72,7 +74,8 @@ enum Movie {
 	Table,
 	Id,
 	Name,
-	Slug,
+	NameSlug,
+	UniqueSlug,
 	PosterId,
 	RegisteredAt,
 	PackageId,
@@ -137,7 +140,7 @@ impl MigrationTrait for Migration {
 					)
 					.col(ColumnDef::new(Artist::Name).string().not_null())
 					.col(
-						ColumnDef::new(Artist::Slug)
+						ColumnDef::new(Artist::UniqueSlug)
 							.string()
 							.not_null()
 							.unique_key(),
@@ -187,6 +190,12 @@ impl MigrationTrait for Migration {
 							.to(Image::Table, Image::Id)
 							.on_delete(ForeignKeyAction::SetNull),
 					)
+					.col(
+						ColumnDef::new(File::RegisteredAt)
+							.date()
+							.not_null()
+							.default(Expr::current_date()),
+					)
 					.to_owned(),
 			)
 			.await?;
@@ -203,8 +212,9 @@ impl MigrationTrait for Migration {
 							.extra("DEFAULT gen_random_uuid()"),
 					)
 					.col(ColumnDef::new(Package::Name).string().not_null())
+					.col(ColumnDef::new(Package::NameSlug).string().not_null())
 					.col(
-						ColumnDef::new(Package::Slug)
+						ColumnDef::new(Package::UniqueSlug)
 							.string()
 							.not_null()
 							.unique_key(),
@@ -249,7 +259,7 @@ impl MigrationTrait for Migration {
 							.extra("DEFAULT gen_random_uuid()"),
 					)
 					.col(ColumnDef::new(Extra::Name).string().not_null())
-					.col(ColumnDef::new(Extra::Slug).string().not_null())
+					.col(ColumnDef::new(Extra::NameSlug).string().not_null())
 					.col(ColumnDef::new(Extra::ThumbnailId).uuid())
 					.foreign_key(
 						ForeignKey::create()
@@ -311,7 +321,13 @@ impl MigrationTrait for Migration {
 							.extra("DEFAULT gen_random_uuid()"),
 					)
 					.col(ColumnDef::new(Movie::Name).string().not_null())
-					.col(ColumnDef::new(Movie::Slug).string().not_null().unique_key())
+					.col(ColumnDef::new(Movie::NameSlug).string().not_null())
+					.col(
+						ColumnDef::new(Movie::UniqueSlug)
+							.string()
+							.not_null()
+							.unique_key(),
+					)
 					.col(ColumnDef::new(Movie::PosterId).uuid())
 					.foreign_key(
 						ForeignKey::create()

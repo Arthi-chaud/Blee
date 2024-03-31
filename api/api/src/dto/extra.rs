@@ -2,7 +2,6 @@ use super::file::{FileResponse, NewFile};
 use super::{artist::ArtistResponse, package::PackageResponse};
 use crate::dto::image::ImageResponse;
 use crate::swagger_examples::*;
-use crate::utils::Identifiable;
 use chrono::NaiveDateTime;
 use entity::extra;
 use entity::sea_orm_active_enums::ExtraTypeEnum;
@@ -26,18 +25,11 @@ pub struct ExtraResponseWithRelations {
 	pub file: Option<FileResponse>,
 }
 
-impl Identifiable for ExtraResponseWithRelations {
-	fn get_id(&self) -> String {
-		self.extra.get_id()
-	}
-}
-
 #[derive(Serialize, JsonSchema)]
 pub struct ExtraResponse {
 	#[schemars(example = "example_uuid")]
 	pub id: Uuid,
 	pub name: String,
-	pub slug: String,
 	#[schemars(example = "example_uuid")]
 	pub thumbnail_id: Option<Uuid>,
 	pub registered_at: NaiveDateTime,
@@ -54,18 +46,11 @@ pub struct ExtraResponse {
 	pub r#type: Vec<ExtraType>,
 }
 
-impl Identifiable for ExtraResponse {
-	fn get_id(&self) -> String {
-		self.id.to_string()
-	}
-}
-
 impl From<extra::Model> for ExtraResponse {
 	fn from(value: extra::Model) -> Self {
 		ExtraResponse {
 			id: value.id,
 			name: value.name,
-			slug: value.slug,
 			thumbnail_id: value.thumbnail_id,
 			registered_at: value.registered_at.into(),
 			package_id: value.package_id,
@@ -168,4 +153,20 @@ pub struct ExtraFilter {
 	pub artist: Option<Uuid>,
 	/// Filter by Package
 	pub package: Option<Uuid>,
+}
+
+// Sorting for Extras
+#[derive(Deserialize, FromFormField, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ExtraSort {
+	#[field(value = "name")]
+	Name,
+	#[field(value = "artist_name")]
+	ArtistName,
+	#[field(value = "package_name")]
+	PackageName,
+	#[field(value = "add_date")]
+	AddDate,
+	#[field(value = "release_date")]
+	ReleaseDate,
 }

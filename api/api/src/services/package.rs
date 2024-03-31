@@ -1,13 +1,16 @@
 use crate::dto::{
 	artist::ArtistResponse,
-	package::{PackageFilter, PackageResponseWithRelations},
+	package::{PackageFilter, PackageResponseWithRelations, PackageSort},
 	page::Pagination,
+	sort::Sort,
 };
 use ::slug::slugify;
-use entity::{image, package};
+use entity::{artist, image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	sea_query, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set,
+	sea_query::{self, *},
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+	QueryTrait, RelationTrait, Set,
 };
 
 pub async fn create_or_find<'s, 'a, C>(
@@ -22,10 +25,11 @@ where
 	let artist_name = artist
 		.as_ref()
 		.map_or(String::from("Various Artist"), |a| a.name.clone());
-	let package_slug = slugify(format!("{} {}", artist_name, package_name));
+	let unique_slug = slugify(format!("{} {}", artist_name, package_name));
 	let new_package = package::ActiveModel {
 		name: Set(package_name.to_string()),
-		slug: Set(package_slug.to_owned()),
+		unique_slug: Set(unique_slug.to_owned()),
+		name_slug: Set(slugify(package_name)),
 		release_year: Set(release_date),
 		artist_id: Set(artist.as_ref().map(|a| a.id)),
 		..Default::default()
@@ -33,7 +37,7 @@ where
 
 	let _ = package::Entity::insert(new_package.clone())
 		.on_conflict(
-			sea_query::OnConflict::column(package::Column::Slug)
+			sea_query::OnConflict::column(package::Column::UniqueSlug)
 				.do_nothing()
 				.to_owned(),
 		)
@@ -41,7 +45,7 @@ where
 		.await;
 
 	package::Entity::find()
-		.filter(package::Column::Slug.eq(package_slug))
+		.filter(package::Column::UniqueSlug.eq(unique_slug))
 		.one(connection)
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))
@@ -60,7 +64,7 @@ where
 	if let Ok(uuid) = uuid_parse_result {
 		query = query.filter(package::Column::Id.eq(uuid));
 	} else {
-		query = query.filter(package::Column::Slug.eq(slug_or_uuid));
+		query = query.filter(package::Column::UniqueSlug.eq(slug_or_uuid));
 	}
 
 	let (package, poster) = query
@@ -78,35 +82,52 @@ where
 
 pub async fn find_many<'a, C>(
 	filters: &PackageFilter,
+	sort: Option<Sort<PackageSort>>,
 	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<PackageResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let query = package::Entity::find().apply_if(filters.artist, |q, artist_uuid| {
-		q.filter(package::Column::ArtistId.eq(artist_uuid))
-	});
-
-	let mut joint_query = query
-		.find_also_related(image::Entity)
-		.cursor_by(package::Column::Id);
-
-	if let Some(after_id) = pagination.after_id {
-		joint_query.after(after_id);
-	}
-	joint_query
-		.first(pagination.page_size)
-		.all(connection)
-		.await
-		.map(|items| {
-			items
-				.into_iter()
-				.map(|(package, poster)| PackageResponseWithRelations {
-					package: package.into(),
-					poster: poster.map(|x| x.into()),
-					artist: None,
-				})
-				.collect()
+	let mut query = package::Entity::find()
+		.join_as(
+			JoinType::LeftJoin,
+			package::Relation::Artist.def(),
+			Alias::new("artist"),
+		)
+		.apply_if(filters.artist, |q, artist_uuid| {
+			q.filter(package::Column::ArtistId.eq(artist_uuid))
 		})
+		.offset(pagination.skip)
+		.limit(pagination.take);
+
+	if let Some(s) = sort {
+		query = match s.sort_by {
+			PackageSort::Name => query.order_by(package::Column::NameSlug, s.order.into()),
+			PackageSort::AddDate => query.order_by(package::Column::RegisteredAt, s.order.into()),
+			PackageSort::ReleaseDate => {
+				//TODO: Handle nulls
+				query.order_by(package::Column::ReleaseYear, s.order.into())
+			}
+			PackageSort::ArtistName => query
+				.order_by(
+					Expr::col((Alias::new("artist"), artist::Column::UniqueSlug)),
+					s.order.into(),
+				)
+				.order_by(package::Column::NameSlug, sea_orm::Order::Asc),
+		}
+	}
+
+	let joint_query = query.find_also_related(image::Entity);
+
+	joint_query.all(connection).await.map(|items| {
+		items
+			.into_iter()
+			.map(|(package, poster)| PackageResponseWithRelations {
+				package: package.into(),
+				poster: poster.map(|x| x.into()),
+				artist: None,
+			})
+			.collect()
+	})
 }

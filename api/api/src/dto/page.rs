@@ -1,6 +1,6 @@
+use rocket::form::FromForm;
 use rocket::http::ContentType;
 use rocket::response::Responder;
-use rocket::{form::FromForm, serde::uuid::Uuid};
 use rocket::{Request, Response};
 use rocket_okapi::gen::OpenApiGenerator;
 use rocket_okapi::okapi::openapi3::Responses;
@@ -11,25 +11,29 @@ use rocket_okapi::util::add_schema_response;
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-use crate::utils::Identifiable;
-
 const DEFAULT_PAGE_SIZE: u64 = 20;
 
 fn get_default_page_size() -> u64 {
 	DEFAULT_PAGE_SIZE
 }
 
+fn get_default_skip() -> u64 {
+	0
+}
+
 /// Parameters for pagination
 #[derive(Serialize, Deserialize, JsonSchema, FromForm)]
 pub struct Pagination {
 	/// The maximum number of items per page
-	#[schemars(range(min = 2))]
+	#[schemars(range(min = 1))]
 	#[serde(default = "get_default_page_size")]
-	#[field(validate = range(2..).or_else(msg!("Page size should be at least 2.")), default = DEFAULT_PAGE_SIZE)]
-	pub page_size: u64,
-	/// If specified, page will start with the item following the item with the
-	/// provided id
-	pub after_id: Option<Uuid>,
+	#[field(default = DEFAULT_PAGE_SIZE, validate = range(1..).or_else(msg!("Page size should be at least 1.")))]
+	pub take: u64,
+	/// The number of items to skip, in the current order
+	#[schemars(range(min = 0))]
+	#[serde(default = "get_default_skip")]
+	#[field(validate = range(0..).or_else(msg!("Skip should not be negative.")), default = 0)]
+	pub skip: u64,
 }
 
 /// Builds a page from a list of items.
@@ -42,7 +46,7 @@ impl<T> Page<T> {
 	}
 }
 
-impl<T: Identifiable + JsonSchema> OpenApiResponderInner for Page<T> {
+impl<T: JsonSchema> OpenApiResponderInner for Page<T> {
 	fn responses(gen: &mut OpenApiGenerator) -> rocket_okapi::Result<Responses> {
 		let mut responses = Responses::default();
 		let schema = gen.json_schema::<PageResponse<T>>();
@@ -51,11 +55,14 @@ impl<T: Identifiable + JsonSchema> OpenApiResponderInner for Page<T> {
 	}
 }
 
-impl<'r, T: Identifiable + Serialize> Responder<'r, 'r> for Page<T> {
+impl<'r, T: Serialize> Responder<'r, 'r> for Page<T> {
 	fn respond_to(self, r: &'r Request<'_>) -> rocket::response::Result<'r> {
 		let requested_page_size = r
-			.query_value::<u64>("page_size")
+			.query_value::<u64>("take")
 			.map_or_else(|| DEFAULT_PAGE_SIZE, |r| r.unwrap());
+		let skipped = r
+			.query_value::<usize>("skip")
+			.map_or_else(|| 0, |r| r.unwrap());
 		let is_last_page = self.0.len() != (requested_page_size as usize);
 		let next_route = if is_last_page {
 			None
@@ -63,13 +70,13 @@ impl<'r, T: Identifiable + Serialize> Responder<'r, 'r> for Page<T> {
 			let path = r.uri().path();
 			let mut query_params: Vec<String> = r
 				.query_fields()
-				.filter(|field| field.name.as_name().ne("after_id"))
+				.filter(|field| field.name.as_name().ne("skip"))
 				.map(|field| format!("{}={}", field.name.as_name().as_str(), field.value))
 				.collect();
-			query_params.push(format!(
-				"after_id={}",
-				self.0.last().unwrap().get_id().as_str()
-			));
+			let next_page_skip = skipped + self.0.len();
+			if next_page_skip != 0 {
+				query_params.push(format!("skip={}", next_page_skip));
+			}
 			let mut full_next_route = path.to_string();
 			full_next_route.push('?');
 			full_next_route.push_str(query_params.join("&").as_str());

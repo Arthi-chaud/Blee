@@ -1,10 +1,14 @@
 use entity::file;
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
+use sea_orm::{
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+	QueryTrait, Set,
+};
 
 use crate::dto::{
-	file::{FileFilter, FileResponse, VideoQuality},
+	file::{FileFilter, FileResponse, FileSort, VideoQuality},
 	page::Pagination,
+	sort::Sort,
 };
 
 pub async fn create_or_find<'s, 'a, C>(
@@ -40,23 +44,28 @@ where
 
 pub async fn find_many<'a, C>(
 	filter: &FileFilter,
+	sort: Option<Sort<FileSort>>,
 	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<FileResponse>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let query = file::Entity::find().apply_if(filter.path.clone(), |q, path| {
-		q.filter(file::Column::Path.starts_with(path))
-	});
+	let mut query = file::Entity::find()
+		.apply_if(filter.path.clone(), |q, path| {
+			q.filter(file::Column::Path.starts_with(path))
+		})
+		.offset(pagination.skip)
+		.limit(pagination.take);
 
-	let mut cursor = query.cursor_by(file::Column::Id);
-
-	if let Some(after_id) = pagination.after_id {
-		cursor.after(after_id);
+	if let Some(s) = sort {
+		query = match s.sort_by {
+			FileSort::Path => query.order_by(file::Column::Path, s.order.into()),
+			FileSort::AddDate => query.order_by(file::Column::RegisteredAt, s.order.into()),
+			FileSort::Size => query.order_by(file::Column::Size, s.order.into()),
+		}
 	}
-	cursor
-		.first(pagination.page_size)
+	query
 		.all(connection)
 		.await
 		.map(|items| items.into_iter().map(|file| file.into()).collect())

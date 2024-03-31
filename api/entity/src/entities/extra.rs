@@ -10,7 +10,7 @@ pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false)]
 	pub id: Uuid,
 	pub name: String,
-	pub slug: String,
+	pub name_slug: String,
 	pub thumbnail_id: Option<Uuid>,
 	pub registered_at: Date,
 	pub package_id: Uuid,
@@ -44,7 +44,7 @@ pub enum Relation {
 		from = "Column::ThumbnailId",
 		to = "super::image::Column::Id",
 		on_update = "NoAction",
-		on_delete = "NoAction"
+		on_delete = "SetNull"
 	)]
 	Image,
 	#[sea_orm(

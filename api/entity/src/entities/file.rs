@@ -14,6 +14,7 @@ pub struct Model {
 	pub size: i64,
 	pub quality: VideoQualityEnum,
 	pub scrubber_id: Option<Uuid>,
+	pub registered_at: Date,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -25,7 +26,7 @@ pub enum Relation {
 		from = "Column::ScrubberId",
 		to = "super::image::Column::Id",
 		on_update = "NoAction",
-		on_delete = "NoAction"
+		on_delete = "SetNull"
 	)]
 	Image,
 	#[sea_orm(has_many = "super::movie::Entity")]

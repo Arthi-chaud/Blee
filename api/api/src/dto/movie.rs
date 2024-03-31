@@ -1,5 +1,4 @@
 use crate::swagger_examples::*;
-use crate::utils::Identifiable;
 use chrono::NaiveDateTime;
 use entity::movie;
 use entity::sea_orm_active_enums::MovieTypeEnum;
@@ -31,12 +30,6 @@ pub struct MovieResponseWithRelations {
 	pub file: Option<FileResponse>,
 }
 
-impl Identifiable for MovieResponseWithRelations {
-	fn get_id(&self) -> String {
-		self.movie.get_id()
-	}
-}
-
 #[derive(Serialize, JsonSchema)]
 pub struct MovieResponse {
 	#[schemars(example = "example_uuid")]
@@ -57,18 +50,12 @@ pub struct MovieResponse {
 	pub type_: MovieType,
 }
 
-impl Identifiable for MovieResponse {
-	fn get_id(&self) -> String {
-		self.id.to_string()
-	}
-}
-
 impl From<movie::Model> for MovieResponse {
 	fn from(value: movie::Model) -> Self {
 		MovieResponse {
 			id: value.id,
 			name: value.name,
-			slug: value.slug,
+			slug: value.unique_slug,
 			poster_id: value.poster_id,
 			registered_at: value.registered_at.into(),
 			package_id: value.package_id,
@@ -148,4 +135,20 @@ pub struct MovieFilter {
 	pub artist: Option<Uuid>,
 	/// Filter by Package
 	pub package: Option<Uuid>,
+}
+
+// Sorting for Movies
+#[derive(Deserialize, FromFormField, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum MovieSort {
+	#[field(value = "name")]
+	Name,
+	#[field(value = "artist_name")]
+	ArtistName,
+	#[field(value = "package_name")]
+	PackageName,
+	#[field(value = "add_date")]
+	AddDate,
+	#[field(value = "release_date")]
+	ReleaseDate,
 }

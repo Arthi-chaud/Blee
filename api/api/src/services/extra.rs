@@ -1,10 +1,14 @@
 use crate::dto::{
-	extra::{ExtraFilter, ExtraResponseWithRelations, ExtraType},
+	extra::{ExtraFilter, ExtraResponseWithRelations, ExtraSort, ExtraType},
 	page::Pagination,
+	sort::Sort,
 };
-use entity::{extra, image, sea_orm_active_enums::ExtraTypeEnum};
+use entity::{artist, extra, image, package, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryTrait, Set};
+use sea_orm::{
+	sea_query::*, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, JoinType, QueryFilter,
+	QueryOrder, QuerySelect, QueryTrait, RelationTrait, Set,
+};
 use slug::slugify;
 
 pub async fn create<'s, 'a, C>(
@@ -22,7 +26,7 @@ where
 {
 	let creation_dto = extra::ActiveModel {
 		name: Set(extra_name.to_string()),
-		slug: Set(slugify(extra_name)),
+		name_slug: Set(slugify(extra_name)),
 		package_id: Set(*package_uuid),
 		artist_id: Set(*artist_uuid),
 		file_id: Set(*file_uuid),
@@ -61,13 +65,24 @@ where
 
 pub async fn find_many<'a, C>(
 	filters: &ExtraFilter,
+	sort: Option<Sort<ExtraSort>>,
 	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<ExtraResponseWithRelations>, DbErr>
 where
 	C: ConnectionTrait,
 {
-	let query = extra::Entity::find()
+	let mut query = extra::Entity::find()
+		.join_as(
+			JoinType::LeftJoin,
+			extra::Relation::Artist.def(),
+			Alias::new("artist"),
+		)
+		.join_as(
+			JoinType::LeftJoin,
+			extra::Relation::Package.def(),
+			Alias::new("package"),
+		)
 		.apply_if(filters.r#type, |q, r#type| {
 			//TODO
 			q.filter(extra::Column::Type.eq(vec![ExtraTypeEnum::from(r#type)]))
@@ -77,16 +92,38 @@ where
 		})
 		.apply_if(filters.package, |q, package_uuid| {
 			q.filter(extra::Column::PackageId.eq(package_uuid))
-		});
-	let mut joint_query = query
-		.find_also_related(image::Entity)
-		.cursor_by(extra::Column::Id);
+		})
+		.offset(pagination.skip)
+		.limit(pagination.take);
 
-	if let Some(after_id) = pagination.after_id {
-		joint_query.after(after_id);
+	if let Some(s) = sort {
+		query = match s.sort_by {
+			ExtraSort::Name => query.order_by(extra::Column::NameSlug, s.order.into()),
+			ExtraSort::AddDate => query.order_by(extra::Column::RegisteredAt, s.order.into()),
+			ExtraSort::ArtistName => query
+				.order_by(
+					Expr::col((Alias::new("artist"), artist::Column::UniqueSlug)),
+					s.order.into(),
+				)
+				.order_by(extra::Column::NameSlug, sea_orm::Order::Asc),
+			ExtraSort::PackageName => query
+				.order_by(
+					Expr::col((Alias::new("package"), package::Column::NameSlug)),
+					s.order.into(),
+				)
+				.order_by(extra::Column::DiscIndex, sea_orm::Order::Asc)
+				.order_by(extra::Column::TrackIndex, sea_orm::Order::Asc),
+			ExtraSort::ReleaseDate => query
+				.order_by(
+					Expr::col((Alias::new("package"), package::Column::ReleaseYear)),
+					s.order.into(),
+				)
+				.order_by(extra::Column::DiscIndex, sea_orm::Order::Asc)
+				.order_by(extra::Column::TrackIndex, sea_orm::Order::Asc),
+		}
 	}
-	joint_query
-		.first(pagination.page_size)
+	query
+		.find_also_related(image::Entity)
 		.all(connection)
 		.await
 		.map(|items| {

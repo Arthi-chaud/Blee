@@ -1,11 +1,10 @@
 use crate::swagger_examples::*;
-use crate::utils::Identifiable;
 use chrono::{NaiveDate, NaiveDateTime};
 use entity::package;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::artist::ArtistResponse;
 use super::image::ImageResponse;
@@ -19,12 +18,6 @@ pub struct PackageResponseWithRelations {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub artist: Option<Option<ArtistResponse>>,
 	pub poster: Option<ImageResponse>,
-}
-
-impl Identifiable for PackageResponseWithRelations {
-	fn get_id(&self) -> String {
-		self.package.get_id()
-	}
 }
 
 /// A Package Data type
@@ -46,18 +39,12 @@ pub struct PackageResponse {
 	pub poster_id: Option<Uuid>,
 }
 
-impl Identifiable for PackageResponse {
-	fn get_id(&self) -> String {
-		self.id.to_string()
-	}
-}
-
 impl From<package::Model> for PackageResponse {
 	fn from(value: package::Model) -> Self {
 		PackageResponse {
 			id: value.id,
 			name: value.name,
-			slug: value.slug,
+			slug: value.unique_slug,
 			description: value.description,
 			release_year: value.release_year,
 			registered_at: value.registered_at.into(),
@@ -71,4 +58,18 @@ impl From<package::Model> for PackageResponse {
 pub struct PackageFilter {
 	/// Filter by Artist
 	pub artist: Option<Uuid>,
+}
+
+// Sorting for Packages
+#[derive(Deserialize, FromFormField, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum PackageSort {
+	#[field(value = "name")]
+	Name,
+	#[field(value = "add_date")]
+	AddDate,
+	#[field(value = "release_date")]
+	ReleaseDate,
+	#[field(value = "artist_name")]
+	ArtistName,
 }

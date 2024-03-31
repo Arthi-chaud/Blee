@@ -80,7 +80,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 	let min_to_sec = |min: i64, sec: i64| -> i64 { min * 60 + sec };
 	let artist_a = artist::Entity::insert(artist::ActiveModel {
 		name: Set("Madonna".to_string()),
-		slug: Set("madonna".to_string()),
+		unique_slug: Set("madonna".to_string()),
 		..Default::default()
 	})
 	.exec_with_returning(db)
@@ -88,7 +88,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 	let package_a1 = package::Entity::insert(package::ActiveModel {
 		name: Set("The Video Collection 93:99".to_string()),
-		slug: Set("madonna-the-video-collection-93-99".to_string()),
+		unique_slug: Set("madonna-the-video-collection-93-99".to_string()),
+		name_slug: Set("the-video-collection-93-99".to_string()),
 		release_year: Set(NaiveDate::from_ymd_opt(1999, 1, 1)),
 		artist_id: Set(Some(artist_a.id)),
 		..Default::default()
@@ -97,57 +98,60 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 	.await?;
 
 	let package_tracks = vec![
-		("Bad Girl", min_to_sec(6, 10)),
-		("Fever", min_to_sec(4, 7)),
-		("Rain", min_to_sec(4, 33)),
-		("Secret", min_to_sec(4, 22)),
-		("Take A Bow", min_to_sec(4, 33)),
-		("Bedtime Story", min_to_sec(4, 25)),
-		("Human Nature", min_to_sec(4, 33)),
-		("Love Don't Live Here Anymore", min_to_sec(4, 39)),
-		("Frozen", min_to_sec(5, 21)),
-		("Ray Of Light", min_to_sec(5, 05)),
-		("Drowned World", min_to_sec(4, 57)),
-		("The Power Of Good-Bye", min_to_sec(4, 10)),
-		("Nothing Really Matters", min_to_sec(4, 25)),
-		("Beautiful Stranger", min_to_sec(4, 34)),
+		(1, "Bad Girl", min_to_sec(6, 10)),
+		(2, "Fever", min_to_sec(4, 7)),
+		(3, "Rain", min_to_sec(4, 33)),
+		(4, "Secret", min_to_sec(4, 22)),
+		(5, "Take A Bow", min_to_sec(4, 33)),
+		(6, "Bedtime Story", min_to_sec(4, 25)),
+		(7, "Human Nature", min_to_sec(4, 33)),
+		(8, "Love Don't Live Here Anymore", min_to_sec(4, 39)),
+		(9, "Frozen", min_to_sec(5, 21)),
+		(10, "Ray Of Light", min_to_sec(5, 05)),
+		(11, "Drowned World", min_to_sec(4, 57)),
+		(12, "The Power Of Good-Bye", min_to_sec(4, 10)),
+		(13, "Nothing Really Matters", min_to_sec(4, 25)),
+		(14, "Beautiful Stranger", min_to_sec(4, 34)),
 	];
 
-	let package_a1_extra = join_all(package_tracks.iter().map(|(track_name, duration)| async {
-		let new_file = file::Entity::insert(file::ActiveModel {
-			path: Set(format!(
-				"/videos/Madonna/The Video Collection 93:99/01 {}.mp4",
-				track_name.to_string()
-			)),
-			size: Set(*duration * 1000), // 1kb per second
-			quality: Set(VideoQualityEnum::_480p),
-			..Default::default()
-		})
-		.exec_with_returning(db)
-		.await
-		.unwrap();
+	let package_a1_extra = join_all(package_tracks.iter().map(
+		|(i, track_name, duration)| async move {
+			let new_file = file::Entity::insert(file::ActiveModel {
+				path: Set(format!(
+					"/videos/Madonna/The Video Collection 93:99/{:02} {}.mp4",
+					i,
+					track_name.to_string()
+				)),
+				size: Set(*duration * 1000), // 1kb per second
+				quality: Set(VideoQualityEnum::_480p),
+				..Default::default()
+			})
+			.exec_with_returning(db)
+			.await
+			.unwrap();
 
-		let new_extra = extra::Entity::insert(extra::ActiveModel {
-			name: Set(track_name.to_string()),
-			slug: Set(slugify(track_name.to_string()).to_string()),
-			package_id: Set(package_a1.id),
-			artist_id: Set(artist_a.id),
-			disc_index: Set(Some(1)),
-			track_index: Set(Some(1)),
-			r#type: Set(vec![ExtraTypeEnum::MusicVideo]),
-			file_id: Set(new_file.id),
-			..Default::default()
-		})
-		.exec_with_returning(db)
-		.await
-		.unwrap();
-		ExtraDummy(new_extra, new_file)
-	}))
+			let new_extra = extra::Entity::insert(extra::ActiveModel {
+				name: Set(track_name.to_string()),
+				name_slug: Set(slugify(track_name.to_string()).to_string()),
+				package_id: Set(package_a1.id),
+				artist_id: Set(artist_a.id),
+				disc_index: Set(Some(1)),
+				track_index: Set(Some(*i)),
+				r#type: Set(vec![ExtraTypeEnum::MusicVideo]),
+				file_id: Set(new_file.id),
+				..Default::default()
+			})
+			.exec_with_returning(db)
+			.await
+			.unwrap();
+			ExtraDummy(new_extra, new_file)
+		},
+	))
 	.await;
 
 	let artist_b = artist::Entity::insert(artist::ActiveModel {
 		name: Set("MIKA".to_string()),
-		slug: Set("mika".to_string()),
+		unique_slug: Set("mika".to_string()),
 		..Default::default()
 	})
 	.exec_with_returning(db)
@@ -155,7 +159,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 	let package_b1 = package::Entity::insert(package::ActiveModel {
 		name: Set("Live in Cartoon Motion".to_string()),
-		slug: Set("mika-live-in-cartoon-motion".to_string()),
+		unique_slug: Set("mika-live-in-cartoon-motion".to_string()),
+		name_slug: Set("live-in-cartoon-motion".to_string()),
 		release_year: Set(NaiveDate::from_ymd_opt(2006, 1, 1)),
 		artist_id: Set(Some(artist_b.id)),
 		..Default::default()
@@ -176,7 +181,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 		let new_movie = movie::Entity::insert(movie::ActiveModel {
 			name: Set("Live in Cartoon Motion".to_string()),
-			slug: Set(slugify("mika-live-in-cartoon-motion".to_string()).to_string()),
+			unique_slug: Set(slugify("mika-live-in-cartoon-motion".to_string()).to_string()),
+			name_slug: Set(slugify("live-in-cartoon-motion".to_string()).to_string()),
 			package_id: Set(package_b1.id),
 			artist_id: Set(artist_b.id),
 			file_id: Set(new_file.id),
@@ -201,7 +207,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 		let new_extra = extra::Entity::insert(extra::ActiveModel {
 			name: Set("Interview".to_string()),
-			slug: Set(slugify("interview".to_string()).to_string()),
+			name_slug: Set(slugify("interview".to_string()).to_string()),
 			package_id: Set(package_b1.id),
 			artist_id: Set(artist_b.id),
 			file_id: Set(new_file.id),
@@ -215,7 +221,8 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 	let package_a2 = package::Entity::insert(package::ActiveModel {
 		name: Set("I'm Going to Tell You a Secret".to_string()),
-		slug: Set("im-going-to-tell-you-a-secret".to_string()),
+		unique_slug: Set("madonna-im-going-to-tell-you-a-secret".to_string()),
+		name_slug: Set("im-going-to-tell-you-a-secret".to_string()),
 		release_year: Set(NaiveDate::from_ymd_opt(2005, 1, 1)),
 		artist_id: Set(Some(artist_a.id)),
 		..Default::default()
@@ -236,7 +243,10 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 
 		let new_movie = movie::Entity::insert(movie::ActiveModel {
 			name: Set("I'm Going to Tell You a Secret".to_string()),
-			slug: Set(slugify("madonna-im-going-to-tell-you-a-secret".to_string()).to_string()),
+			unique_slug: Set(
+				slugify("madonna-im-going-to-tell-you-a-secret".to_string()).to_string()
+			),
+			name_slug: Set("im-going-to-tell-you-a-secret".to_owned()),
 			package_id: Set(package_a2.id),
 			artist_id: Set(artist_a.id),
 			file_id: Set(new_file.id),

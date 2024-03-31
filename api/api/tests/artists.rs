@@ -64,17 +64,18 @@ mod test_artist {
 		let conn = &Db::fetch(client.rocket()).unwrap().conn;
 		let _ = aw!(
 			artist::Entity::insert_many((1..10).map(|i| artist::ActiveModel {
-				slug: Set(format!("artist-{}", i)),
+				unique_slug: Set(format!("artist-{}", i)),
 				name: Set(format!("Artist {}", i)),
 				..Default::default()
 			}))
 			.exec_without_returning(conn)
 		);
 
-		let response_first_page = client.get("/artists?page_size=5").dispatch();
+		let response_first_page = client.get("/artists?take=5").dispatch();
 		assert_eq!(response_first_page.status(), Status::Ok);
 		let value = response_json_value(response_first_page);
 		let items = value.get("items").unwrap().as_array().unwrap();
+		assert_eq!(items.len(), 5);
 		let next = value
 			.get("metadata")
 			.unwrap()
@@ -84,17 +85,11 @@ mod test_artist {
 			.unwrap()
 			.as_str()
 			.unwrap();
-		assert_eq!(items.len(), 5);
-		let last_item = items.last().unwrap().as_object().unwrap();
-		let last_item_id = last_item.get("id").unwrap().as_str().unwrap();
-		assert_eq!(
-			next,
-			format!("/artists?page_size=5&after_id={}", last_item_id)
-		);
+		assert_eq!(next, "/artists?take=5&skip=5");
 
 		//teardown
 		aw!(artist::Entity::delete_many()
-			.filter(artist::Column::Slug.starts_with("artist-"))
+			.filter(artist::Column::UniqueSlug.starts_with("artist-"))
 			.exec(conn));
 	}
 
@@ -113,7 +108,6 @@ mod test_artist {
 					.dispatch();
 				assert_eq!(response.status(), Status::Ok);
 				let value = response_json_value(response);
-				println!("{:?}", value);
 				let items = value
 					.as_object()
 					.unwrap()
@@ -128,6 +122,80 @@ mod test_artist {
 					expected_artist.to_string()
 				);
 			})
-			.is_ok());
+			.is_ok())
+	}
+
+	#[test]
+	// Test /artists?sort=name
+	fn test_artist_sort_by_name() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_artist =
+					&data.as_ref().unwrap().package_a.package.artist_id.unwrap();
+				let second_expected_artist =
+					&data.as_ref().unwrap().package_b.package.artist_id.unwrap();
+				let response = client.get("/artists?sort=name").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 2);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					first_expected_artist.to_string()
+				);
+				let item = items.get(1).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					second_expected_artist.to_string()
+				);
+			})
+			.is_ok())
+	}
+
+	#[test]
+	// Test /artists?sort=name&order=desc
+	fn test_artist_sort_by_name_desc() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let first_expected_artist =
+					&data.as_ref().unwrap().package_b.package.artist_id.unwrap();
+				let second_expected_artist =
+					&data.as_ref().unwrap().package_a.package.artist_id.unwrap();
+				let response = client.get("/artists?sort=name&order=desc").dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 2);
+				let item = items.first().unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					first_expected_artist.to_string()
+				);
+				let item = items.get(1).unwrap().as_object().unwrap();
+				assert_eq!(
+					item.get("id").unwrap().as_str().unwrap(),
+					second_expected_artist.to_string()
+				);
+			})
+			.is_ok())
 	}
 }

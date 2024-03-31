@@ -1,14 +1,13 @@
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
-use crate::dto::extra::ExtraCreationResponse;
-use crate::dto::extra::ExtraFilter;
-use crate::dto::extra::ExtraResponseWithRelations;
-use crate::dto::extra::ExtraType;
-use crate::dto::extra::NewExtra;
+use crate::dto::extra::{
+	ExtraCreationResponse, ExtraFilter, ExtraResponseWithRelations, ExtraSort, ExtraType, NewExtra,
+};
 use crate::dto::image::ImageResponse;
 use crate::dto::page::Page;
 use crate::dto::page::Pagination;
+use crate::dto::sort::{build_sort, SortOrder};
 use crate::error_handling::ApiPageResult;
 use crate::error_handling::{ApiError, ApiRawResult, ApiResult};
 use crate::guards::ScannerAuthGuard;
@@ -32,9 +31,11 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 
 /// Get many extras
 #[openapi(tag = "Movies")]
-#[get("/?<type>&<artist>&<package>&<pagination..>")]
+#[get("/?<type>&<sort>&<order>&<artist>&<package>&<pagination..>")]
 async fn get_extras(
 	db: Database<'_>,
+	sort: Option<ExtraSort>,
+	order: Option<SortOrder>,
 	r#type: Option<ExtraType>,
 	artist: Option<Uuid>,
 	package: Option<Uuid>,
@@ -46,6 +47,7 @@ async fn get_extras(
 			artist,
 			package,
 		},
+		build_sort(sort, order),
 		&pagination,
 		db.into_inner(),
 	)
