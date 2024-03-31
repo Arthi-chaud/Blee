@@ -136,3 +136,19 @@ pub struct MovieFilter {
 	/// Filter by Package
 	pub package: Option<Uuid>,
 }
+
+// Sorting for Movies
+#[derive(Deserialize, FromFormField, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum MovieSort {
+	#[field(value = "name")]
+	Name,
+	#[field(value = "artist_name")]
+	ArtistName,
+	#[field(value = "package_name")]
+	PackageName,
+	#[field(value = "add_date")]
+	AddDate,
+	#[field(value = "release_date")]
+	ReleaseDate,
+}

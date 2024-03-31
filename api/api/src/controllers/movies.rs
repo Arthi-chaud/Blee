@@ -3,9 +3,10 @@ use crate::database::Database;
 use crate::dto::artist::ArtistResponse;
 use crate::dto::chapter::ChapterResponseWithThumbnail;
 use crate::dto::image::ImageResponse;
-use crate::dto::movie::{MovieCreationResponse, MovieFilter, MovieType};
+use crate::dto::movie::{MovieCreationResponse, MovieFilter, MovieSort, MovieType};
 use crate::dto::movie::{MovieResponseWithRelations, NewMovie};
 use crate::dto::page::{Page, Pagination};
+use crate::dto::sort::{build_sort, SortOrder};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
 use crate::guards::ScannerAuthGuard;
 use crate::{services, utils};
@@ -110,9 +111,11 @@ async fn get_movie(
 
 /// Get many movies
 #[openapi(tag = "Movies")]
-#[get("/?<type>&<artist>&<package>&<pagination..>")]
+#[get("/?<type>&<sort>&<order>&<artist>&<package>&<pagination..>")]
 async fn get_movies(
 	db: Database<'_>,
+	sort: Option<MovieSort>,
+	order: Option<SortOrder>,
 	r#type: Option<MovieType>,
 	artist: Option<Uuid>,
 	package: Option<Uuid>,
@@ -124,6 +127,7 @@ async fn get_movies(
 			artist,
 			package,
 		},
+		build_sort(sort, order),
 		&pagination,
 		db.into_inner(),
 	)
