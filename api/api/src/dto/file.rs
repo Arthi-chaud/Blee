@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, JsonSchema, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct NewFile {
-	/// The aboslute path of the file
+	/// The absolute path of the file
 	#[schemars(example = "example_file_path")]
 	pub path: String,
 	/// The size (in bytes) of the file
@@ -106,10 +106,11 @@ impl From<VideoQuality> for VideoQualityEnum {
 }
 
 #[derive(Deserialize, Serialize, JsonSchema, Clone)]
+#[serde(crate = "rocket::serde")]
 pub struct UpdateFile {
-	/// The new aboslute path of the file
+	/// The new absolute path of the file
 	#[schemars(example = "example_file_path")]
-	pub path: String,
+	pub path: Option<String>,
 }
 
 /// Filters for Files

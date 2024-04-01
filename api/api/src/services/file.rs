@@ -1,14 +1,14 @@
 use entity::{chapter, extra, file, movie};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
-	QueryTrait, Set,
+	ActiveValue::NotSet, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder,
+	QuerySelect, QueryTrait, Set,
 };
 
 use crate::{
 	config::Config,
 	dto::{
-		file::{FileFilter, FileResponse, FileSort, VideoQuality},
+		file::{FileFilter, FileResponse, FileSort, UpdateFile, VideoQuality},
 		page::Pagination,
 		sort::Sort,
 	},
@@ -35,6 +35,27 @@ where
 	})
 	.exec_with_returning(connection)
 	.await
+}
+
+pub async fn update<'s, 'a, C>(
+	file_uuid: &Uuid,
+	update_dto: &UpdateFile,
+	connection: &'a C,
+) -> Result<file::Model, DbErr>
+where
+	C: ConnectionTrait,
+{
+	let path = update_dto.path.clone();
+	let db_dto = file::ActiveModel {
+		id: Set(*file_uuid),
+		path: path.map_or(NotSet, |p| Set(p)),
+		..Default::default()
+	};
+
+	file::Entity::update(db_dto)
+		.filter(file::Column::Id.eq(*file_uuid))
+		.exec(connection)
+		.await
 }
 
 pub async fn find<'a, C>(uuid: &Uuid, connection: &'a C) -> Result<FileResponse, DbErr>

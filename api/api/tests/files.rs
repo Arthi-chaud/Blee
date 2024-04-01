@@ -4,8 +4,11 @@ mod common;
 #[cfg(test)]
 mod test_files {
 
+	use std::env;
+
 	use crate::common::*;
-	use rocket::http::Status;
+	use api::dto::file::UpdateFile;
+	use rocket::http::{ContentType, Header, Status};
 	use urlencoding::encode;
 
 	#[test]
@@ -158,6 +161,78 @@ mod test_files {
 								.as_str()
 						));
 				}
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test /files/<path>
+	// Expect a single file
+	fn test_file_update_path() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let parent_package = &data.as_ref().unwrap().package_b;
+				let new_path = "/videos/MIKA - Live in Cartoon Motion.mkv";
+				let expected_file = &parent_package.movies.first().unwrap().2;
+				let dto = UpdateFile {
+					path: Some(new_path.to_string()),
+				};
+				let response = client
+					.post(format!("/files/{}", expected_file.id))
+					.header(Header::new(
+						"X-API-Key",
+						env::var("SCANNER_API_KEY").unwrap(),
+					))
+					.header(ContentType::JSON)
+					.body(serde_json::to_value(dto).unwrap().to_string())
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				assert_eq!(
+					value
+						.as_object()
+						.unwrap()
+						.get("id")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					expected_file.id.to_string()
+				);
+				assert_eq!(
+					value
+						.as_object()
+						.unwrap()
+						.get("path")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					new_path
+				);
+			})
+			.is_ok());
+		// teardown
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let parent_package = &data.as_ref().unwrap().package_b;
+				let old_path = "/videos/MIKA/Live in Cartoon Motion/Live in Cartoon Motion.mkv";
+				let expected_file = &parent_package.movies.first().unwrap().2;
+				let dto = UpdateFile {
+					path: Some(old_path.to_string()),
+				};
+				let response = client
+					.post(format!("/files/{}", expected_file.id))
+					.header(Header::new(
+						"X-API-Key",
+						env::var("SCANNER_API_KEY").unwrap(),
+					))
+					.header(ContentType::JSON)
+					.body(serde_json::to_value(dto).unwrap().to_string())
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
 			})
 			.is_ok());
 	}

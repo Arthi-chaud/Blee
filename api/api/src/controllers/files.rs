@@ -3,6 +3,7 @@ use crate::database::Database;
 use crate::dto::file::FileFilter;
 use crate::dto::file::FileResponse;
 use crate::dto::file::FileSort;
+use crate::dto::file::UpdateFile;
 use crate::dto::page::Page;
 use crate::dto::page::Pagination;
 use crate::dto::sort::build_sort;
@@ -18,7 +19,7 @@ use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: get_file, delete_file, get_files, get_file_by_path]
+	openapi_get_routes_spec![settings: get_file, delete_file, get_files, get_file_by_path, update_file]
 }
 
 /// Get a Single File
@@ -37,6 +38,20 @@ async fn get_file_by_path(db: Database<'_>, path: String) -> ApiResult<FileRespo
 	services::file::find_by_path(&path, db.into_inner())
 		.await
 		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+}
+
+/// Update a Single File
+#[openapi(tag = "Files")]
+#[post("/<uuid>", format = "json", data = "<update_dto>")]
+async fn update_file(
+	db: Database<'_>,
+	uuid: Uuid,
+	update_dto: Json<UpdateFile>,
+	_scanner: ScannerAuthGuard,
+) -> ApiResult<FileResponse> {
+	services::file::update(&uuid, &update_dto, db.into_inner())
+		.await
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v.into())))
 }
 
 /// Get delete a File, along with the related resources if needed (images,

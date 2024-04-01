@@ -30,7 +30,7 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 }
 
 /// Get many extras
-#[openapi(tag = "Movies")]
+#[openapi(tag = "Extras")]
 #[get("/?<type>&<sort>&<order>&<artist>&<package>&<pagination..>")]
 async fn get_extras(
 	db: Database<'_>,
