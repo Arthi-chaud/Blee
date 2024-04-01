@@ -49,6 +49,19 @@ where
 		})
 }
 
+pub async fn find_by_path<'a, C>(path: &str, connection: &'a C) -> Result<FileResponse, DbErr>
+where
+	C: ConnectionTrait,
+{
+	file::Entity::find()
+		.filter(file::Column::Path.eq(path))
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("File".to_string())), |r| {
+			Ok(r.into())
+		})
+}
+
 pub async fn find_many<'a, C>(
 	filter: &FileFilter,
 	sort: Option<Sort<FileSort>>,

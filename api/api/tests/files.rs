@@ -87,6 +87,39 @@ mod test_files {
 	}
 
 	#[test]
+	// Test /files/<path>
+	// Expect a single file
+	fn test_file_by_path() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let parent_package = &data.as_ref().unwrap().package_b;
+				let expected_file = &parent_package.movies.first().unwrap().2;
+				let response = client
+					.get(format!(
+						"/files/{}",
+						encode("/videos/MIKA/Live in Cartoon Motion/Live in Cartoon Motion.mkv")
+					))
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				assert_eq!(
+					value
+						.as_object()
+						.unwrap()
+						.get("id")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					expected_file.id.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
 	fn test_files_path_filter_and_sort() {
 		let client = test_client().lock().unwrap();
 
@@ -102,7 +135,6 @@ mod test_files {
 					.dispatch();
 				assert_eq!(response.status(), Status::Ok);
 				let value = response_json_value(response);
-				println!("{}", value);
 				let items = value
 					.as_object()
 					.unwrap()

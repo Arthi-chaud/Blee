@@ -105,6 +105,13 @@ impl From<VideoQuality> for VideoQualityEnum {
 	}
 }
 
+#[derive(Deserialize, Serialize, JsonSchema, Clone)]
+pub struct UpdateFile {
+	/// The new aboslute path of the file
+	#[schemars(example = "example_file_path")]
+	pub path: String,
+}
+
 /// Filters for Files
 pub struct FileFilter {
 	/// Filter by Path (starts with)
