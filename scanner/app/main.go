@@ -5,6 +5,8 @@ import (
 	"slices"
 	"time"
 
+	"github.com/Arthi-chaud/Blee/scanner/pkg"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/actions"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/api"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	wa "github.com/Arthi-chaud/Blee/scanner/pkg/watcher"
@@ -55,19 +57,19 @@ func main() {
 	}
 	watchedFiles := []string{}
 	// Handle files that are currently in the file system
-	for _, watchedFile := range w.WatchedFiles() {
-		if !watchedFile.IsDir() {
-			watchedFiles = append(watchedFiles, watchedFile.Name())
+	for path, watchedFileInfo := range w.WatchedFiles() {
+		if !watchedFileInfo.IsDir() {
+			watchedFiles = append(watchedFiles, path)
 		}
 	}
 	for _, path := range watchedFiles {
-		if !slices.Contains(knownPaths, path) {
-			glg.Logf("File to scan %s", path)
+		if !slices.Contains(knownPaths, path) && pkg.FileIsVideo(path) {
+			actions.RegisterFile(path, &c)
 		}
 	}
 	for _, path := range knownPaths {
 		if !slices.Contains(watchedFiles, path) {
-			glg.Logf("File to delete %s", path)
+			actions.DeleteFile(path, &c)
 		}
 	}
 	glg.Log("Scanner started! Let's get this show on the road.")
