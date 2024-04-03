@@ -37,7 +37,7 @@ pub struct MovieResponse {
 	pub name: String,
 	pub slug: String,
 	#[schemars(example = "example_uuid")]
-	pub poster_id: Option<Uuid>,
+	pub thumbnail_id: Option<Uuid>,
 	pub registered_at: NaiveDateTime,
 	#[schemars(example = "example_uuid")]
 	pub package_id: Uuid,
@@ -56,7 +56,7 @@ impl From<movie::Model> for MovieResponse {
 			id: value.id,
 			name: value.name,
 			slug: value.unique_slug,
-			poster_id: value.poster_id,
+			thumbnail_id: value.thumbnail_id,
 			registered_at: value.registered_at.into(),
 			package_id: value.package_id,
 			artist_id: value.artist_id,

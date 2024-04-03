@@ -165,12 +165,12 @@ async fn post_movie_thumbnail(
 		.map_err(|e| ApiError::from(e))?;
 	let new_poster = services::image::save_image(
 		&bytes,
-		crate::dto::image::ImageType::Poster,
+		crate::dto::image::ImageType::Thumbnail,
 		movie.poster.map(|p| p.id),
 		&movie.movie.id,
 		movie::Entity,
 		movie::Column::Id,
-		movie::Column::PosterId,
+		movie::Column::ThumbnailId,
 		conn,
 		config,
 	)
