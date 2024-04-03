@@ -62,6 +62,8 @@ pub enum VideoQuality {
 	P1080,
 	#[iden = "720p"]
 	P720,
+	#[iden = "576p"]
+	P576,
 	#[iden = "480p"]
 	P480,
 	#[iden = "360p"]

@@ -63,6 +63,8 @@ pub enum VideoQuality {
 	P1080,
 	#[serde(rename(deserialize = "720p", serialize = "720p"))]
 	P720,
+	#[serde(rename(deserialize = "576p", serialize = "576p"))]
+	P576,
 	#[serde(rename(deserialize = "480p", serialize = "480p"))]
 	P480,
 	#[serde(rename(deserialize = "360p", serialize = "360p"))]
@@ -81,6 +83,7 @@ impl From<VideoQualityEnum> for VideoQuality {
 			VideoQualityEnum::_2k => VideoQuality::K2,
 			VideoQualityEnum::_360p => VideoQuality::P360,
 			VideoQualityEnum::_480p => VideoQuality::P480,
+			VideoQualityEnum::_576p => VideoQuality::P576,
 			VideoQualityEnum::_4k => VideoQuality::K4,
 			VideoQualityEnum::_720p => VideoQuality::P720,
 			VideoQualityEnum::_8k => VideoQuality::K8,
@@ -97,6 +100,7 @@ impl From<VideoQuality> for VideoQualityEnum {
 			VideoQuality::K2 => VideoQualityEnum::_2k,
 			VideoQuality::P360 => VideoQualityEnum::_360p,
 			VideoQuality::P480 => VideoQualityEnum::_480p,
+			VideoQuality::P576 => VideoQualityEnum::_576p,
 			VideoQuality::K4 => VideoQualityEnum::_4k,
 			VideoQuality::P720 => VideoQualityEnum::_720p,
 			VideoQuality::K8 => VideoQualityEnum::_8k,
