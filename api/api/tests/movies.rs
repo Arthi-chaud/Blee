@@ -27,6 +27,7 @@ mod test_movie {
 			package_release_date: NaiveDate::from_ymd_opt(2019, 02, 01),
 			movie_type: MovieType::Documentary,
 			file: NewFile {
+				duration: 10,
 				path: "/data/Taylor Swift/Miss Americana.mp4".to_owned(),
 				size: 160000,
 				quality: VideoQuality::P1080,
@@ -145,6 +146,7 @@ mod test_movie {
 			package_release_date: NaiveDate::from_ymd_opt(2019, 02, 01),
 			movie_type: MovieType::Documentary,
 			file: NewFile {
+				duration: 10,
 				path: "/data/Taylor Swift/Miss Americana.mp4".to_owned(),
 				size: 160000,
 				quality: VideoQuality::P1080,

@@ -76,6 +76,7 @@ async fn new_extra(
 				let file = services::file::create_or_find(
 					&data.file.path,
 					data.file.size,
+					data.file.duration,
 					data.file.quality,
 					txn,
 				)

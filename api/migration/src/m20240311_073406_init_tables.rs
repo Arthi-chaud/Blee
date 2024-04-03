@@ -35,6 +35,7 @@ enum File {
 	Size,
 	Path,
 	Quality,
+	Duration,
 	RegisteredAt,
 	ScrubberId,
 }
@@ -177,6 +178,7 @@ impl MigrationTrait for Migration {
 					)
 					.col(ColumnDef::new(File::Path).string().not_null().unique_key())
 					.col(ColumnDef::new(File::Size).big_unsigned().not_null())
+					.col(ColumnDef::new(File::Duration).big_unsigned().not_null())
 					.col(
 						ColumnDef::new(File::Quality)
 							.enumeration(Alias::new("video_quality_enum"), VideoQuality::iter())

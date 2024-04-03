@@ -15,6 +15,8 @@ pub struct NewFile {
 	/// The size (in bytes) of the file
 	#[schemars(example = "example_size")]
 	pub size: u64,
+	/// The duration of the file, in seconds
+	pub duration: u64,
 	#[schemars(example = "example_video_quality")]
 	pub quality: VideoQuality,
 }
@@ -26,17 +28,21 @@ pub struct FileResponse {
 	pub id: Uuid,
 	#[schemars(example = "example_file_path")]
 	pub path: String,
+	/// The size of the file, in bytes
 	#[schemars(example = "example_size")]
 	pub size: i64,
 	pub quality: VideoQuality,
 	#[schemars(example = "example_uuid")]
 	pub scrubber_id: Option<Uuid>,
+	/// The duration of the video, in seconds
+	pub duration: i64,
 }
 
 impl From<file::Model> for FileResponse {
 	fn from(value: file::Model) -> Self {
 		FileResponse {
 			id: value.id,
+			duration: value.duration,
 			path: value.path,
 			size: value.size,
 			quality: VideoQuality::from(value.quality),

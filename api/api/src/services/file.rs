@@ -19,6 +19,7 @@ use super::{housekeeping, image};
 pub async fn create_or_find<'s, 'a, C>(
 	file_path: &'s str,
 	file_size: u64,
+	file_duration: u64,
 	video_quality: VideoQuality,
 	connection: &'a C,
 ) -> Result<file::Model, DbErr>
@@ -29,6 +30,7 @@ where
 		path: Set(file_path.to_string()),
 		size: Set(file_size as i64),
 		quality: Set(video_quality.into()),
+		duration: Set(file_duration as i64),
 		..Default::default()
 	})
 	.exec_with_returning(connection)
