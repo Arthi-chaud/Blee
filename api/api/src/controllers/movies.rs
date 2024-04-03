@@ -48,6 +48,7 @@ async fn new_movie(
 				let file = services::file::create_or_find(
 					&data.file.path,
 					data.file.size,
+					data.file.duration,
 					data.file.quality,
 					txn,
 				)

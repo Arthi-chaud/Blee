@@ -31,6 +31,7 @@ mod test_extra {
 				path: "/data/Depeche Mode/The Best Of/1-08 Enjoy the Silence (Music Video).mp4"
 					.to_owned(),
 				size: 160000,
+				duration: 10,
 				quality: VideoQuality::P480,
 			},
 		};
@@ -118,6 +119,7 @@ mod test_extra {
 					package_release_date: NaiveDate::from_ymd_opt(1999, 01, 02),
 					types: vec![ExtraType::MusicVideo],
 					file: NewFile {
+						duration: 10,
 						path: source_package
 							.extras
 							.first()
@@ -157,6 +159,7 @@ mod test_extra {
 			package_release_date: NaiveDate::from_ymd_opt(1999, 01, 02),
 			types: vec![],
 			file: NewFile {
+				duration: 10,
 				path: "Secret (Music Video).mp4".to_owned(),
 				size: 160000,
 				quality: VideoQuality::P480,

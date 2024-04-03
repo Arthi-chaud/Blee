@@ -12,6 +12,7 @@ pub struct Model {
 	#[sea_orm(unique)]
 	pub path: String,
 	pub size: i64,
+	pub duration: i64,
 	pub quality: VideoQualityEnum,
 	pub scrubber_id: Option<Uuid>,
 	pub registered_at: Date,
