@@ -101,7 +101,7 @@ where
 			.all(connection)
 			.await?;
 		if let Some(related_movie) = related_movies.first() {
-			if let Some(movie_poster) = related_movie.poster_id {
+			if let Some(movie_poster) = related_movie.thumbnail_id {
 				image::delete(&movie_poster, connection, config).await?;
 			}
 			chapter::Entity::delete_many()

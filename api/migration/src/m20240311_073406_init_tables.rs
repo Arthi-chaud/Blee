@@ -77,7 +77,7 @@ enum Movie {
 	Name,
 	NameSlug,
 	UniqueSlug,
-	PosterId,
+	ThumbnailId,
 	RegisteredAt,
 	PackageId,
 	ArtistId,
@@ -330,11 +330,11 @@ impl MigrationTrait for Migration {
 							.not_null()
 							.unique_key(),
 					)
-					.col(ColumnDef::new(Movie::PosterId).uuid())
+					.col(ColumnDef::new(Movie::ThumbnailId).uuid())
 					.foreign_key(
 						ForeignKey::create()
 							.name("fk-movie-poster_id")
-							.from(Movie::Table, Movie::PosterId)
+							.from(Movie::Table, Movie::ThumbnailId)
 							.to(Image::Table, Image::Id)
 							.on_delete(ForeignKeyAction::SetNull),
 					)

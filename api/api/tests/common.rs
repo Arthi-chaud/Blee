@@ -122,6 +122,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 					i,
 					track_name.to_string()
 				)),
+				duration: Set(1),
 				size: Set(*duration * 1000), // 1kb per second
 				quality: Set(VideoQualityEnum::_480p),
 				..Default::default()
@@ -172,6 +173,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 		let new_file = file::Entity::insert(file::ActiveModel {
 			path: Set("/videos/MIKA/Live in Cartoon Motion/Live in Cartoon Motion.mkv".to_string()),
 			size: Set(min_to_sec(120, 0) * 1000), // 1kb per second
+			duration: Set(1),
 			quality: Set(VideoQualityEnum::_720p),
 			..Default::default()
 		})
@@ -199,6 +201,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 			path: Set("/videos/MIKA/Live in Cartoon Motion/Interview.mkv".to_string()),
 			size: Set(min_to_sec(20, 0) * 1000), // 1kb per second
 			quality: Set(VideoQualityEnum::_480p),
+			duration: Set(1),
 			..Default::default()
 		})
 		.exec_with_returning(db)
@@ -235,6 +238,7 @@ pub async fn seed_data(db: &DatabaseTransaction) -> Result<DummyData, DbErr> {
 			path: Set("/videos/Madonna/I'm Going to Tell You a Secret.mp4".to_string()),
 			size: Set(min_to_sec(150, 0) * 1000), // 1kb per second
 			quality: Set(VideoQualityEnum::_480p),
+			duration: Set(1),
 			..Default::default()
 		})
 		.exec_with_returning(db)

@@ -13,7 +13,7 @@ pub struct Model {
 	pub name_slug: String,
 	#[sea_orm(unique)]
 	pub unique_slug: String,
-	pub poster_id: Option<Uuid>,
+	pub thumbnail_id: Option<Uuid>,
 	pub package_id: Uuid,
 	pub artist_id: Uuid,
 	pub file_id: Uuid,
@@ -43,7 +43,7 @@ pub enum Relation {
 	File,
 	#[sea_orm(
 		belongs_to = "super::image::Entity",
-		from = "Column::PosterId",
+		from = "Column::ThumbnailId",
 		to = "super::image::Column::Id",
 		on_update = "NoAction",
 		on_delete = "SetNull"
