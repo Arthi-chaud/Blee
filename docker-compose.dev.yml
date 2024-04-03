@@ -10,10 +10,10 @@ services:
     volumes:
       - ./scanner:/app
       - ./scanner.example.json:/config/scanner.json
-      - ${DATA_DIR}:/video
+      - ${DATA_DIR}:/videos
     environment:
       - API_URL=http://api:8000
-      - WATCH_DIR=/video
+      - WATCH_DIR=/videos
       - SCANNER_API_KEY=${SCANNER_API_KEY}
       - CONFIG_DIR=/config
   api:

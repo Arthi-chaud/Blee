@@ -30,13 +30,13 @@ func TestMovieParsingWithoutPackageFolderWithYear(t *testing.T) {
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.extra)
-	assert.Equal(t, "The Corrs", res.movie.artist_name)
-	assert.Equal(t, "Unplugged", res.movie.name)
-	assert.Equal(t, models.Concert, res.movie.type_)
-	assert.Equal(t, "The Corrs", res.movie.package_.artist_name)
-	assert.Equal(t, "Unplugged", res.movie.package_.name)
-	assert.Equal(t, 1999, res.movie.package_.release_year.Year())
+	assert.Nil(t, res.Extra)
+	assert.Equal(t, "The Corrs", res.Movie.ArtistName)
+	assert.Equal(t, "Unplugged", res.Movie.Name)
+	assert.Equal(t, models.Concert, res.Movie.Type_)
+	assert.Equal(t, "The Corrs", res.Movie.Package_.ArtistName)
+	assert.Equal(t, "Unplugged", res.Movie.Package_.Name)
+	assert.Equal(t, 1999, res.Movie.Package_.ReleaseYear.Year())
 }
 
 func TestMovieParsingWithPackageFolderWithoutYear(t *testing.T) {
@@ -45,13 +45,13 @@ func TestMovieParsingWithPackageFolderWithoutYear(t *testing.T) {
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.extra)
-	assert.Equal(t, res.movie.artist_name, "The Corrs")
-	assert.Equal(t, res.movie.name, "Unplugged")
-	assert.Equal(t, res.movie.type_, models.Concert)
-	assert.Equal(t, res.movie.package_.artist_name, "The Corrs")
-	assert.Equal(t, res.movie.package_.name, "Unplugged")
-	assert.Equal(t, res.movie.package_.release_year, time.Time{})
+	assert.Nil(t, res.Extra)
+	assert.Equal(t, res.Movie.ArtistName, "The Corrs")
+	assert.Equal(t, res.Movie.Name, "Unplugged")
+	assert.Equal(t, res.Movie.Type_, models.Concert)
+	assert.Equal(t, res.Movie.Package_.ArtistName, "The Corrs")
+	assert.Equal(t, res.Movie.Package_.Name, "Unplugged")
+	assert.Equal(t, res.Movie.Package_.ReleaseYear, time.Time{})
 }
 
 func TestMovieParsingWithPackageFolderWithArtistFolderWithMovieYear(t *testing.T) {
@@ -60,13 +60,13 @@ func TestMovieParsingWithPackageFolderWithArtistFolderWithMovieYear(t *testing.T
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.extra)
-	assert.Equal(t, res.movie.artist_name, "The Corrs")
-	assert.Equal(t, res.movie.name, "Unplugged")
-	assert.Equal(t, res.movie.type_, models.Concert)
-	assert.Equal(t, res.movie.package_.artist_name, "The Corrs")
-	assert.Equal(t, res.movie.package_.name, "Unplugged")
-	assert.Equal(t, res.movie.package_.release_year.Year(), 1999)
+	assert.Nil(t, res.Extra)
+	assert.Equal(t, res.Movie.ArtistName, "The Corrs")
+	assert.Equal(t, res.Movie.Name, "Unplugged")
+	assert.Equal(t, res.Movie.Type_, models.Concert)
+	assert.Equal(t, res.Movie.Package_.ArtistName, "The Corrs")
+	assert.Equal(t, res.Movie.Package_.Name, "Unplugged")
+	assert.Equal(t, res.Movie.Package_.ReleaseYear.Year(), 1999)
 }
 
 func TestExtraParsingWithPackageFolderWithoutArtistFolder(t *testing.T) {
@@ -75,15 +75,15 @@ func TestExtraParsingWithPackageFolderWithoutArtistFolder(t *testing.T) {
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.movie)
-	assert.Equal(t, res.extra.artist_name, "Olivia Ruiz")
-	assert.Equal(t, res.extra.disc_index, 0)
-	assert.Equal(t, res.extra.track_index, 0)
-	assert.Equal(t, res.extra.name, "Autour D'Olivia (Documentaire)")
-	assert.Equal(t, res.extra.types, []models.ExtraType{models.ExtraType(models.Documentary)})
-	assert.Equal(t, res.extra.package_.artist_name, "Olivia Ruiz")
-	assert.Equal(t, res.extra.package_.name, "Miss Météores Live")
-	assert.Equal(t, res.extra.package_.release_year.Year(), 2008)
+	assert.Nil(t, res.Movie)
+	assert.Equal(t, res.Extra.ArtistName, "Olivia Ruiz")
+	assert.Equal(t, res.Extra.DiscIndex, 0)
+	assert.Equal(t, res.Extra.TrackIndex, 0)
+	assert.Equal(t, res.Extra.Name, "Autour D'Olivia (Documentaire)")
+	assert.Equal(t, res.Extra.Types, []models.ExtraType{models.ExtraType(models.Documentary)})
+	assert.Equal(t, res.Extra.Package_.ArtistName, "Olivia Ruiz")
+	assert.Equal(t, res.Extra.Package_.Name, "Miss Météores Live")
+	assert.Equal(t, res.Extra.Package_.ReleaseYear.Year(), 2008)
 }
 
 func TestExtraParsingWithPackageFolderWithArtistFolder(t *testing.T) {
@@ -92,15 +92,15 @@ func TestExtraParsingWithPackageFolderWithArtistFolder(t *testing.T) {
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.movie)
-	assert.Equal(t, res.extra.artist_name, "Olivia Ruiz")
-	assert.Equal(t, res.extra.disc_index, 0)
-	assert.Equal(t, res.extra.track_index, 0)
-	assert.Equal(t, res.extra.name, "Interview")
-	assert.Equal(t, res.extra.types, []models.ExtraType{models.Interview})
-	assert.Equal(t, res.extra.package_.artist_name, "Olivia Ruiz")
-	assert.Equal(t, res.extra.package_.name, "Chocolat Show")
-	assert.Equal(t, res.extra.package_.release_year, time.Time{})
+	assert.Nil(t, res.Movie)
+	assert.Equal(t, res.Extra.ArtistName, "Olivia Ruiz")
+	assert.Equal(t, res.Extra.DiscIndex, 0)
+	assert.Equal(t, res.Extra.TrackIndex, 0)
+	assert.Equal(t, res.Extra.Name, "Interview")
+	assert.Equal(t, res.Extra.Types, []models.ExtraType{models.Interview})
+	assert.Equal(t, res.Extra.Package_.ArtistName, "Olivia Ruiz")
+	assert.Equal(t, res.Extra.Package_.Name, "Chocolat Show")
+	assert.Equal(t, res.Extra.Package_.ReleaseYear, time.Time{})
 }
 
 func TestExtraParsingWithPackageFolderWithArtistFolderWithExtraFolder(t *testing.T) {
@@ -109,15 +109,15 @@ func TestExtraParsingWithPackageFolderWithArtistFolderWithExtraFolder(t *testing
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.movie)
-	assert.Equal(t, res.extra.artist_name, "Olivia Ruiz")
-	assert.Equal(t, res.extra.disc_index, 0)
-	assert.Equal(t, res.extra.track_index, 0)
-	assert.Equal(t, res.extra.name, "Interview")
-	assert.Equal(t, res.extra.types, []models.ExtraType{models.Interview})
-	assert.Equal(t, res.extra.package_.artist_name, "Olivia Ruiz")
-	assert.Equal(t, res.extra.package_.name, "Chocolat Show")
-	assert.Equal(t, res.extra.package_.release_year, time.Time{})
+	assert.Nil(t, res.Movie)
+	assert.Equal(t, res.Extra.ArtistName, "Olivia Ruiz")
+	assert.Equal(t, res.Extra.DiscIndex, 0)
+	assert.Equal(t, res.Extra.TrackIndex, 0)
+	assert.Equal(t, res.Extra.Name, "Interview")
+	assert.Equal(t, res.Extra.Types, []models.ExtraType{models.Interview})
+	assert.Equal(t, res.Extra.Package_.ArtistName, "Olivia Ruiz")
+	assert.Equal(t, res.Extra.Package_.Name, "Chocolat Show")
+	assert.Equal(t, res.Extra.Package_.ReleaseYear, time.Time{})
 }
 
 func TestExtraParsingWithPackageFolderWithoutArtistFolderWithIndexesWithoutTypes(t *testing.T) {
@@ -126,15 +126,15 @@ func TestExtraParsingWithPackageFolderWithoutArtistFolderWithIndexesWithoutTypes
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.movie)
-	assert.Equal(t, res.extra.artist_name, "Artist")
-	assert.Equal(t, res.extra.disc_index, 1)
-	assert.Equal(t, res.extra.track_index, 2)
-	assert.Equal(t, res.extra.name, "Extra1")
-	assert.Equal(t, res.extra.types, []models.ExtraType{models.Other})
-	assert.Equal(t, res.extra.package_.artist_name, "Artist")
-	assert.Equal(t, res.extra.package_.name, "Package")
-	assert.Equal(t, res.extra.package_.release_year.Year(), 2000)
+	assert.Nil(t, res.Movie)
+	assert.Equal(t, res.Extra.ArtistName, "Artist")
+	assert.Equal(t, res.Extra.DiscIndex, 1)
+	assert.Equal(t, res.Extra.TrackIndex, 2)
+	assert.Equal(t, res.Extra.Name, "Extra1")
+	assert.Equal(t, res.Extra.Types, []models.ExtraType{models.Other})
+	assert.Equal(t, res.Extra.Package_.ArtistName, "Artist")
+	assert.Equal(t, res.Extra.Package_.Name, "Package")
+	assert.Equal(t, res.Extra.Package_.ReleaseYear.Year(), 2000)
 }
 
 func TestExtraWithoutDisc(t *testing.T) {
@@ -143,13 +143,13 @@ func TestExtraWithoutDisc(t *testing.T) {
 	res, err := ParseMetadataFromPath(path, config)
 
 	assert.Nil(t, err)
-	assert.Nil(t, res.movie)
-	assert.Equal(t, res.extra.artist_name, "Artist")
-	assert.Equal(t, res.extra.disc_index, 0)
-	assert.Equal(t, res.extra.track_index, 2)
-	assert.Equal(t, res.extra.name, "Extra1")
-	assert.Equal(t, res.extra.types, []models.ExtraType{models.Other})
-	assert.Equal(t, res.extra.package_.artist_name, "Artist")
-	assert.Equal(t, res.extra.package_.name, "Package")
-	assert.Equal(t, res.extra.package_.release_year.Year(), 2000)
+	assert.Nil(t, res.Movie)
+	assert.Equal(t, res.Extra.ArtistName, "Artist")
+	assert.Equal(t, res.Extra.DiscIndex, 0)
+	assert.Equal(t, res.Extra.TrackIndex, 2)
+	assert.Equal(t, res.Extra.Name, "Extra1")
+	assert.Equal(t, res.Extra.Types, []models.ExtraType{models.Other})
+	assert.Equal(t, res.Extra.Package_.ArtistName, "Artist")
+	assert.Equal(t, res.Extra.Package_.Name, "Package")
+	assert.Equal(t, res.Extra.Package_.ReleaseYear.Year(), 2000)
 }

@@ -14,43 +14,43 @@ import (
 // Metadata Extracted from the path of a file
 type PackageMetadataFromPath struct {
 	// Name of the package
-	name string `validate:"required"`
+	Name string `validate:"required"`
 	// Name of the artist of the package
 	// Optional
-	artist_name string
+	ArtistName string
 	// Release Year of the package
-	release_year time.Time
+	ReleaseYear time.Time
 }
 
 // Metadata Extracted from the path of an Extra file
 type ExtraMetadataFromPath struct {
 	// Name of the extra
-	name string `validate:"required"`
+	Name string `validate:"required"`
 	// Name of the artist of the extra
-	artist_name string `validate:"required"`
+	ArtistName string `validate:"required"`
 	// Index of the disc of the extra
-	disc_index int `validate:"gte=0"`
+	DiscIndex int `validate:"gte=0"`
 	// Index of the track of the extra
-	track_index int `validate:"gte=0"`
+	TrackIndex int `validate:"gte=0"`
 	// Types of the extra
-	types    [](models.ExtraType)    `validate:"min=1"`
-	package_ PackageMetadataFromPath `validate:"required,dive,required"`
+	Types    [](models.ExtraType)    `validate:"min=1"`
+	Package_ PackageMetadataFromPath `validate:"required"`
 }
 
 // Metadata Extracted from the path of a Movie file
 type MovieMetadataFromPath struct {
 	// Name of the movie
-	name string `validate:"required"`
+	Name string `validate:"required"`
 	// Name of the artist of the movie
-	artist_name string `validate:"required"`
+	ArtistName string `validate:"required"`
 	// Type of movie
-	type_    models.MovieType        `validate:"required"`
-	package_ PackageMetadataFromPath `validate:"required,dive,required"`
+	Type_    models.MovieType        `validate:"required"`
+	Package_ PackageMetadataFromPath `validate:"required"`
 }
 
 type PathMetadataParsingResult struct {
-	movie *MovieMetadataFromPath
-	extra *ExtraMetadataFromPath
+	Movie *MovieMetadataFromPath
+	Extra *ExtraMetadataFromPath
 }
 
 func ParseMetadataFromPath(filePath string, userConfig *config.UserConfiguration) (PathMetadataParsingResult, error) {
@@ -61,7 +61,7 @@ func ParseMetadataFromPath(filePath string, userConfig *config.UserConfiguration
 			continue
 		}
 		extra, err := parseExtraMetadataFromMatches(matches, regex)
-		return PathMetadataParsingResult{extra: extra}, err
+		return PathMetadataParsingResult{Movie: nil, Extra: extra}, err
 	}
 	for _, movieRegex := range userConfig.Regexes.Movie {
 		regex := regexp.MustCompile(movieRegex)
@@ -70,7 +70,7 @@ func ParseMetadataFromPath(filePath string, userConfig *config.UserConfiguration
 			continue
 		}
 		movie, err := parseMovieMetadataFromMatches(matches, regex)
-		return PathMetadataParsingResult{movie: movie}, err
+		return PathMetadataParsingResult{Movie: movie, Extra: nil}, err
 	}
 	return PathMetadataParsingResult{}, errors.New("No match")
 }
@@ -79,23 +79,23 @@ func parseMovieMetadataFromMatches(matches []string, regex *regexp.Regexp) (*Mov
 	res := MovieMetadataFromPath{}
 
 	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
-		res.artist_name = matches[artist_index]
-		res.package_.artist_name = res.artist_name
+		res.ArtistName = matches[artist_index]
+		res.Package_.ArtistName = res.ArtistName
 	}
 	if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
-		res.package_.artist_name = matches[package_artist]
-		if len(res.artist_name) == 0 {
-			res.artist_name = res.package_.artist_name
+		res.Package_.ArtistName = matches[package_artist]
+		if len(res.ArtistName) == 0 {
+			res.ArtistName = res.Package_.ArtistName
 		}
 	}
 	if name_index := regex.SubexpIndex("Movie"); name_index != -1 {
-		res.name = matches[name_index]
+		res.Name = matches[name_index]
 	}
 	if package_index := regex.SubexpIndex("Package"); package_index != -1 {
-		res.package_.name = matches[package_index]
+		res.Package_.Name = matches[package_index]
 	}
-	res.type_ = parseMovieTypeFromName(res.name)
-	parseYearFromRegex(matches, regex, &res.package_)
+	res.Type_ = parseMovieTypeFromName(res.Name)
+	parseYearFromRegex(matches, regex, &res.Package_)
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err := validate.Struct(res)
 	return &res, err
@@ -105,7 +105,7 @@ func parseYearFromRegex(matches []string, regex *regexp.Regexp, p *PackageMetada
 	for _, group_name := range []string{"PackageYear", "Year"} {
 		if group_index := regex.SubexpIndex(group_name); group_index != -1 {
 			if parsed_year, err := strconv.Atoi(matches[group_index]); err == nil {
-				p.release_year = time.Date(parsed_year, 1, 1, 1, 1, 1, 1, time.UTC)
+				p.ReleaseYear = time.Date(parsed_year, 1, 1, 1, 1, 1, 1, time.UTC)
 				return
 			}
 		}
@@ -128,36 +128,36 @@ func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) (*Ext
 	res := ExtraMetadataFromPath{}
 
 	if artist_index := regex.SubexpIndex("Artist"); artist_index != -1 {
-		res.artist_name = matches[artist_index]
-		res.package_.artist_name = res.artist_name
+		res.ArtistName = matches[artist_index]
+		res.Package_.ArtistName = res.ArtistName
 	}
 	if package_artist := regex.SubexpIndex("PackageArtist"); package_artist != -1 {
-		res.package_.artist_name = matches[package_artist]
-		if len(res.artist_name) == 0 {
-			res.artist_name = res.package_.artist_name
+		res.Package_.ArtistName = matches[package_artist]
+		if len(res.ArtistName) == 0 {
+			res.ArtistName = res.Package_.ArtistName
 		}
 	}
 	if disc_index, err := strconv.Atoi(matches[regex.SubexpIndex("Disc")]); err == nil {
-		res.disc_index = disc_index
+		res.DiscIndex = disc_index
 	}
 	if index, err := strconv.Atoi(matches[regex.SubexpIndex("Index")]); err == nil {
-		res.track_index = index
+		res.TrackIndex = index
 	}
 	if name_index := regex.SubexpIndex("Extra"); name_index != -1 {
-		res.name = matches[name_index]
+		res.Name = matches[name_index]
 	}
 	if plexExtraType := parseExtraTypeFromPlexRegexGroup(matches[regex.SubexpIndex("PlexExtraType")]); plexExtraType != models.Other {
-		res.types = []models.ExtraType{plexExtraType}
+		res.Types = []models.ExtraType{plexExtraType}
 	}
-	if extraType := parseExtraTypeFromName(res.name); extraType != models.Other {
-		res.types = append(res.types, extraType)
+	if extraType := parseExtraTypeFromName(res.Name); extraType != models.Other {
+		res.Types = append(res.Types, extraType)
 	}
-	if len(res.types) == 0 {
-		res.types = append(res.types, models.Other)
+	if len(res.Types) == 0 {
+		res.Types = append(res.Types, models.Other)
 	}
-	parseYearFromRegex(matches, regex, &res.package_)
+	parseYearFromRegex(matches, regex, &res.Package_)
 	if package_index := regex.SubexpIndex("Package"); package_index != -1 {
-		res.package_.name = matches[package_index]
+		res.Package_.Name = matches[package_index]
 	}
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err := validate.Struct(res)

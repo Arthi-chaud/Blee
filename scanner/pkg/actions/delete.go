@@ -6,6 +6,6 @@ import (
 )
 
 // Delete File from API
-func DeleteFile(path string, c* config.Config) {
+func DeleteFile(path string, c *config.Config) {
 	glg.Logf("File to delete %s", path)
 }

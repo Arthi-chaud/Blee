@@ -27,11 +27,11 @@ services:
       api:
         condition: service_healthy
     volumes:
-      - ${DATA_DIR}:/video
+      - ${DATA_DIR}:/videos
       - ./scanner.example.json:/app/scanner.json
     environment:
       - API_URL=http://api:8000
-      - WATCH_DIR=/video
+      - WATCH_DIR=/videos
       - SCANNER_API_KEY=${SCANNER_API_KEY}
       - CONFIG_DIR=/app
   db:
