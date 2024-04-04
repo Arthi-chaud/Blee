@@ -1,14 +1,15 @@
 package api
 
 type Page[T any] struct {
-	items    []T          `validate:"required,dive,required"`
-	metadata PageMetadata `validate:"required,dive,required"`
+	Items    []T          `validate:"required,dive,required" json:"items"`
+	Metadata PageMetadata `json:"metadata"`
 }
 
 type PageMetadata struct {
-	next string
+	Next string  `json:"next"`
+	Count uint64  `json:"count"`
 }
 
 type File struct {
-	path string `validate:"required"`
+	Path string `validate:"required" json:"path"`
 }

@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/Arthi-chaud/Blee/scanner/pkg"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/api"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/parser"
@@ -29,14 +30,18 @@ func RegisterFile(path string, c *config.Config) error {
 
 		if err != nil {
 			glg.Failf(err.Error())
-		} else {
-			glg.Fail(dto)
+			return err
+		}
+		err = api.SaveMovie(&dto, *c);
+		if err != nil {
+			glg.Failf(err.Error())
+			return err
 		}
 	} else if parsedPath.Extra != nil {
-
+		// TODO
 	}
 
-	return err
+	return nil
 }
 
 func buildMovieDto(path string, parsedPath *parser.MovieMetadataFromPath, mediainfo *parser.MediaInfo) (models.NewMovieDto, error) {

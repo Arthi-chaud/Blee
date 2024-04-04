@@ -80,7 +80,7 @@ func TestExtraParsingWithPackageFolderWithoutArtistFolder(t *testing.T) {
 	assert.Equal(t, res.Extra.DiscIndex, 0)
 	assert.Equal(t, res.Extra.TrackIndex, 0)
 	assert.Equal(t, res.Extra.Name, "Autour D'Olivia (Documentaire)")
-	assert.Equal(t, res.Extra.Types, []models.ExtraType{models.ExtraType(models.Documentary)})
+	assert.Equal(t, res.Extra.Types, []models.ExtraType{models.ExtraType(models.BehindTheScenes)})
 	assert.Equal(t, res.Extra.Package_.ArtistName, "Olivia Ruiz")
 	assert.Equal(t, res.Extra.Package_.Name, "Miss Météores Live")
 	assert.Equal(t, res.Extra.Package_.ReleaseYear.Year(), 2008)
