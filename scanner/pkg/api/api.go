@@ -53,6 +53,15 @@ func SaveMovie(movie *models.NewMovieDto, config config.Config) error {
 	return err
 }
 
+func SaveExtra(movie *models.NewExtraDto, config config.Config) error {
+	serialized, err := json.Marshal(movie)
+	if err != nil {
+		return err
+	}
+	_, err = request("POST", "/extras", bytes.NewBuffer(serialized), config)
+	return err
+}
+
 func request(method string, url string, body io.Reader, config config.Config) (string, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest(method, fmt.Sprintf("%s%s", config.ApiUrl, url), body)

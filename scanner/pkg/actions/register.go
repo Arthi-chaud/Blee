@@ -32,13 +32,23 @@ func RegisterFile(path string, c *config.Config) error {
 			glg.Failf(err.Error())
 			return err
 		}
-		err = api.SaveMovie(&dto, *c);
+		err = api.SaveMovie(&dto, *c)
 		if err != nil {
 			glg.Failf(err.Error())
 			return err
 		}
 	} else if parsedPath.Extra != nil {
-		// TODO
+		dto, err := buildExtraDto(path, parsedPath.Extra, mediainfo)
+
+		if err != nil {
+			glg.Failf(err.Error())
+			return err
+		}
+		err = api.SaveExtra(&dto, *c)
+		if err != nil {
+			glg.Failf(err.Error())
+			return err
+		}
 	}
 
 	return nil
@@ -63,15 +73,40 @@ func buildMovieDto(path string, parsedPath *parser.MovieMetadataFromPath, mediai
 				}),
 			}
 		}),
-		File: models.NewFileDto{
-			Path:     path,
-			Size:     mediainfo.Size,
-			Duration: mediainfo.Duration,
-			Quality:  string(mediainfo.Quality),
-		},
+		File: buildFileDto(path, mediainfo),
 	}
 	if err := validate.Struct(dto); err != nil {
 		return models.NewMovieDto{}, err.(validator.ValidationErrors)
 	}
 	return dto, nil
+}
+
+func buildExtraDto(path string, parsedPath *parser.ExtraMetadataFromPath, mediainfo *parser.MediaInfo) (models.NewExtraDto, error) {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	dto := models.NewExtraDto{
+		ArtistName:         parsedPath.ArtistName,
+		ExtraName:          parsedPath.Name,
+		Types:              pkg.Map(make([]string, len(parsedPath.Types)), func(_ string, i int) string {
+			return string(parsedPath.Types[i])
+		}),
+		PackageArtistName:  parsedPath.Package_.ArtistName,
+		PackageName:        parsedPath.Package_.Name,
+		PackageReleaseDate: parsedPath.Package_.ReleaseYear,
+		DiscIndex:          parsedPath.DiscIndex,
+		TrackIndex:         parsedPath.TrackIndex,
+		File:               buildFileDto(path, mediainfo),
+	}
+	if err := validate.Struct(dto); err != nil {
+		return models.NewExtraDto{}, err.(validator.ValidationErrors)
+	}
+	return dto, nil
+}
+
+func buildFileDto(path string, mediainfo *parser.MediaInfo) models.NewFileDto {
+	return models.NewFileDto{
+		Path:     path,
+		Size:     mediainfo.Size,
+		Duration: mediainfo.Duration,
+		Quality:  string(mediainfo.Quality),
+	}
 }

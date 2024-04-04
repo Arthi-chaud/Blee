@@ -9,17 +9,17 @@ const (
 	CPerformance         = "performance"
 )
 
-type ExtraType int64
+type ExtraType string
 
 const (
-	AlternateView ExtraType = iota
-	Backdrops
-	BehindTheScenes
-	Interview
-	MusicVideo
-	Other
-	Performance
-	Trailer
+	AlternateView   = "alternate_view"
+	Backdrops       = "backdrops"
+	BehindTheScenes = "behind_the_scenes"
+	Interview       = "interview"
+	MusicVideo      = "music_video"
+	Other           = "other"
+	Performance     = "performance"
+	Trailer         = "trailer"
 )
 
 type MovieType string
