@@ -2,13 +2,14 @@ package parser
 
 import (
 	"errors"
-	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
-	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
-	validator "github.com/go-playground/validator/v10"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
+	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
+	validator "github.com/go-playground/validator/v10"
 )
 
 // Metadata Extracted from the path of a file
@@ -187,7 +188,7 @@ func parseExtraTypeFromPlexRegexGroup(group string) models.ExtraType {
 func parseExtraTypeFromName(extraName string) models.ExtraType {
 	extraName = strings.ToLower(extraName)
 	if strings.Contains(extraName, "document") {
-		return models.ExtraType(models.Documentary)
+		return models.ExtraType(models.BehindTheScenes)
 	}
 	if strings.Contains(extraName, "music video") {
 		return models.ExtraType(models.MusicVideo)

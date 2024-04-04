@@ -1,5 +1,14 @@
 package models
 
+type ChapterType string
+
+const (
+	CInterview           = "interview"
+	CNonMusicalInterview = "non_musical_interview"
+	COther               = "other"
+	CPerformance         = "performance"
+)
+
 type ExtraType int64
 
 const (
@@ -13,17 +22,17 @@ const (
 	Trailer
 )
 
-type MovieType int64
+type MovieType string
 
 const (
-	Concert MovieType = iota
-	Documentary
+	Concert     = "concert"
+	Documentary = "documentary"
 )
 
 type Quality string
 
 const (
-	Other_ Quality = "Other"
+	Other_ Quality = "other"
 	P240   Quality = "240p"
 	P360   Quality = "360p"
 	P480   Quality = "480p"

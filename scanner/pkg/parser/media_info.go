@@ -3,7 +3,6 @@ package parser
 import (
 	"github.com/Arthi-chaud/Blee/scanner/pkg"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
-	"github.com/kpango/glg"
 	"github.com/zoriya/go-mediainfo"
 )
 
@@ -15,9 +14,10 @@ type MediaInfo struct {
 }
 
 type MediaChapter struct {
-	Name      string `validate:"required"`
-	StartTime uint32 `validate:"required"`
-	EndTime   uint32 `validate:"required"`
+	Name      string               `validate:"required"`
+	StartTime uint32               `validate:"required"`
+	EndTime   uint32               `validate:"required"`
+	Types     []models.ChapterType `validate:"required,dive,required"`
 }
 
 func GetMediaInfo(path string) (*MediaInfo, error) {
@@ -30,11 +30,6 @@ func GetMediaInfo(path string) (*MediaInfo, error) {
 	chapters_begin := pkg.ParseUint64(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_Begin"))
 	chapters_end := pkg.ParseUint64(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_End"))
 
-	glg.Fail(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))
-	// _a := pkg.Map(make([]models.Quality, pkg.ParseUint64(mi.Parameter(mediainfo.StreamVideo, 0, "StreamCount"))), func(_ Video, i int) Video {
-	// 	return qualityFromHeight(pkg.ParseUint64(mi.Parameter(mediainfo.StreamVideo, i, "Height")))
-	// })
-
 	// SRC: https://github.com/zoriya/Kyoo/blob/master/transcoder/src/info.go
 	info := MediaInfo{
 		Quality:  qualityFromHeight(pkg.ParseUint64(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))),
@@ -45,6 +40,8 @@ func GetMediaInfo(path string) (*MediaInfo, error) {
 				StartTime: uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName))),
 				EndTime:   uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName))),
 				Name:      mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
+				//TODO
+				Types: []models.ChapterType{models.COther},
 			}
 		}),
 	}
