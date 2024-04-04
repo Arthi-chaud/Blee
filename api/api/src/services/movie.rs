@@ -55,7 +55,7 @@ where
 		query = query.filter(movie::Column::UniqueSlug.eq(slug_or_uuid));
 	}
 
-	let (movie, poster) = query
+	let (movie, thumbnail) = query
 		.find_also_related(image::Entity)
 		.one(connection)
 		.await?
@@ -63,7 +63,7 @@ where
 
 	Ok(MovieResponseWithRelations {
 		movie: movie.into(),
-		poster: poster.map(|x| x.into()),
+		thumbnail: thumbnail.map(|x| x.into()),
 		artist: None,
 		package: None,
 		file: None,
@@ -132,9 +132,9 @@ where
 		.map(|items| {
 			items
 				.into_iter()
-				.map(|(movie, poster)| MovieResponseWithRelations {
+				.map(|(movie, thumbnail)| MovieResponseWithRelations {
 					movie: movie.into(),
-					poster: poster.map(|x| x.into()),
+					thumbnail: thumbnail.map(|x| x.into()),
 					artist: None,
 					package: None,
 					file: None,

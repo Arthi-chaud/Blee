@@ -166,7 +166,7 @@ async fn post_movie_thumbnail(
 	let new_poster = services::image::save_image(
 		&bytes,
 		crate::dto::image::ImageType::Thumbnail,
-		movie.poster.map(|p| p.id),
+		movie.thumbnail.map(|p| p.id),
 		&movie.movie.id,
 		movie::Entity,
 		movie::Column::Id,

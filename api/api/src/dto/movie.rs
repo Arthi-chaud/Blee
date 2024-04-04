@@ -18,7 +18,7 @@ use super::package::PackageResponse;
 pub struct MovieResponseWithRelations {
 	#[serde(flatten)]
 	pub movie: MovieResponse,
-	pub poster: Option<ImageResponse>,
+	pub thumbnail: Option<ImageResponse>,
 	#[schemars(skip)]
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub package: Option<PackageResponse>,
