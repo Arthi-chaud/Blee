@@ -44,21 +44,46 @@ func GetAllKnownPaths(config config.Config) ([]string, error) {
 	return filePaths, nil
 }
 
-func SaveMovie(movie *models.NewMovieDto, config config.Config) error {
+func SaveMovie(movie *models.NewMovieDto, config config.Config) (NewMovieResponse, error) {
 	serialized, err := json.Marshal(movie)
+	var newMovie = NewMovieResponse{}
 	if err != nil {
-		return err
+		return newMovie, err
 	}
-	_, err = request("POST", "/movies", bytes.NewBuffer(serialized), config)
+	res, err := request("POST", "/movies", bytes.NewBuffer(serialized), config)
+	if err != nil {
+		return newMovie, err
+	}
+	err = json.Unmarshal([]byte(res), &newMovie)
+	return newMovie, err
+}
+
+func SaveExtra(movie *models.NewExtraDto, config config.Config) (NewExtraResponse, error) {
+	serialized, err := json.Marshal(movie)
+	var newExtra = NewExtraResponse{}
+	if err != nil {
+		return newExtra, err
+	}
+	res, err := request("POST", "/extras", bytes.NewBuffer(serialized), config)
+	if err != nil {
+		return newExtra, err
+	}
+	err = json.Unmarshal([]byte(res), &newExtra)
+	return newExtra, err
+}
+
+func SaveMovieThumbnail(movieUuid string, thumbnail io.Reader, config config.Config) error {
+	_, err := request("POST", fmt.Sprintf("/movies/{%s}/thumbnail", movieUuid), thumbnail, config)
 	return err
 }
 
-func SaveExtra(movie *models.NewExtraDto, config config.Config) error {
-	serialized, err := json.Marshal(movie)
-	if err != nil {
-		return err
-	}
-	_, err = request("POST", "/extras", bytes.NewBuffer(serialized), config)
+func SaveChapterThumbnail(chapterUuid string, thumbnail io.Reader, config config.Config) error {
+	_, err := request("POST", fmt.Sprintf("/chapters/{%s}/thumbnail", chapterUuid), thumbnail, config)
+	return err
+}
+
+func SaveExtraThumbnail(extraUuid string, thumbnail io.Reader, config config.Config) error {
+	_, err := request("POST", fmt.Sprintf("/extras/{%s}/thumbnail", extraUuid), thumbnail, config)
 	return err
 }
 

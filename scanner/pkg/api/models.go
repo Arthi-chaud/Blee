@@ -13,3 +13,11 @@ type PageMetadata struct {
 type File struct {
 	Path string `validate:"required" json:"path"`
 }
+
+type NewExtraResponse struct {
+	ExtraId string `validate:"required" json:"extra_id"`
+}
+
+type NewMovieResponse struct {
+	MovieId string `validate:"required" json:"movie_id"`
+}
