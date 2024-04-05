@@ -120,9 +120,9 @@ func parseMovieTypeFromName(movieName string) models.MovieType {
 		strings.Contains(movieName, "tour") ||
 		strings.Contains(movieName, "show") ||
 		strings.Contains(movieName, "unplugged") {
-		return models.Concert
+		return models.MovieType(models.Concert)
 	}
-	return models.Documentary
+	return models.MovieType(models.Documentary)
 }
 
 func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) (*ExtraMetadataFromPath, error) {
@@ -170,17 +170,17 @@ func parseExtraTypeFromPlexRegexGroup(group string) models.ExtraType {
 	group = strings.ToLower(group)
 	switch {
 	case group == "behindthescenes":
-		return models.BehindTheScenes
+		return models.ExtraType(models.BehindTheScenes)
 	case group == "deleted":
-		return models.Other
+		return models.ExtraType(models.Other)
 	case group == "featurette":
-		return models.Other
+		return models.ExtraType(models.Other)
 	case group == "interview":
-		return models.Interview
+		return models.ExtraType(models.Interview)
 	case group == "scene":
-		return models.Performance
+		return models.ExtraType(models.Performance)
 	case group == "trailer":
-		return models.Trailer
+		return models.ExtraType(models.Trailer)
 	}
 	return models.Other
 }

@@ -6,8 +6,8 @@ type Page[T any] struct {
 }
 
 type PageMetadata struct {
-	Next string  `json:"next"`
-	Count uint64  `json:"count"`
+	Next  string `json:"next"`
+	Count uint64 `json:"count"`
 }
 
 type File struct {

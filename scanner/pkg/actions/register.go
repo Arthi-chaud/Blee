@@ -84,9 +84,9 @@ func buildMovieDto(path string, parsedPath *parser.MovieMetadataFromPath, mediai
 func buildExtraDto(path string, parsedPath *parser.ExtraMetadataFromPath, mediainfo *parser.MediaInfo) (models.NewExtraDto, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	dto := models.NewExtraDto{
-		ArtistName:         parsedPath.ArtistName,
-		ExtraName:          parsedPath.Name,
-		Types:              pkg.Map(make([]string, len(parsedPath.Types)), func(_ string, i int) string {
+		ArtistName: parsedPath.ArtistName,
+		ExtraName:  parsedPath.Name,
+		Types: pkg.Map(make([]string, len(parsedPath.Types)), func(_ string, i int) string {
 			return string(parsedPath.Types[i])
 		}),
 		PackageArtistName:  parsedPath.Package_.ArtistName,
