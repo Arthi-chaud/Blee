@@ -68,6 +68,8 @@ pub enum VideoQualityEnum {
 	_480p,
 	#[sea_orm(string_value = "4k")]
 	_4k,
+	#[sea_orm(string_value = "576p")]
+	_576p,
 	#[sea_orm(string_value = "720p")]
 	_720p,
 	#[sea_orm(string_value = "8k")]

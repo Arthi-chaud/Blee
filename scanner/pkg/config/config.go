@@ -13,6 +13,8 @@ type Config struct {
 	WatchDir string
 	// Secret API Key to authenticate
 	ApiKey string
+	// URL to the API
+	ApiUrl string
 	// User configuration from `scanner.json`
 	UserConfig UserConfiguration
 }
@@ -64,7 +66,14 @@ func GetConfig() Config {
 		os.Exit(1)
 	}
 
+	apiUrl, is_present := os.LookupEnv("API_URL")
+	if !is_present || len(apiUrl) == 0 {
+		glg.Fatalf("API_URL is missing or empty.")
+		os.Exit(1)
+	}
+
 	config.ApiKey = apiKey
+	config.ApiUrl = apiUrl
 	config.WatchDir = *watchDir
 	config.UserConfig = parseConfigFile(*configFilePath)
 	glg.Log("Configuration parsed successfully")

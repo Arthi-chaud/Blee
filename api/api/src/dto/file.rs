@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, JsonSchema, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct NewFile {
-	/// The aboslute path of the file
+	/// The absolute path of the file
 	#[schemars(example = "example_file_path")]
 	pub path: String,
 	/// The size (in bytes) of the file
@@ -63,6 +63,8 @@ pub enum VideoQuality {
 	P1080,
 	#[serde(rename(deserialize = "720p", serialize = "720p"))]
 	P720,
+	#[serde(rename(deserialize = "576p", serialize = "576p"))]
+	P576,
 	#[serde(rename(deserialize = "480p", serialize = "480p"))]
 	P480,
 	#[serde(rename(deserialize = "360p", serialize = "360p"))]
@@ -81,6 +83,7 @@ impl From<VideoQualityEnum> for VideoQuality {
 			VideoQualityEnum::_2k => VideoQuality::K2,
 			VideoQualityEnum::_360p => VideoQuality::P360,
 			VideoQualityEnum::_480p => VideoQuality::P480,
+			VideoQualityEnum::_576p => VideoQuality::P576,
 			VideoQualityEnum::_4k => VideoQuality::K4,
 			VideoQualityEnum::_720p => VideoQuality::P720,
 			VideoQualityEnum::_8k => VideoQuality::K8,
@@ -97,12 +100,21 @@ impl From<VideoQuality> for VideoQualityEnum {
 			VideoQuality::K2 => VideoQualityEnum::_2k,
 			VideoQuality::P360 => VideoQualityEnum::_360p,
 			VideoQuality::P480 => VideoQualityEnum::_480p,
+			VideoQuality::P576 => VideoQualityEnum::_576p,
 			VideoQuality::K4 => VideoQualityEnum::_4k,
 			VideoQuality::P720 => VideoQualityEnum::_720p,
 			VideoQuality::K8 => VideoQualityEnum::_8k,
 			VideoQuality::Other => VideoQualityEnum::Other,
 		}
 	}
+}
+
+#[derive(Deserialize, Serialize, JsonSchema, Clone)]
+#[serde(crate = "rocket::serde")]
+pub struct UpdateFile {
+	/// The new absolute path of the file
+	#[schemars(example = "example_file_path")]
+	pub path: Option<String>,
 }
 
 /// Filters for Files
