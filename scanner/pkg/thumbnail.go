@@ -21,4 +21,3 @@ func GetFrame(filepath string, timestamp int64) (io.Reader, error) {
 		WithOutput(buf, os.Stdout).Run()
 	return buf, err
 }
-
