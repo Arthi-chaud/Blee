@@ -25,6 +25,7 @@ func RegisterFile(path string, c *config.Config) error {
 		glg.Failf("Getting MediaInfo on '%s' failed:", filepath.Base(path))
 		glg.Fail(err)
 	}
+	var resourceUuid = ""
 	if parsedPath.Movie != nil {
 		dto, err := buildMovieDto(path, parsedPath.Movie, mediainfo)
 
@@ -32,11 +33,21 @@ func RegisterFile(path string, c *config.Config) error {
 			glg.Failf(err.Error())
 			return err
 		}
-		err = api.SaveMovie(&dto, *c)
+		res, err := api.SaveMovie(&dto, *c)
+		resourceUuid = res.MovieId
 		if err != nil {
 			glg.Failf(err.Error())
 			return err
 		}
+		go func() {
+			for i, chapterId := range res.ChaptersId {
+				thumbnailBytes, err := pkg.GetFrame(path, int64(dto.Chapters[i].StartTimestamp)+int64(dto.Chapters[i].EndTimestamp-dto.Chapters[i].StartTimestamp)/2)
+				api.SaveChapterThumbnail(chapterId, thumbnailBytes, *c)
+				if err != nil {
+					glg.Fail(err)
+				}
+			}
+		}()
 	} else if parsedPath.Extra != nil {
 		dto, err := buildExtraDto(path, parsedPath.Extra, mediainfo)
 
@@ -44,14 +55,24 @@ func RegisterFile(path string, c *config.Config) error {
 			glg.Failf(err.Error())
 			return err
 		}
-		err = api.SaveExtra(&dto, *c)
+		res, err := api.SaveExtra(&dto, *c)
+		resourceUuid = res.ExtraId
 		if err != nil {
 			glg.Failf(err.Error())
 			return err
 		}
 	}
-
-	return nil
+	thumbnailBytes, err := pkg.GetFrame(path, int64(mediainfo.Duration)/2)
+	if err != nil {
+		glg.Failf(err.Error())
+		return err
+	}
+	if parsedPath.Extra != nil {
+		err = api.SaveExtraThumbnail(resourceUuid, thumbnailBytes, *c)
+	} else if parsedPath.Movie != nil {
+		err = api.SaveMovieThumbnail(resourceUuid, thumbnailBytes, *c)
+	}
+	return err
 }
 
 func buildMovieDto(path string, parsedPath *parser.MovieMetadataFromPath, mediainfo *parser.MediaInfo) (models.NewMovieDto, error) {

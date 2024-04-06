@@ -1,5 +1,5 @@
 FROM golang:1.22.1-bullseye
-RUN apt-get update -y; apt-get install -y libmediainfo-dev
+RUN apt-get update -y; apt-get install -y libmediainfo-dev ffmpeg
 WORKDIR /app
 RUN go install github.com/githubnemo/CompileDaemon@latest
 ENTRYPOINT CompileDaemon -build="go build -o ./scanner ./app" -command="./scanner -d $WATCH_DIR -c $CONFIG_DIR/scanner.json"

@@ -1,5 +1,5 @@
 FROM golang:1.22.1-bullseye as builder
-RUN apt-get update -y; apt-get install -y libmediainfo-dev
+RUN apt-get update -y; apt-get install -y libmediainfo-dev ffmpeg
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
