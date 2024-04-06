@@ -18,7 +18,9 @@ func HandleWatcherEvent(event *w.Event, c *config.Config) {
 			actions.RegisterFile(event.Path, c)
 		}
 	case w.Remove:
-		actions.DeleteFile(event.Path, c)
+		if pkg.FileIsVideo(event.Path) {
+			actions.DeleteFile(event.Path, c)
+		}
 	case w.Rename:
 		actions.RenameFile(event.OldPath, event.Path, c)
 	case w.Move:
