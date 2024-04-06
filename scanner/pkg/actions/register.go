@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"bytes"
+	"os"
 	"path/filepath"
 
 	"github.com/Arthi-chaud/Blee/scanner/pkg"
@@ -26,6 +28,7 @@ func RegisterFile(path string, c *config.Config) error {
 		glg.Fail(err)
 	}
 	var resourceUuid = ""
+	var packageUuid = ""
 	if parsedPath.Movie != nil {
 		dto, err := buildMovieDto(path, parsedPath.Movie, mediainfo)
 
@@ -35,6 +38,7 @@ func RegisterFile(path string, c *config.Config) error {
 		}
 		res, err := api.SaveMovie(&dto, *c)
 		resourceUuid = res.MovieId
+		packageUuid = res.PackageId
 		if err != nil {
 			glg.Failf(err.Error())
 			return err
@@ -57,6 +61,7 @@ func RegisterFile(path string, c *config.Config) error {
 		}
 		res, err := api.SaveExtra(&dto, *c)
 		resourceUuid = res.ExtraId
+		packageUuid = res.PackageId
 		if err != nil {
 			glg.Failf(err.Error())
 			return err
@@ -71,6 +76,29 @@ func RegisterFile(path string, c *config.Config) error {
 		err = api.SaveExtraThumbnail(resourceUuid, thumbnailBytes, *c)
 	} else if parsedPath.Movie != nil {
 		err = api.SaveMovieThumbnail(resourceUuid, thumbnailBytes, *c)
+	}
+	posterPath := pkg.GetPosterPathInFolder(filepath.Dir(path))
+	if len(posterPath) == 0 {
+		return err
+	}
+	parentPackage, err := api.GetPackage(packageUuid, *c)
+	if err != nil {
+		glg.Failf(err.Error())
+		return err
+	}
+	if len(parentPackage.PosterId) != 0 {
+		return err
+	}
+	glg.Log("Found a Poster to save!")
+	bs, err := os.ReadFile(posterPath)
+	if err != nil {
+		glg.Fail("Could not open Poster filer")
+		return err
+	}
+	if e := api.SavePackagePoster(packageUuid, bytes.NewReader(bs), *c); e != nil {
+		glg.Fail("Could not POST poster.")
+		glg.Fail(e.Error())
+		return e
 	}
 	return err
 }

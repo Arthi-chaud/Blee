@@ -15,8 +15,13 @@ type File struct {
 	Path string `validate:"required" json:"path"`
 }
 
+type Package struct {
+	PosterId string `json:"psoter_id"`
+}
+
 type NewExtraResponse struct {
-	ExtraId string `validate:"required" json:"extra_id"`
+	ExtraId   string `validate:"required" json:"extra_id"`
+	PackageId string `validate:"required" json:"package_id"`
 }
 
 type NewChapterResponse struct {
@@ -25,5 +30,6 @@ type NewChapterResponse struct {
 
 type NewMovieResponse struct {
 	MovieId    string   `validate:"required" json:"movie_id"`
+	PackageId  string   `validate:"required" json:"package_id"`
 	ChaptersId []string `validate:"required,dive,required" json:"chapters_id"`
 }

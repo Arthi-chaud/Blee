@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -13,6 +15,14 @@ func FileIsVideo(path string) bool {
 		return false
 	}
 	return strings.HasPrefix(mime.String(), "video/")
+}
+
+func FileIsImage(path string) bool {
+	mime, err := mimetype.DetectFile(path)
+	if err != nil {
+		return false
+	}
+	return strings.HasPrefix(mime.String(), "image/")
 }
 
 func ParseUint64(str string) uint64 {
@@ -48,4 +58,18 @@ func Map[T, U any](ts []T, f func(T, int) U) []U {
 		us[i] = f(ts[i], i)
 	}
 	return us
+}
+
+func GetPosterPathInFolder(path string) string {
+	list, err := filepath.Glob(fmt.Sprintf("%s/*.*", path))
+
+	if err != nil {
+		return ""
+	}
+	for _, path := range list {
+		if FileIsImage(path) {
+			return path
+		}
+	}
+	return ""
 }

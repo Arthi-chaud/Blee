@@ -99,17 +99,22 @@ func SaveExtra(movie *models.NewExtraDto, config config.Config) (NewExtraRespons
 }
 
 func SaveMovieThumbnail(movieUuid string, thumbnail io.Reader, config config.Config) error {
-	_, err := request("POST", fmt.Sprintf("/movies/{%s}/thumbnail", movieUuid), thumbnail, config)
+	_, err := request("POST", fmt.Sprintf("/movies/%s/thumbnail", movieUuid), thumbnail, config)
 	return err
 }
 
 func SaveChapterThumbnail(chapterUuid string, thumbnail io.Reader, config config.Config) error {
-	_, err := request("POST", fmt.Sprintf("/chapters/{%s}/thumbnail", chapterUuid), thumbnail, config)
+	_, err := request("POST", fmt.Sprintf("/chapters/%s/thumbnail", chapterUuid), thumbnail, config)
 	return err
 }
 
 func SaveExtraThumbnail(extraUuid string, thumbnail io.Reader, config config.Config) error {
-	_, err := request("POST", fmt.Sprintf("/extras/{%s}/thumbnail", extraUuid), thumbnail, config)
+	_, err := request("POST", fmt.Sprintf("/extras/%s/thumbnail", extraUuid), thumbnail, config)
+	return err
+}
+
+func SavePackagePoster(packageUuid string, poster io.Reader, config config.Config) error {
+	_, err := request("POST", fmt.Sprintf("/packages/%s/poster", packageUuid), poster, config)
 	return err
 }
 
@@ -137,4 +142,20 @@ func request(method string, url string, body io.Reader, config config.Config) (s
 		return "", err
 	}
 	return string(b), nil
+}
+
+func GetPackage(packageUuid string, c config.Config) (Package, error) {
+	res, err := request("GET", fmt.Sprintf("/packages/%s", packageUuid), nil, c)
+	if err != nil {
+		return Package{}, err
+	}
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	var p = Package{}
+	if err = json.Unmarshal([]byte(res), &p); err != nil {
+		return Package{}, err
+	}
+	if err = validate.Struct(p); err != nil {
+		return Package{}, err
+	}
+	return p, nil
 }
