@@ -11,6 +11,7 @@ type PageMetadata struct {
 }
 
 type File struct {
+	Id   string `validate:"required" json:"id"`
 	Path string `validate:"required" json:"path"`
 }
 

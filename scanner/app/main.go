@@ -68,7 +68,7 @@ func main() {
 		}
 	}
 	for _, path := range knownPaths {
-		if !slices.Contains(watchedFiles, path) {
+		if !slices.Contains(watchedFiles, path) && pkg.FileIsVideo(path) {
 			actions.DeleteFile(path, &c)
 		}
 	}

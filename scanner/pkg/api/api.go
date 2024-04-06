@@ -2,9 +2,11 @@ package api
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
@@ -42,6 +44,30 @@ func GetAllKnownPaths(config config.Config) ([]string, error) {
 		next = page.Metadata.Next
 	}
 	return filePaths, nil
+}
+
+func GetFileByPath(path string, c config.Config) (File, error) {
+	res, err := request("GET", fmt.Sprintf("/files?path=%s", url.QueryEscape(path)), nil, c)
+	if err != nil {
+		return File{}, err
+	}
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	var page Page[File] = Page[File]{}
+	if err = json.Unmarshal([]byte(res), &page); err != nil {
+		return File{}, err
+	}
+	if err = validate.Struct(page); err != nil {
+		return File{}, err
+	}
+	if len(page.Items) == 0 {
+		return File{}, errors.New("File Not Found")
+	}
+	return page.Items[0], nil
+}
+
+func DeleteFile(fileUuid string, c config.Config) error {
+	_, err := request("DELETE", fmt.Sprintf("/files/%s", fileUuid), nil, c)
+	return err
 }
 
 func SaveMovie(movie *models.NewMovieDto, config config.Config) (NewMovieResponse, error) {
