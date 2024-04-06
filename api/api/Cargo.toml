@@ -16,7 +16,7 @@ serde = { version = "1.0", features = ["derive"] }
 rocket_okapi = { version = "0.8.0", features = ["swagger", "uuid", "rocket_db_pools"] }
 serde_json = "1.0"
 schemars = { version = "0.8", features = ["chrono", "uuid1"] }
-sea-orm = { version = "0.12", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "with-uuid", "sqlx-dep", "postgres-array" ] }
+sea-orm = { version = "0.12", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "with-uuid", "sqlx-dep", "postgres-array", "sea-orm-internal" ] }
 sea-orm-rocket = { git = "https://github.com/SeaQL/sea-orm.git", branch = "master", features = ["rocket_okapi"]}
 sqlx = "*"
 chrono = { version = "0.4.34", features = ["serde"] }

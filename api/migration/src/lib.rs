@@ -2,6 +2,7 @@ pub use sea_orm_migration::prelude::*;
 
 mod m20240311_000001_init_enums;
 mod m20240311_073406_init_tables;
+mod m20240406_163549_insert_events;
 
 pub struct Migrator;
 
@@ -11,6 +12,9 @@ impl MigratorTrait for Migrator {
 		vec![
 			Box::new(m20240311_000001_init_enums::Migration),
 			Box::new(m20240311_073406_init_tables::Migration),
+			Box::new(m20240406_163549_insert_events::Migration),
 		]
 	}
 }
+
+pub static EVENT_CHANNEL: &str = "table_update";
