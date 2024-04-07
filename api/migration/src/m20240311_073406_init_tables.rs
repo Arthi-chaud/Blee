@@ -22,7 +22,6 @@ enum Artist {
 	Table,
 	Id,
 	Name,
-	Description,
 	UniqueSlug,
 	RegisteredAt,
 	PosterId,
@@ -47,7 +46,6 @@ enum Package {
 	Name,
 	NameSlug,
 	UniqueSlug,
-	Description,
 	ReleaseYear,
 	RegisteredAt,
 	ArtistId,
@@ -95,6 +93,20 @@ enum Chapter {
 	StartTime,
 	EndTime,
 	Type,
+}
+
+#[derive(DeriveIden)]
+enum ExternalId {
+	Table,
+	Id,
+	Url,
+	Value,
+	Description,
+	Rating,
+	ProviderName,
+	RegisteredAt,
+	ArtistId,
+	PackageId,
 }
 
 #[async_trait::async_trait]
@@ -146,7 +158,6 @@ impl MigrationTrait for Migration {
 							.not_null()
 							.unique_key(),
 					)
-					.col(ColumnDef::new(Artist::Description).text())
 					.col(
 						ColumnDef::new(Artist::RegisteredAt)
 							.date()
@@ -222,7 +233,6 @@ impl MigrationTrait for Migration {
 							.unique_key(),
 					)
 					.col(ColumnDef::new(Package::ReleaseYear).date())
-					.col(ColumnDef::new(Package::Description).text())
 					.col(
 						ColumnDef::new(Package::RegisteredAt)
 							.date()
@@ -415,11 +425,56 @@ impl MigrationTrait for Migration {
 					.to_owned(),
 			)
 			.await?;
+		manager
+			.create_table(
+				Table::create()
+					.table(ExternalId::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(ExternalId::Id)
+							.uuid()
+							.not_null()
+							.primary_key()
+							.extra("DEFAULT gen_random_uuid()"),
+					)
+					.col(ColumnDef::new(ExternalId::Description).text())
+					.col(ColumnDef::new(ExternalId::Rating).small_integer())
+					.col(ColumnDef::new(ExternalId::ProviderName).string())
+					.col(ColumnDef::new(ExternalId::Value).string().not_null())
+					.col(ColumnDef::new(ExternalId::Url).string().not_null())
+					.col(
+						ColumnDef::new(ExternalId::RegisteredAt)
+							.date()
+							.not_null()
+							.default(Expr::current_date()),
+					)
+					.col(ColumnDef::new(ExternalId::ArtistId).uuid())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-artist-external-id_id")
+							.from(ExternalId::Table, ExternalId::ArtistId)
+							.to(Artist::Table, Artist::Id)
+							.on_delete(ForeignKeyAction::Cascade),
+					)
+					.col(ColumnDef::new(ExternalId::PackageId).uuid())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-package-external-id_id")
+							.from(ExternalId::Table, ExternalId::PackageId)
+							.to(Artist::Table, Artist::Id)
+							.on_delete(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
 
 		Ok(())
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		manager
+			.drop_table(Table::drop().table(ExternalId::Table).to_owned())
+			.await?;
 		manager
 			.drop_table(Table::drop().table(Chapter::Table).to_owned())
 			.await?;

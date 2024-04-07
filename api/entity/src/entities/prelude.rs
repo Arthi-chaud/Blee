@@ -2,6 +2,7 @@
 
 pub use super::artist::Entity as Artist;
 pub use super::chapter::Entity as Chapter;
+pub use super::external_id::Entity as ExternalId;
 pub use super::extra::Entity as Extra;
 pub use super::file::Entity as File;
 pub use super::image::Entity as Image;
