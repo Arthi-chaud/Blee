@@ -3,16 +3,15 @@ use crate::controllers::index::index;
 use crate::database::Db;
 use crate::error_handling::{not_found, unprocessable_entity};
 use crate::swagger::custom_openapi_spec;
-use migration::{MigratorTrait, EVENT_CHANNEL};
+use amqprs::connection::OpenConnectionArguments;
+use migration::MigratorTrait;
 use rocket::fairing::{self, AdHoc};
 use rocket::figment::providers::Serialized;
 use rocket::figment::Figment;
-use rocket::tokio::spawn;
 use rocket::{Build, Rocket};
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 use sea_orm_rocket::Database;
-use sqlx::postgres::PgListener;
 use std::env;
 
 pub mod config;
@@ -41,24 +40,6 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
 	Ok(rocket)
 }
 
-async fn hook_psql_events(rocket: Rocket<Build>) -> fairing::Result {
-	let pool = Db::fetch(&rocket)
-		.unwrap()
-		.conn
-		.get_postgres_connection_pool();
-	let mut listener = PgListener::connect_with(&pool).await.unwrap();
-
-	let _ = listener.listen(EVENT_CHANNEL).await;
-	spawn(async move {
-		loop {
-			while let Some(notification) = listener.try_recv().await.unwrap() {
-				events::handle_database_event(&notification);
-			}
-		}
-	});
-	Ok(rocket)
-}
-
 fn create_server() -> Rocket<Build> {
 	let data_dir = env::var("CONFIG_DIR").expect("env variable `CONFIG_DIR` not set.");
 	let scanner_api_key =
@@ -70,15 +51,27 @@ fn create_server() -> Rocket<Build> {
 		data_folder: data_dir,
 		scanner_api_key: scanner_api_key,
 	}));
+	let rabbit_config = deadpool_amqprs::Config::new(
+		OpenConnectionArguments::new(
+			&env::var("RABBIT_HOST").unwrap(),
+			env::var("RABBIT_PORT")
+				.unwrap_or("5672".to_string())
+				.parse::<u16>()
+				.unwrap(),
+			&env::var("RABBIT_USER").unwrap(),
+			&env::var("RABBIT_PASS").unwrap(),
+		),
+		None,
+	);
+	let rabbit_pool = rabbit_config.create_pool();
 
 	let mut building_rocket = rocket::custom(figment)
 		.attach(Db::init())
 		.attach(AdHoc::config::<Config>())
 		.attach(AdHoc::try_on_ignite("Run migrations", run_migrations))
-		.attach(AdHoc::try_on_ignite(
-			"Hook Database Events",
-			hook_psql_events,
-		))
+		.attach(AdHoc::try_on_ignite("Hook Database Events", |r| {
+			events::hook_psql_events(r, rabbit_pool)
+		}))
 		.register("/", catchers![not_found, unprocessable_entity])
 		.mount(
 			"/swagger",

@@ -11,6 +11,8 @@ entity = { path = "../entity" }
 
 async-stream = { version = "0.3" }
 async-trait = { version = "0.1" }
+amqprs = { version = "1.5.4", features = ["urispec"] }
+deadpool-amqprs = "0.2.0"
 rocket = { version = "0.5.0", features = ["uuid", "json"] }
 serde = { version = "1.0", features = ["derive"] }
 rocket_okapi = { version = "0.8.0", features = ["swagger", "uuid", "rocket_db_pools"] }

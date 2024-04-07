@@ -14,12 +14,19 @@ services:
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
+      - RABBIT_HOST=mq
+      - RABBIT_PORT=5672
     env_file:
       - .env
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- localhost:8000"]
       interval: 5s
       retries: 3
+  mq:
+    image: rabbitmq:3.13-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PASS}
   scanner:
     build:
       context: ./scanner
