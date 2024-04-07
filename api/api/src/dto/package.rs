@@ -28,8 +28,6 @@ pub struct PackageResponse {
 	#[schemars(example = "example_package_name")]
 	pub name: String,
 	pub slug: String,
-	#[schemars(example = "example_description")]
-	pub description: Option<String>,
 	#[schemars(example = "example_package_release_date")]
 	pub release_year: Option<NaiveDate>,
 	pub registered_at: NaiveDateTime,
@@ -45,7 +43,6 @@ impl From<package::Model> for PackageResponse {
 			id: value.id,
 			name: value.name,
 			slug: value.unique_slug,
-			description: value.description,
 			release_year: value.release_year,
 			registered_at: value.registered_at.into(),
 			artist_id: value.artist_id,
