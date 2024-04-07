@@ -20,6 +20,7 @@ mod controllers;
 pub mod database;
 pub mod dto;
 mod error_handling;
+mod events;
 pub(crate) mod guards;
 pub mod services;
 mod swagger;
@@ -51,8 +52,7 @@ async fn hook_psql_events(rocket: Rocket<Build>) -> fairing::Result {
 	spawn(async move {
 		loop {
 			while let Some(notification) = listener.try_recv().await.unwrap() {
-				let strr = notification.payload().to_owned();
-				println!("{}", strr);
+				events::handle_database_event(&notification);
 			}
 		}
 	});
