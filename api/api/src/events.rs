@@ -67,7 +67,7 @@ pub async fn hook_psql_events(rocket: Rocket<Build>, rabbit_pool: Pool) -> fairi
 			while let Some(notification) = listener.try_recv().await.unwrap() {
 				let args = BasicPublishArguments::new(exchange_name, routing_key);
 				let strr = notification.payload().to_owned();
-				let payload = serde_json::from_str::<EventPayload>(&strr).unwrap();
+				let _ = serde_json::from_str::<EventPayload>(&strr).unwrap();
 				rabbit_channel
 					.basic_publish(BasicProperties::default(), strr.into(), args)
 					.await

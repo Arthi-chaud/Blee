@@ -63,6 +63,10 @@ jobs:
       ROCKET_DATABASES: '{sea_orm={url="postgresql://test:test@localhost:5432/test"}}'
       CONFIG_DIR: "./data"
       SCANNER_API_KEY: "API_KEY"
+      RABBIT_USER: test
+      RABBIT_PASS: test
+      RABBIT_HOST: localhost
+      RABBIT_PORT: 5672
     services:
       postgres:
         image: postgres:alpine3.16
@@ -77,6 +81,13 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      mq:
+        image: rabbitmq:3.13-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: test
+          RABBITMQ_DEFAULT_PASS: test
+        ports:
+          - 5672:5672
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
