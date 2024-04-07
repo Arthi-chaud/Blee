@@ -11,12 +11,14 @@ entity = { path = "../entity" }
 
 async-stream = { version = "0.3" }
 async-trait = { version = "0.1" }
+amqprs = { version = "1.5.4", features = ["urispec"] }
+deadpool-amqprs = "0.2.0"
 rocket = { version = "0.5.0", features = ["uuid", "json"] }
 serde = { version = "1.0", features = ["derive"] }
 rocket_okapi = { version = "0.8.0", features = ["swagger", "uuid", "rocket_db_pools"] }
 serde_json = "1.0"
 schemars = { version = "0.8", features = ["chrono", "uuid1"] }
-sea-orm = { version = "0.12", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "with-uuid", "sqlx-dep", "postgres-array" ] }
+sea-orm = { version = "0.12", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "with-uuid", "sqlx-dep", "postgres-array", "sea-orm-internal" ] }
 sea-orm-rocket = { git = "https://github.com/SeaQL/sea-orm.git", branch = "master", features = ["rocket_okapi"]}
 sqlx = "*"
 chrono = { version = "0.4.34", features = ["serde"] }

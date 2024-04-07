@@ -3,6 +3,7 @@ use crate::controllers::index::index;
 use crate::database::Db;
 use crate::error_handling::{not_found, unprocessable_entity};
 use crate::swagger::custom_openapi_spec;
+use amqprs::connection::OpenConnectionArguments;
 use migration::MigratorTrait;
 use rocket::fairing::{self, AdHoc};
 use rocket::figment::providers::Serialized;
@@ -18,6 +19,7 @@ mod controllers;
 pub mod database;
 pub mod dto;
 mod error_handling;
+mod events;
 pub(crate) mod guards;
 pub mod services;
 mod swagger;
@@ -49,10 +51,27 @@ fn create_server() -> Rocket<Build> {
 		data_folder: data_dir,
 		scanner_api_key: scanner_api_key,
 	}));
+	let rabbit_config = deadpool_amqprs::Config::new(
+		OpenConnectionArguments::new(
+			&env::var("RABBIT_HOST").unwrap(),
+			env::var("RABBIT_PORT")
+				.unwrap_or("5672".to_string())
+				.parse::<u16>()
+				.unwrap(),
+			&env::var("RABBIT_USER").unwrap(),
+			&env::var("RABBIT_PASS").unwrap(),
+		),
+		None,
+	);
+	let rabbit_pool = rabbit_config.create_pool();
+
 	let mut building_rocket = rocket::custom(figment)
 		.attach(Db::init())
 		.attach(AdHoc::config::<Config>())
 		.attach(AdHoc::try_on_ignite("Run migrations", run_migrations))
+		.attach(AdHoc::try_on_ignite("Hook Database Events", |r| {
+			events::hook_psql_events(r, rabbit_pool)
+		}))
 		.register("/", catchers![not_found, unprocessable_entity])
 		.mount(
 			"/swagger",
