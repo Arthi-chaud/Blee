@@ -11,7 +11,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub description: Option<String>,
 	pub rating: Option<i16>,
-	pub provider_name: Option<String>,
+	pub provider_name: String,
 	pub value: String,
 	pub url: String,
 	pub registered_at: Date,

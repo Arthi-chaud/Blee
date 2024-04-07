@@ -439,7 +439,7 @@ impl MigrationTrait for Migration {
 					)
 					.col(ColumnDef::new(ExternalId::Description).text())
 					.col(ColumnDef::new(ExternalId::Rating).small_integer())
-					.col(ColumnDef::new(ExternalId::ProviderName).string())
+					.col(ColumnDef::new(ExternalId::ProviderName).string().not_null())
 					.col(ColumnDef::new(ExternalId::Value).string().not_null())
 					.col(ColumnDef::new(ExternalId::Url).string().not_null())
 					.col(
@@ -467,6 +467,24 @@ impl MigrationTrait for Migration {
 					.to_owned(),
 			)
 			.await?;
+		manager.create_index(
+			Index::create()
+				.name("idx-external-id-provider-artist")
+				.table(ExternalId::Table)
+				.col(ExternalId::ProviderName)
+				.col(ExternalId::ArtistId)
+				.unique()
+				.to_owned(),
+		).await?;
+		manager.create_index(
+			Index::create()
+				.name("idx-external-id-provider-package")
+				.table(ExternalId::Table)
+				.col(ExternalId::ProviderName)
+				.col(ExternalId::PackageId)
+				.unique()
+				.to_owned(),
+		).await?;
 
 		Ok(())
 	}
