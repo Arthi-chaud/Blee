@@ -70,6 +70,18 @@ func DeleteFile(fileUuid string, c config.Config) error {
 	return err
 }
 
+func UpdateFile(fileUuid string, dto *models.UpdateFileDto, config config.Config) error {
+	serialized, err := json.Marshal(dto)
+	if err != nil {
+		return err
+	}
+	_, err = request("POST", fmt.Sprintf("/files/%s", fileUuid), bytes.NewBuffer(serialized), config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func SaveMovie(movie *models.NewMovieDto, config config.Config) (NewMovieResponse, error) {
 	serialized, err := json.Marshal(movie)
 	var newMovie = NewMovieResponse{}

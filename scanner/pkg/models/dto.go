@@ -38,3 +38,7 @@ type NewExtraDto struct {
 	PackageReleaseDate time.Time  `json:"package-release-date"`
 	File               NewFileDto `validate:"required" json:"file"`
 }
+
+type UpdateFileDto struct {
+	Path    string   `json:"path"`
+}
