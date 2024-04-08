@@ -3,9 +3,11 @@ mod common;
 
 #[cfg(test)]
 mod test_external_id {
+	use std::env;
+
 	use api::dto::external_id::NewExternalId;
 	use rocket::{
-		http::{ContentType, Status},
+		http::{ContentType, Header, Status},
 		serde::uuid,
 	};
 
@@ -31,6 +33,10 @@ mod test_external_id {
 				let response = client
 					.post("/external_ids")
 					.header(ContentType::JSON)
+					.header(Header::new(
+						"X-API-Key",
+						env::var("MATCHER_API_KEY").unwrap(),
+					))
 					.body(serde_json::to_value(dto.clone()).unwrap().to_string())
 					.dispatch();
 				assert_eq!(response.status(), Status::Created);
@@ -80,6 +86,10 @@ mod test_external_id {
 				let response = client
 					.post("/external_ids")
 					.header(ContentType::JSON)
+					.header(Header::new(
+						"X-API-Key",
+						env::var("MATCHER_API_KEY").unwrap(),
+					))
 					.body(serde_json::to_value(dto.clone()).unwrap().to_string())
 					.dispatch();
 				assert_eq!(response.status(), Status::Conflict);
@@ -106,6 +116,10 @@ mod test_external_id {
 				};
 				let response = client
 					.post("/external_ids")
+					.header(Header::new(
+						"X-API-Key",
+						env::var("MATCHER_API_KEY").unwrap(),
+					))
 					.header(ContentType::JSON)
 					.body(serde_json::to_value(dto.clone()).unwrap().to_string())
 					.dispatch();
@@ -133,6 +147,10 @@ mod test_external_id {
 				};
 				let response = client
 					.post("/external_ids")
+					.header(Header::new(
+						"X-API-Key",
+						env::var("MATCHER_API_KEY").unwrap(),
+					))
 					.header(ContentType::JSON)
 					.body(serde_json::to_value(dto.clone()).unwrap().to_string())
 					.dispatch();
@@ -161,6 +179,10 @@ mod test_external_id {
 				let response = client
 					.post("/external_ids")
 					.header(ContentType::JSON)
+					.header(Header::new(
+						"X-API-Key",
+						env::var("MATCHER_API_KEY").unwrap(),
+					))
 					.body(serde_json::to_value(dto.clone()).unwrap().to_string())
 					.dispatch();
 				assert_eq!(response.status(), Status::Created);
@@ -208,6 +230,10 @@ mod test_external_id {
 				};
 				let response = client
 					.post("/external_ids")
+					.header(Header::new(
+						"X-API-Key",
+						env::var("MATCHER_API_KEY").unwrap(),
+					))
 					.header(ContentType::JSON)
 					.body(serde_json::to_value(dto.clone()).unwrap().to_string())
 					.dispatch();

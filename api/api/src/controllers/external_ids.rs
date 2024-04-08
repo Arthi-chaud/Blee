@@ -2,6 +2,7 @@ use crate::database::Database;
 use crate::dto::external_id::{ExternalIdFilter, ExternalIdResponse, NewExternalId};
 use crate::dto::page::{Page, Pagination};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult};
+use crate::guards::MatcherAuthGuard;
 use crate::services;
 use rocket::response::status;
 use rocket::serde::uuid::Uuid;
@@ -19,7 +20,7 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 async fn new_external_id(
 	db: Database<'_>,
 	data: Json<NewExternalId>,
-	// _scanner: ScannerAuthGuard,
+	_matcher: MatcherAuthGuard,
 ) -> ApiRawResult<status::Created<Json<ExternalIdResponse>>> {
 	if data.package_id.is_some() && data.artist_id.is_some()
 		|| (data.package_id.is_none() && data.artist_id.is_none())

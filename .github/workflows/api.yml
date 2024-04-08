@@ -63,6 +63,7 @@ jobs:
       ROCKET_DATABASES: '{sea_orm={url="postgresql://test:test@localhost:5432/test"}}'
       CONFIG_DIR: "./data"
       SCANNER_API_KEY: "API_KEY"
+      MATCHER_API_KEY: "API_KEY"
       RABBIT_USER: test
       RABBIT_PASS: test
       RABBIT_HOST: localhost

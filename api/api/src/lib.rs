@@ -47,9 +47,15 @@ fn create_server() -> Rocket<Build> {
 	if scanner_api_key.is_empty() {
 		panic!("env variable `SCANNER_API_KEY` is empty.")
 	}
+	let matcher_api_key =
+		env::var("MATCHER_API_KEY").expect("env variable `MATCHER_API_KEY` not set.");
+	if matcher_api_key.is_empty() {
+		panic!("env variable `MATCHER_API_KEY` is empty.")
+	}
 	let figment = Figment::from(rocket::Config::figment()).merge(Serialized::defaults(Config {
 		data_folder: data_dir,
-		scanner_api_key: scanner_api_key,
+		scanner_api_key,
+		matcher_api_key,
 	}));
 	let rabbit_config = deadpool_amqprs::Config::new(
 		OpenConnectionArguments::new(
