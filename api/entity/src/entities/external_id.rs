@@ -28,15 +28,27 @@ pub enum Relation {
 		on_update = "NoAction",
 		on_delete = "Cascade"
 	)]
-	Artist2,
+	Artist,
 	#[sea_orm(
-		belongs_to = "super::artist::Entity",
+		belongs_to = "super::package::Entity",
 		from = "Column::PackageId",
-		to = "super::artist::Column::Id",
+		to = "super::package::Column::Id",
 		on_update = "NoAction",
 		on_delete = "Cascade"
 	)]
-	Artist1,
+	Package,
+}
+
+impl Related<super::artist::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Artist.def()
+	}
+}
+
+impl Related<super::package::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Package.def()
+	}
 }
 
 impl ActiveModelBehavior for ActiveModel {}

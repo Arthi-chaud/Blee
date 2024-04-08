@@ -1,7 +1,7 @@
 use api::{self, database::Db};
 use chrono::NaiveDate;
 use entity::{
-	artist, chapter, extra, file, image, movie, package,
+	artist, chapter, external_id, extra, file, image, movie, package,
 	sea_orm_active_enums::{ExtraTypeEnum, MovieTypeEnum, VideoQualityEnum},
 };
 use once_cell::sync::OnceCell;
@@ -60,6 +60,7 @@ pub fn test_client() -> &'static Mutex<Client> {
 pub async fn setup_test_database(rocket: Rocket<Build>) -> Rocket<Build> {
 	let conn = &Db::fetch(&rocket).unwrap().conn;
 
+	let _ = external_id::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = extra::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = chapter::Entity::delete_many().exec(conn).await.unwrap();
 	let _ = movie::Entity::delete_many().exec(conn).await.unwrap();

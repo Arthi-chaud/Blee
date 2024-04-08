@@ -461,30 +461,34 @@ impl MigrationTrait for Migration {
 						ForeignKey::create()
 							.name("fk-package-external-id_id")
 							.from(ExternalId::Table, ExternalId::PackageId)
-							.to(Artist::Table, Artist::Id)
+							.to(Package::Table, Package::Id)
 							.on_delete(ForeignKeyAction::Cascade),
 					)
 					.to_owned(),
 			)
 			.await?;
-		manager.create_index(
-			Index::create()
-				.name("idx-external-id-provider-artist")
-				.table(ExternalId::Table)
-				.col(ExternalId::ProviderName)
-				.col(ExternalId::ArtistId)
-				.unique()
-				.to_owned(),
-		).await?;
-		manager.create_index(
-			Index::create()
-				.name("idx-external-id-provider-package")
-				.table(ExternalId::Table)
-				.col(ExternalId::ProviderName)
-				.col(ExternalId::PackageId)
-				.unique()
-				.to_owned(),
-		).await?;
+		manager
+			.create_index(
+				Index::create()
+					.name("idx-external-id-provider-artist")
+					.table(ExternalId::Table)
+					.col(ExternalId::ProviderName)
+					.col(ExternalId::ArtistId)
+					.unique()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.create_index(
+				Index::create()
+					.name("idx-external-id-provider-package")
+					.table(ExternalId::Table)
+					.col(ExternalId::ProviderName)
+					.col(ExternalId::PackageId)
+					.unique()
+					.to_owned(),
+			)
+			.await?;
 
 		Ok(())
 	}

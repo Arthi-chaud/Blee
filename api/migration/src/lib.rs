@@ -10,10 +10,10 @@ pub struct Migrator;
 impl MigratorTrait for Migrator {
 	fn migrations() -> Vec<Box<dyn MigrationTrait>> {
 		vec![
-            Box::new(m20240311_000001_init_enums::Migration),
-            Box::new(m20240311_073406_init_tables::Migration),
-            Box::new(m20240406_163549_insert_events::Migration),
-        ]
+			Box::new(m20240311_000001_init_enums::Migration),
+			Box::new(m20240311_073406_init_tables::Migration),
+			Box::new(m20240406_163549_insert_events::Migration),
+		]
 	}
 }
 

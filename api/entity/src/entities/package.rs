@@ -28,6 +28,8 @@ pub enum Relation {
 		on_delete = "NoAction"
 	)]
 	Artist,
+	#[sea_orm(has_many = "super::external_id::Entity")]
+	ExternalId,
 	#[sea_orm(has_many = "super::extra::Entity")]
 	Extra,
 	#[sea_orm(
@@ -45,6 +47,12 @@ pub enum Relation {
 impl Related<super::artist::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Artist.def()
+	}
+}
+
+impl Related<super::external_id::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::ExternalId.def()
 	}
 }
 

@@ -17,6 +17,8 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+	#[sea_orm(has_many = "super::external_id::Entity")]
+	ExternalId,
 	#[sea_orm(has_many = "super::extra::Entity")]
 	Extra,
 	#[sea_orm(
@@ -31,6 +33,12 @@ pub enum Relation {
 	Movie,
 	#[sea_orm(has_many = "super::package::Entity")]
 	Package,
+}
+
+impl Related<super::external_id::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::ExternalId.def()
+	}
 }
 
 impl Related<super::extra::Entity> for Entity {
