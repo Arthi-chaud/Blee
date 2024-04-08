@@ -1,7 +1,12 @@
 use entity::external_id;
-use sea_orm::{ConnectionTrait, DbErr, EntityTrait, Set};
+use sea_orm::{
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QuerySelect, QueryTrait, Set,
+};
 
-use crate::dto::external_id::NewExternalId;
+use crate::dto::{
+	external_id::{ExternalIdFilter, ExternalIdResponse, NewExternalId},
+	page::Pagination,
+};
 
 use super::{artist, package};
 
@@ -29,4 +34,28 @@ where
 	})
 	.exec_with_returning(connection)
 	.await
+}
+
+pub async fn find_many<'a, C>(
+	filters: &ExternalIdFilter,
+	pagination: &Pagination,
+	connection: &'a C,
+) -> Result<Vec<ExternalIdResponse>, DbErr>
+where
+	C: ConnectionTrait,
+{
+	let query = external_id::Entity::find()
+		.apply_if(filters.artist, |q, artist_uuid| {
+			q.filter(external_id::Column::ArtistId.eq(artist_uuid))
+		})
+		.apply_if(filters.package, |q, package_uuid| {
+			q.filter(external_id::Column::PackageId.eq(package_uuid))
+		})
+		.offset(pagination.skip)
+		.limit(pagination.take);
+
+	query
+		.all(connection)
+		.await
+		.map(|items| items.into_iter().map(|item| item.into()).collect())
 }

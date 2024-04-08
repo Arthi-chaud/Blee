@@ -1,15 +1,17 @@
 use crate::database::Database;
-use crate::dto::external_id::{ExternalIdResponse, NewExternalId};
-use crate::error_handling::{ApiError, ApiRawResult};
+use crate::dto::external_id::{ExternalIdFilter, ExternalIdResponse, NewExternalId};
+use crate::dto::page::{Page, Pagination};
+use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult};
 use crate::services;
 use rocket::response::status;
+use rocket::serde::uuid::Uuid;
 use rocket::{post, serde::json::Json};
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: new_external_id]
+	openapi_get_routes_spec![settings: new_external_id, get_external_ids]
 }
 /// Create a new extra
 #[openapi(tag = "External Id")]
@@ -39,4 +41,28 @@ async fn new_external_id(
 			|e| Err(ApiError::from(e)),
 			|v| Ok(status::Created::new("").body(Json(v.into()))),
 		)
+}
+
+/// Get many External IDs
+#[openapi(tag = "Extras")]
+#[get("/?<artist>&<package>&<pagination..>")]
+async fn get_external_ids(
+	db: Database<'_>,
+	artist: Option<Uuid>,
+	package: Option<Uuid>,
+	pagination: Pagination,
+) -> ApiPageResult<ExternalIdResponse> {
+	if artist.is_some() && package.is_some() {
+		return Err(ApiError::ValidationError(
+			"There should be exactly one parent ID set.".to_owned(),
+		));
+	}
+	services::external_ids::find_many(
+		&ExternalIdFilter { artist, package },
+		&pagination,
+		db.into_inner(),
+	)
+	.await
+	.map(|items| Page::from(items))
+	.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }

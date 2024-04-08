@@ -4,7 +4,10 @@ mod common;
 #[cfg(test)]
 mod test_external_id {
 	use api::dto::external_id::NewExternalId;
-	use rocket::http::{ContentType, Status};
+	use rocket::{
+		http::{ContentType, Status},
+		serde::uuid,
+	};
 
 	use crate::common::*;
 
@@ -19,7 +22,7 @@ mod test_external_id {
 				let dto = NewExternalId {
 					url: "a.b/c".to_string(),
 					value: "c".to_string(),
-					description: Some("This is a description".to_string()),
+					description: Some("This is an artist description".to_string()),
 					rating: Some(50),
 					provider_name: "TMDB".to_string(),
 					artist_id: Some(artist_id.clone()),
@@ -149,7 +152,7 @@ mod test_external_id {
 				let dto = NewExternalId {
 					url: "a.b/c".to_string(),
 					value: "c".to_string(),
-					description: Some("This is a description".to_string()),
+					description: Some("This is a package description".to_string()),
 					rating: Some(50),
 					provider_name: "TMDB".to_string(),
 					artist_id: None,
@@ -213,43 +216,134 @@ mod test_external_id {
 			.is_ok());
 	}
 
-	// #[test]
-	// /// Test GET `/external_ids?artist=`
-	// fn test_get_external_id_artist() {
-	// 	let client = test_client().lock().unwrap();
+	#[test]
+	/// Test GET `/external_ids?artist=`
+	fn test_get_external_id_artist() {
+		let client = test_client().lock().unwrap();
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let artist_id = &data.as_ref().unwrap().package_a.package.artist_id.unwrap();
+				let response = client
+					.get(format!("/external_ids?artist={}", artist_id))
+					.header(ContentType::JSON)
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				assert_eq!(
+					items
+						.get(0)
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("description")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					"This is an artist description"
+				);
+			})
+			.is_ok());
+	}
 
-	// 	assert!(false);
-	// }
+	#[test]
+	/// Test GET `/external_ids?package=`
+	fn test_get_external_id_package() {
+		let client = test_client().lock().unwrap();
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let package_id = &data.as_ref().unwrap().package_b.package.id;
+				let response = client
+					.get(format!("/external_ids?package={}", package_id))
+					.header(ContentType::JSON)
+					.dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let value = response_json_value(response);
+				let items = value
+					.as_object()
+					.unwrap()
+					.get("items")
+					.unwrap()
+					.as_array()
+					.unwrap();
+				assert_eq!(items.len(), 1);
+				assert_eq!(
+					items
+						.get(0)
+						.unwrap()
+						.as_object()
+						.unwrap()
+						.get("description")
+						.unwrap()
+						.as_str()
+						.unwrap(),
+					"This is a package description"
+				);
+			})
+			.is_ok());
+	}
 
-	// #[test]
-	// /// Test GET `/external_ids?package=`
-	// fn test_get_external_id_package() {
-	// 	let client = test_client().lock().unwrap();
+	#[test]
+	/// Test GET `/external_ids?package=&artist=`
+	fn test_get_external_id_package_and_artist() {
+		let client = test_client().lock().unwrap();
+		let response = client
+			.get(format!(
+				"/external_ids?artist={}&package={}",
+				uuid::Uuid::max(),
+				uuid::Uuid::max()
+			))
+			.header(ContentType::JSON)
+			.dispatch();
+		assert_eq!(response.status(), Status::BadRequest);
+	}
 
-	// 	assert!(false);
-	// }
+	#[test]
+	/// Test GET `/external_ids?package=`
+	fn test_get_external_id_parent_not_found() {
+		let client = test_client().lock().unwrap();
+		let response = client
+			.get(format!("/external_ids?package={}", uuid::Uuid::max()))
+			.header(ContentType::JSON)
+			.dispatch();
+		assert_eq!(response.status(), Status::Ok);
+		let value = response_json_value(response);
+		let items = value
+			.as_object()
+			.unwrap()
+			.get("items")
+			.unwrap()
+			.as_array()
+			.unwrap();
+		assert_eq!(items.len(), 0);
+	}
 
-	// #[test]
-	// /// Test GET `/external_ids?package=&artist=`
-	// fn test_get_external_id_package_and_artist() {
-	// 	let client = test_client().lock().unwrap();
-
-	// 	assert!(false);
-	// }
-
-	// #[test]
-	// /// Test GET `/external_ids?package=`
-	// fn test_get_external_id_parent_not_found() {
-	// 	let client = test_client().lock().unwrap();
-
-	// 	assert!(false);
-	// }
-
-	// #[test]
-	// /// Test GET `/external_ids?take=`
-	// fn test_get_external_id_pagination() {
-	// 	let client = test_client().lock().unwrap();
-
-	// 	assert!(false);
-	// }
+	#[test]
+	/// Test GET `/external_ids?skip=`
+	fn test_get_external_id_pagination() {
+		let client = test_client().lock().unwrap();
+		let response = client
+			.get("/external_ids?skip=1")
+			.header(ContentType::JSON)
+			.dispatch();
+		assert_eq!(response.status(), Status::Ok);
+		let value = response_json_value(response);
+		let items = value
+			.as_object()
+			.unwrap()
+			.get("items")
+			.unwrap()
+			.as_array()
+			.unwrap();
+		assert_eq!(items.len(), 1);
+	}
 }

@@ -54,3 +54,9 @@ pub struct NewExternalId {
 	pub artist_id: Option<Uuid>,
 	pub package_id: Option<Uuid>,
 }
+
+/// Filters for External IDs
+pub struct ExternalIdFilter {
+	pub artist: Option<Uuid>,
+	pub package: Option<Uuid>,
+}
