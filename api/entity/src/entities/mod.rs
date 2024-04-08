@@ -4,6 +4,7 @@ pub mod prelude;
 
 pub mod artist;
 pub mod chapter;
+pub mod external_id;
 pub mod extra;
 pub mod file;
 pub mod image;

@@ -65,3 +65,11 @@ pub fn example_image_ratio() -> f32 {
 pub fn example_image_colors() -> Vec<&'static str> {
 	vec!["#ffffff", "#000000", "#ff0000"]
 }
+
+pub fn example_rating() -> i16 {
+	50
+}
+
+pub fn example_provider_name() -> &'static str {
+	"TMDB"
+}

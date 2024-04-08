@@ -34,8 +34,6 @@ pub struct ArtistResponse {
 	pub name: String,
 	#[schemars(example = "example_artist_slug")]
 	pub slug: String,
-	#[schemars(example = "example_description")]
-	pub description: Option<String>,
 	pub registered_at: NaiveDateTime,
 	#[schemars(example = "example_uuid")]
 	pub poster_id: Option<Uuid>,
@@ -47,7 +45,6 @@ impl From<artist::Model> for ArtistResponse {
 			id: value.id,
 			name: value.name,
 			slug: value.unique_slug,
-			description: value.description,
 			registered_at: value.registered_at.into(),
 			poster_id: value.poster_id,
 		}

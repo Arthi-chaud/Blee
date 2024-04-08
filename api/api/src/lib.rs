@@ -47,13 +47,19 @@ fn create_server() -> Rocket<Build> {
 	if scanner_api_key.is_empty() {
 		panic!("env variable `SCANNER_API_KEY` is empty.")
 	}
+	let matcher_api_key =
+		env::var("MATCHER_API_KEY").expect("env variable `MATCHER_API_KEY` not set.");
+	if matcher_api_key.is_empty() {
+		panic!("env variable `MATCHER_API_KEY` is empty.")
+	}
 	let figment = Figment::from(rocket::Config::figment()).merge(Serialized::defaults(Config {
 		data_folder: data_dir,
-		scanner_api_key: scanner_api_key,
+		scanner_api_key,
+		matcher_api_key,
 	}));
 	let rabbit_config = deadpool_amqprs::Config::new(
 		OpenConnectionArguments::new(
-			&env::var("RABBIT_HOST").unwrap(),
+			&env::var("RABBIT_HOST").unwrap_or("localhost".to_string()),
 			env::var("RABBIT_PORT")
 				.unwrap_or("5672".to_string())
 				.parse::<u16>()
@@ -90,6 +96,7 @@ fn create_server() -> Rocket<Build> {
 		building_rocket, "/".to_owned(), openapi_settings,
 		"/artists" => controllers::artists::get_routes_and_docs(&openapi_settings),
 		"/chapters" => controllers::chapters::get_routes_and_docs(&openapi_settings),
+		"/external_ids" => controllers::external_ids::get_routes_and_docs(&openapi_settings),
 		"/extras" => controllers::extras::get_routes_and_docs(&openapi_settings),
 		"/files" => controllers::files::get_routes_and_docs(&openapi_settings),
 		"/images" => controllers::images::get_routes_and_docs(&openapi_settings),

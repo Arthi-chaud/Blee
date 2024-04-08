@@ -5,4 +5,5 @@ use serde::{Deserialize, Serialize};
 pub struct Config {
 	pub data_folder: String,
 	pub scanner_api_key: String,
+	pub matcher_api_key: String,
 }
