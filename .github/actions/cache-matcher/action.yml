@@ -1,0 +1,22 @@
+name: 'Cache (Matcher)'
+description: 'Cache for Matcher'
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/cache@v3
+      name: Cache ~/.stack
+      with:
+        path: ~/.stack
+        key: stack-global
+        restore-keys: |
+          stack-global
+    - uses: actions/cache@v3
+      name: Cache .stack-work
+      with:
+        path: matcher/.stack-work
+        key: stack-work
+        restore-keys: |
+          stack-work
+    - name: Install Stack
+      shell: bash
+      run: curl -sSL https://get.haskellstack.org/ | sh -s - -f
