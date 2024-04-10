@@ -18,7 +18,7 @@ apiRequest ::
     -> [(String, String)]
     -- ^ Query Parameters
     -> IO (Either String ByteString)
-apiRequest (APIClient url key) route query = request (url <> route) [("x-api-key", key)] query
+apiRequest (APIClient url key) route = request (url <> route) [("x-api-key", key)]
 
 -- | Returns () if the ping succeeded
 ping :: APIClient -> IO (Either String ())

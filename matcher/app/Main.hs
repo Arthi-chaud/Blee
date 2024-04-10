@@ -1,18 +1,14 @@
-import Control.Concurrent (
-    MVar,
-    newEmptyMVar,
-    takeMVar, threadDelay,
- )
+import Control.Concurrent (threadDelay)
 import Control.Monad (when)
 import Data.Aeson
 import Data.Either
 import Data.Text (pack)
+import GHC.Base (maxInt)
 import Matcher.API.Client
 import Matcher.API.Event (APIEvent (..))
 import Network.AMQP
 import System.Environment (getEnv)
 import System.Exit (exitFailure)
-import GHC.Base (maxInt)
 
 main :: IO ()
 main = do
@@ -25,7 +21,6 @@ main = do
     when (isLeft pingRes) (print pingRes >> exitFailure)
     conn <- openConnection rabbitHost "/" rabbitUname rabbitPass
     ch <- openChannel conn
-    m <- newEmptyMVar :: IO (MVar ())
 
     putStrLn "Matcher ready to match! Waiting for messages..."
     _ <- consumeMsgs ch "api" NoAck deliveryHandler
