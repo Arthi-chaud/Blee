@@ -7,4 +7,4 @@ COPY stack.yaml package.yaml stack.yaml.lock ./
 RUN stack build --dependencies-only
 RUN stack install ghcid
 
-CMD stack build && ghcid -c stack ghci matcher -W -T main
+CMD ghcid -c stack ghci matcher -W -T main

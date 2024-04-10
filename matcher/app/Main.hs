@@ -1,29 +1,37 @@
+import Control.Concurrent (
+    MVar,
+    newEmptyMVar,
+    takeMVar,
+ )
+import Control.Monad (when)
 import Data.Aeson
-import qualified Data.ByteString.Lazy.Char8 as BL
+import Data.Either
 import Data.Text (pack)
+import Matcher.API.Client
 import Matcher.API.Event (APIEvent (..))
 import Network.AMQP
 import System.Environment (getEnv)
+import System.Exit (exitFailure)
 
 main :: IO ()
 main = do
+    apiUrl <- getEnv "API_URL"
+    apiKey <- getEnv "MATCHER_API_KEY"
     rabbitHost <- getEnv "RABBIT_HOST"
     rabbitUname <- pack <$> getEnv "RABBIT_USER"
     rabbitPass <- pack <$> getEnv "RABBIT_PASS"
+    pingRes <- ping (newAPIClient apiUrl apiKey)
+    when (isLeft pingRes) (print pingRes >> exitFailure)
     conn <- openConnection rabbitHost "/" rabbitUname rabbitPass
     ch <- openChannel conn
+    m <- newEmptyMVar :: IO (MVar ())
 
-    putStrLn " [*] Waiting for messages. To exit press CTRL+C"
+    putStrLn "Matcher ready to match! Waiting for messages..."
     _ <- consumeMsgs ch "api" NoAck deliveryHandler
-    _ <- wait
+    _ <- takeMVar m
     closeConnection conn
 
 deliveryHandler :: (Message, Envelope) -> IO ()
 deliveryHandler (msg, _) = case decode (msgBody msg) :: Maybe APIEvent of
     Nothing -> putStrLn "Could not parse event"
-    Just a -> putStrLn $ " [x] Received Event " <> show (actionType a)
-
-wait :: IO ()
-wait = do
-    putStr ""
-    wait
+    Just a -> putStrLn $ "Received Event " <> show (actionType a)

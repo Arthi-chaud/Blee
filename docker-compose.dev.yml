@@ -61,6 +61,8 @@ services:
     environment:
       - RABBIT_HOST=mq
       - RABBIT_PORT=5672
+      - API_URL=http://api:8000
+      - MATCHER_API_KEY=${MATCHER_API_KEY}
     env_file:
       - .env
   db:

@@ -32,6 +32,10 @@ library:
   dependencies:
   - aeson
   - text
+  - http-client
+  - http-types
+  - http-client-tls
+  - bytestring
 
 executables:
   matcher-exe:

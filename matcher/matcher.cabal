@@ -23,7 +23,9 @@ source-repository head
 library
   exposed-modules:
       Matcher
+      Matcher.API.Client
       Matcher.API.Event
+      Matcher.Network
   other-modules:
       Paths_matcher
   hs-source-dirs:
@@ -35,6 +37,10 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bytestring
+    , http-client
+    , http-client-tls
+    , http-types
     , text
   default-language: Haskell2010
 

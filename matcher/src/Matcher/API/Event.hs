@@ -1,4 +1,4 @@
-module Matcher.API.Event where
+module Matcher.API.Event (APIEvent (..), ActionType (..)) where
 
 import Data.Aeson
 import Data.Text

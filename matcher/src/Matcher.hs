@@ -1,1 +1,1 @@
-module Matcher where
+module Matcher () where
