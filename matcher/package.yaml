@@ -12,6 +12,10 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 
+default-extensions:
+- OverloadedStrings
+- DeriveGeneric
+
 ghc-options:
 - -Wall
 - -Wcompat
@@ -25,6 +29,9 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - aeson
+  - text
 
 executables:
   matcher-exe:
@@ -36,6 +43,10 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - matcher
+    - bytestring
+    - amqp
+    - text
+    - aeson
 
 tests:
   matcher-test:
