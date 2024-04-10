@@ -1,7 +1,7 @@
 import Control.Concurrent (
     MVar,
     newEmptyMVar,
-    takeMVar,
+    takeMVar, threadDelay,
  )
 import Control.Monad (when)
 import Data.Aeson
@@ -12,6 +12,7 @@ import Matcher.API.Event (APIEvent (..))
 import Network.AMQP
 import System.Environment (getEnv)
 import System.Exit (exitFailure)
+import GHC.Base (maxInt)
 
 main :: IO ()
 main = do
@@ -28,7 +29,7 @@ main = do
 
     putStrLn "Matcher ready to match! Waiting for messages..."
     _ <- consumeMsgs ch "api" NoAck deliveryHandler
-    _ <- takeMVar m
+    threadDelay maxInt
     closeConnection conn
 
 deliveryHandler :: (Message, Envelope) -> IO ()
