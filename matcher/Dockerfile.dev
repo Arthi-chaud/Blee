@@ -1,0 +1,10 @@
+FROM haskell:9.4.8-slim as base
+
+FROM base
+WORKDIR /app
+RUN apt-get update -y && apt-get install -y inotify-tools
+COPY stack.yaml package.yaml stack.yaml.lock ./
+RUN stack build --dependencies-only
+RUN stack install ghcid
+
+CMD ghcid -c stack ghci matcher -W -T main

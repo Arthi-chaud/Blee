@@ -47,9 +47,7 @@ pub async fn hook_psql_events(rocket: Rocket<Build>, rabbit_pool: Pool) -> fairi
 			.await
 			.unwrap();
 		let (queue_name, _, _) = rabbit_channel
-			.queue_declare(QueueDeclareArguments::durable_client_named(
-				"amqprs.examples.basic",
-			))
+			.queue_declare(QueueDeclareArguments::durable_client_named("api"))
 			.await
 			.unwrap()
 			.unwrap();
