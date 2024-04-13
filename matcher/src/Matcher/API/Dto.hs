@@ -2,11 +2,11 @@ module Matcher.API.Dto (ArtistExternalId (..), BaseExternalId (..)) where
 
 import Data.Aeson.Types
 
-data BaseExternalId = ExternalId
+data BaseExternalId = BaseExternalId
     { url :: String,
       value :: String,
       description :: Maybe String,
-      rating :: Int,
+      rating :: Maybe Int,
       providerName :: String
     }
 

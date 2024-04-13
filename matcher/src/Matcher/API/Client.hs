@@ -1,6 +1,8 @@
-module Matcher.API.Client (APIClient(..), ping) where
+module Matcher.API.Client (APIClient (..), ping, pushArtistExternalId) where
 
+import Data.Aeson (encode)
 import Data.ByteString
+import Matcher.API.Dto (ArtistExternalId)
 import Matcher.Network
 
 data APIClient = APIClient
@@ -17,6 +19,18 @@ apiRequest ::
     -> IO (Either String ByteString)
 apiRequest (APIClient url key) route = request (url <> route) [("x-api-key", key)]
 
+apiPost ::
+    APIClient
+    -> String
+    -- ^ Route
+    -> ByteString
+    -- ^ Body
+    -> IO (Either String ByteString)
+apiPost (APIClient url key) route = post (url <> route) "application/json" [("x-api-key", key)]
+
 -- | Returns () if the ping succeeded
 ping :: APIClient -> IO (Either String ())
 ping client = (() <$) <$> apiRequest client "/" []
+
+pushArtistExternalId :: APIClient -> ArtistExternalId -> IO (Either String ())
+pushArtistExternalId client dto = (() <$) <$> apiPost client "/external_ids" (toStrict $ encode dto)

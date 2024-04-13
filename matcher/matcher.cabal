@@ -49,6 +49,7 @@ library
     , slugify
     , text
     , text-metrics
+    , transformers
   default-language: Haskell2010
 
 executable matcher-exe
