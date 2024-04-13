@@ -38,6 +38,8 @@ library:
   - http-types
   - http-client-tls
   - bytestring
+  - text-metrics
+  - slugify
 
 executables:
   matcher-exe:

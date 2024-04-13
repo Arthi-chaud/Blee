@@ -1,9 +1,12 @@
 module Matcher.TMDB.Client (TMDBClient (..), searchArtist, getArtistDetails) where
 
 import Data.Aeson (eitherDecodeStrict')
-import Data.ByteString
+import Data.ByteString (ByteString)
+import Data.Text
+import Data.Text.Metrics (levenshtein)
 import Matcher.Network
 import Matcher.TMDB.Models
+import Text.Slugify (slugify)
 
 newtype TMDBClient = TMDBClient
     { apiKey :: String
@@ -39,7 +42,14 @@ searchArtist client token = do
                     page <- eitherDecodeStrict' s :: Either String (Page ArtistSearchResult)
                     case results page of
                         [] -> Left "Empty Page"
-                        (a : _) -> return a
+                        (a : _) ->
+                            if levenshtein (slugify $ pack $ name a) (slugify $ pack token) > 2
+                                then Left "No Match"
+                                else
+                                    return
+                                        a
+                                            { profilePath = ("https://image.tmdb.org/t/p/original" ++) <$> profilePath a
+                                            }
                 )
 
 getArtistDetails :: TMDBClient -> Integer -> IO (Either String ArtistDetails)

@@ -46,7 +46,9 @@ library
     , http-client
     , http-client-tls
     , http-types
+    , slugify
     , text
+    , text-metrics
   default-language: Haskell2010
 
 executable matcher-exe
