@@ -24,8 +24,11 @@ library
   exposed-modules:
       Matcher
       Matcher.API.Client
+      Matcher.API.Dto
       Matcher.API.Event
       Matcher.Network
+      Matcher.TMDB.Client
+      Matcher.TMDB.Models
   other-modules:
       Paths_matcher
   hs-source-dirs:
@@ -33,6 +36,8 @@ library
   default-extensions:
       OverloadedStrings
       DeriveGeneric
+      RecordWildCards
+      LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
@@ -41,7 +46,10 @@ library
     , http-client
     , http-client-tls
     , http-types
+    , slugify
     , text
+    , text-metrics
+    , transformers
   default-language: Haskell2010
 
 executable matcher-exe
@@ -53,6 +61,8 @@ executable matcher-exe
   default-extensions:
       OverloadedStrings
       DeriveGeneric
+      RecordWildCards
+      LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -67,14 +77,19 @@ test-suite matcher-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Matcher.TestTMDB
       Paths_matcher
   hs-source-dirs:
       test
   default-extensions:
       OverloadedStrings
       DeriveGeneric
+      RecordWildCards
+      LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , hspec
+    , load-env
     , matcher
   default-language: Haskell2010

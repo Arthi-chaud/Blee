@@ -15,6 +15,8 @@ dependencies:
 default-extensions:
 - OverloadedStrings
 - DeriveGeneric
+- RecordWildCards
+- LambdaCase
 
 ghc-options:
 - -Wall
@@ -36,6 +38,9 @@ library:
   - http-types
   - http-client-tls
   - bytestring
+  - text-metrics
+  - slugify
+  - transformers
 
 executables:
   matcher-exe:
@@ -62,3 +67,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - matcher
+    - hspec
+    - load-env
