@@ -1,0 +1,21 @@
+server {
+	listen ${PORT} default_server;
+	listen [::]:${PORT} default_server;
+	access_log off;
+	server_name _;
+
+	root /etc/nginx/html;
+    index index.html index.htm;
+
+	location = /api {
+	    return 302 /api/;
+	}
+
+	location /api/ {
+	    proxy_pass ${SERVER_URL};
+	}
+
+	location / {
+        try_files $uri $uri/ =404;
+    }
+}

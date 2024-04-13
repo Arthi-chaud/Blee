@@ -1,5 +1,17 @@
 # This compose allows to build the whole project in a "production"-like environment 
 services:
+  front:
+    build:
+      context: ./front
+    restart: on-failure
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - PORT=3000
+      - SERVER_URL="http://api:8000/"
+    ports:
+      - "3000:3000"
   api:
     build:
       context: ./api

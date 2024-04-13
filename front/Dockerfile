@@ -21,6 +21,6 @@ RUN flutter pub get
 RUN flutter build web
 
 FROM nginx:1.25.2-alpine
-COPY --from=build-env /app/build/web /usr/share/nginx/html
-EXPOSE 80
+COPY --from=build-env /app/build/web /etc/nginx/html
+COPY ./nginx.conf.template /etc/nginx/templates/front.conf.template
 CMD ["nginx", "-g", "daemon off;"]
