@@ -1,4 +1,4 @@
-module Matcher.TMDB.Client (TMDBClient (..), searchArtist, getArtistDetails) where
+module Matcher.TMDB.Client (TMDBClient (..), searchArtist, getArtistDetails, getPoster) where
 
 import Data.Aeson (eitherDecodeStrict')
 import Data.ByteString (ByteString)
@@ -62,3 +62,10 @@ getArtistDetails client artistId = do
     return $
         rawRes
             >>= eitherDecodeStrict'
+
+getPoster :: TMDBClient -> String -> IO (Either String ByteString)
+getPoster client posterurl =
+    request
+        posterurl
+        []
+        [("api_key", apiKey client)]

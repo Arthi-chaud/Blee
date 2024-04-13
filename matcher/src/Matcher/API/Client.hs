@@ -1,4 +1,4 @@
-module Matcher.API.Client (APIClient (..), ping, pushArtistExternalId) where
+module Matcher.API.Client (APIClient (..), ping, pushArtistExternalId, pushArtistPoster) where
 
 import Data.Aeson (encode)
 import Data.ByteString
@@ -28,9 +28,22 @@ apiPost ::
     -> IO (Either String ByteString)
 apiPost (APIClient url key) route = post (url <> route) "application/json" [("x-api-key", key)]
 
+apiPostBinary ::
+    APIClient
+    -> String
+    -- ^ Route
+    -> ByteString
+    -- ^ Body
+    -> IO (Either String ByteString)
+apiPostBinary (APIClient url key) route = post (url <> route) "application/octet-stream" [("x-api-key", key)]
+
 -- | Returns () if the ping succeeded
 ping :: APIClient -> IO (Either String ())
 ping client = (() <$) <$> apiRequest client "/" []
 
 pushArtistExternalId :: APIClient -> ArtistExternalId -> IO (Either String ())
 pushArtistExternalId client dto = (() <$) <$> apiPost client "/external_ids" (toStrict $ encode dto)
+
+pushArtistPoster :: APIClient -> String -> ByteString -> IO (Either String ())
+pushArtistPoster client uuid posterBytes =
+    (() <$) <$> apiPostBinary client ("/artists/" ++ uuid ++ "/poster") posterBytes

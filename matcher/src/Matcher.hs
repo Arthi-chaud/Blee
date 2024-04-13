@@ -7,7 +7,7 @@ import Matcher.API.Event
 import Matcher.TMDB.Client
 import Matcher.TMDB.Models (
     ArtistDetails (ArtistDetails),
-    ArtistSearchResult (identifier),
+    ArtistSearchResult (..),
  )
 import Prelude hiding (id)
 
@@ -28,5 +28,11 @@ handleAPIEvent client tmdb (APIEvent "artist" Insert uuid name) = runExceptT $ d
                           providerName = "TMDB"
                         }
                 }
-    ExceptT $ pushArtistExternalId client artistDto
+    ExceptT $
+        pushArtistExternalId client artistDto
+            >> case profilePath artist of
+                Nothing -> return $ Right ()
+                Just posterUrl -> runExceptT $ do
+                    posterBytes <- ExceptT $ getPoster tmdb posterUrl
+                    ExceptT $ pushArtistPoster client uuid posterBytes
 handleAPIEvent _ _ _ = return $ Left "No handler for this event"
