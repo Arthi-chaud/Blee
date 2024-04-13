@@ -1,4 +1,4 @@
-module Matcher.API.Client (APIClient, newAPIClient, ping) where
+module Matcher.API.Client (APIClient(..), ping) where
 
 import Data.ByteString
 import Matcher.Network
@@ -7,9 +7,6 @@ data APIClient = APIClient
     { apiUrl :: String,
       apiKey :: String
     }
-
-newAPIClient :: String -> String -> APIClient
-newAPIClient = APIClient
 
 apiRequest ::
     APIClient

@@ -17,7 +17,7 @@ main = do
     rabbitHost <- getEnv "RABBIT_HOST"
     rabbitUname <- pack <$> getEnv "RABBIT_USER"
     rabbitPass <- pack <$> getEnv "RABBIT_PASS"
-    pingRes <- ping (newAPIClient apiUrl apiKey)
+    pingRes <- ping (APIClient {..})
     when (isLeft pingRes) (print pingRes >> exitFailure)
     conn <- openConnection rabbitHost "/" rabbitUname rabbitPass
     ch <- openChannel conn

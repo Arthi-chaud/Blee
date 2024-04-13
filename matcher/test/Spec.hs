@@ -1,2 +1,6 @@
+import qualified Matcher.TestTMDB
+import Test.Hspec
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = hspec $ do
+    Matcher.TestTMDB.specs
