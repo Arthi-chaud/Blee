@@ -5,4 +5,4 @@ RUN cargo install cargo-watch
 ENV ROCKET_ADDRESS=0.0.0.0
 EXPOSE 8000
 # We reduce the pool_size because of this: https://github.com/rwf2/Rocket/issues/1931#issuecomment-955945953
-CMD cargo build && cd api && DB_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}" ROCKET_DATABASES="{sea_orm={url=$DB_URL, pool_size=2}}" cargo  watch -x run
+CMD cargo build && cd api && DB_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}" ROCKET_DATABASES="{sea_orm={url=$DB_URL, pool_size=1}}" cargo  watch -x run

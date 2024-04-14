@@ -72,6 +72,12 @@ mod test_extra {
 		assert_eq!(extra_artist_id, artist_id);
 		let extra_file_id = extra_value.get("file_id").unwrap().as_str().unwrap();
 		assert_eq!(extra_file_id, file_id);
+		let artist_name = extra_value.get("artist_name").unwrap().as_str().unwrap();
+		assert_eq!(artist_name, "Depeche Mode");
+		let package_name = extra_value.get("package_name").unwrap().as_str().unwrap();
+		assert_eq!(package_name, "The Best Of");
+		let duration = extra_value.get("duration").unwrap().as_i64().unwrap();
+		assert_eq!(duration, 10);
 
 		// Check Artist Exists
 		let artist_response = client.get(format!("/artists/{}", artist_id)).dispatch();
@@ -88,6 +94,8 @@ mod test_extra {
 		assert_eq!(name, "The Best Of");
 		let package_artist_id = package_value.get("artist_id").unwrap().as_str().unwrap();
 		assert_eq!(package_artist_id, artist_id);
+		let artist_name = extra_value.get("artist_name").unwrap().as_str().unwrap();
+		assert_eq!(artist_name, "Depeche Mode");
 
 		// Check File
 		let file_response = client.get(format!("/files/{}", file_id)).dispatch();
