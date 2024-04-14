@@ -87,7 +87,7 @@ jobs:
       - name: Install Coverage utility
         run: stack install hpc-codecov
       - name: Run unit tests
-        run: stack test --coverage
+        run: TMDB_API_KEY=${{ secrets.TMDB_API_KEY }} stack test --coverage
       - name: Process Coverage report
         run: hpc-codecov stack:all -o codecov.json
       - name: Upload coverage reports to Codecov

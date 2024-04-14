@@ -5,4 +5,8 @@ resolver: lts-21.25
 packages:
 - .
 
+extra-deps:
+- git: https://github.com/hapytex/slugify
+  commit: 3e0e9d88d8b53f1cf8af3d3729147922cee8f76a
+
 system-ghc: true
