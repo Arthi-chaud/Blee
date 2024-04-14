@@ -76,6 +76,10 @@ mod test_movie {
 		let movie_value = response_json_value(movie_response);
 		let name = movie_value.get("name").unwrap().as_str().unwrap();
 		assert_eq!(name, "Miss Americana");
+		let package_name = movie_value.get("package_name").unwrap().as_str().unwrap();
+		assert_eq!(package_name, "Miss Americana");
+		let artist_name = movie_value.get("artist_name").unwrap().as_str().unwrap();
+		assert_eq!(artist_name, "Taylor Swift");
 
 		// Check Chapters properties
 		let chapter_response = client
