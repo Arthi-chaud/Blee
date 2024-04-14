@@ -1,4 +1,11 @@
-module Matcher.TMDB.Client (TMDBClient (..), searchArtist, getArtistDetails, getPoster) where
+module Matcher.TMDB.Client (
+    TMDBClient (..),
+    searchArtist,
+    getArtistDetails,
+    getPoster,
+    searchMovie,
+    getMovieDetails,
+) where
 
 import Data.Aeson (eitherDecodeStrict')
 import Data.ByteString (ByteString)
@@ -52,12 +59,47 @@ searchArtist client token = do
                                             }
                 )
 
+searchMovie :: TMDBClient -> String -> IO (Either String MovieSearchResult)
+searchMovie client token = do
+    searchRawRes <-
+        tmdbRequest
+            client
+            "/search/movie"
+            [ ("query", token),
+              ("page", "1"),
+              ("include_adult", "false"),
+              ("language", "en-US")
+            ]
+    return $
+        searchRawRes
+            >>= ( \s -> do
+                    page <- eitherDecodeStrict' s :: Either String (Page MovieSearchResult)
+                    case results page of
+                        [] -> Left "Empty Page"
+                        (a : _) ->
+                            return $
+                                a
+                                    { posterPath = ("https://image.tmdb.org/t/p/original" ++) <$> posterPath a
+                                    }
+                )
+
 getArtistDetails :: TMDBClient -> Integer -> IO (Either String ArtistDetails)
 getArtistDetails client artistId = do
     rawRes <-
         tmdbRequest
             client
             ("/person/" <> show artistId)
+            []
+    return $
+        rawRes
+            >>= eitherDecodeStrict'
+
+getMovieDetails :: TMDBClient -> Integer -> IO (Either String MovieDetails)
+getMovieDetails client movieId = do
+    rawRes <-
+        tmdbRequest
+            client
+            ("/movie/" <> show movieId)
             []
     return $
         rawRes
