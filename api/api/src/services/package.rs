@@ -1,17 +1,47 @@
+use std::borrow::Borrow;
+
 use crate::dto::{
 	artist::ArtistResponse,
-	package::{PackageFilter, PackageResponseWithRelations, PackageSort},
+	package::{PackageFilter, PackageResponse, PackageResponseWithRelations, PackageSort},
 	page::Pagination,
 	sort::Sort,
 };
 use ::slug::slugify;
+use chrono::NaiveDate;
 use entity::{artist, image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	sea_query::{self, *},
-	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
-	QueryTrait, RelationTrait, Set,
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, FromQueryResult, QueryFilter, QueryOrder,
+	QuerySelect, QueryTrait, RelationTrait, Set,
 };
+
+#[derive(FromQueryResult)]
+struct PackageModel {
+	pub id: Uuid,
+	pub name: String,
+	pub unique_slug: String,
+	pub release_year: Option<NaiveDate>,
+	pub registered_at: NaiveDate,
+	pub artist_id: Option<Uuid>,
+	pub poster_id: Option<Uuid>,
+	pub artist_name: Option<String>,
+}
+
+impl From<PackageModel> for PackageResponse {
+	fn from(value: PackageModel) -> Self {
+		PackageResponse {
+			id: value.id,
+			name: value.name,
+			artist_name: value.artist_name,
+			slug: value.unique_slug,
+			release_year: value.release_year,
+			registered_at: value.registered_at.into(),
+			artist_id: value.artist_id,
+			poster_id: value.poster_id,
+		}
+	}
+}
 
 pub async fn create_or_find<'s, 'a, C>(
 	artist: &Option<ArtistResponse>,
@@ -59,7 +89,9 @@ where
 	C: ConnectionTrait,
 {
 	let uuid_parse_result = Uuid::parse_str(slug_or_uuid);
-	let mut query = package::Entity::find();
+	let mut query = package::Entity::find()
+		.column_as(artist::Column::Name, "artist_name")
+		.join(JoinType::InnerJoin, package::Relation::Artist.def());
 
 	if let Ok(uuid) = uuid_parse_result {
 		query = query.filter(package::Column::Id.eq(uuid));
@@ -69,14 +101,15 @@ where
 
 	let (package, poster) = query
 		.find_also_related(image::Entity)
+		.into_model::<PackageModel, image::Model>()
 		.one(connection)
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))?;
 
+	dbg!(package.artist_name.borrow());
 	Ok(PackageResponseWithRelations {
 		package: package.into(),
 		poster: poster.map(|x| x.into()),
-		artist: None,
 	})
 }
 
@@ -118,7 +151,9 @@ where
 		}
 	}
 
-	let joint_query = query.find_also_related(image::Entity);
+	let joint_query = query
+		.find_also_related(image::Entity)
+		.into_model::<PackageModel, image::Model>();
 
 	joint_query.all(connection).await.map(|items| {
 		items
@@ -126,7 +161,6 @@ where
 			.map(|(package, poster)| PackageResponseWithRelations {
 				package: package.into(),
 				poster: poster.map(|x| x.into()),
-				artist: None,
 			})
 			.collect()
 	})
