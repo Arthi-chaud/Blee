@@ -1,8 +1,17 @@
-module Matcher.API.Client (APIClient (..), ping, pushArtistExternalId, pushArtistPoster) where
+module Matcher.API.Client (
+    APIClient (..),
+    ping,
+    pushArtistExternalId,
+    pushPackageExternalId,
+    pushArtistPoster,
+    pushPackagePoster,
+    getArtist,
+    getPackage,
+) where
 
-import Data.Aeson (encode)
+import Data.Aeson (eitherDecodeStrict', encode)
 import Data.ByteString
-import Matcher.API.Dto (ArtistExternalId)
+import Matcher.API.Dto (Artist, ArtistExternalId, Package, PackageExternalId)
 import Matcher.Network
 
 data APIClient = APIClient
@@ -47,3 +56,16 @@ pushArtistExternalId client dto = (() <$) <$> apiPost client "/external_ids" (to
 pushArtistPoster :: APIClient -> String -> ByteString -> IO (Either String ())
 pushArtistPoster client uuid posterBytes =
     (() <$) <$> apiPostBinary client ("/artists/" ++ uuid ++ "/poster") posterBytes
+
+getArtist :: APIClient -> String -> IO (Either String Artist)
+getArtist client uuid = (eitherDecodeStrict' =<<) <$> apiRequest client ("/artists/" ++ uuid) []
+
+getPackage :: APIClient -> String -> IO (Either String Package)
+getPackage client uuid = (eitherDecodeStrict' =<<) <$> apiRequest client ("/packages/" ++ uuid) []
+
+pushPackageExternalId :: APIClient -> PackageExternalId -> IO (Either String ())
+pushPackageExternalId client dto = (() <$) <$> apiPost client "/external_ids" (toStrict $ encode dto)
+
+pushPackagePoster :: APIClient -> String -> ByteString -> IO (Either String ())
+pushPackagePoster client uuid posterBytes =
+    (() <$) <$> apiPostBinary client ("/packages/" ++ uuid ++ "/poster") posterBytes

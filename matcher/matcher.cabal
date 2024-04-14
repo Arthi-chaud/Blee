@@ -25,6 +25,9 @@ library
       Matcher
       Matcher.API.Client
       Matcher.API.Dto
+      Matcher.API.Dto.Artist
+      Matcher.API.Dto.BaseExternalId
+      Matcher.API.Dto.Package
       Matcher.API.Event
       Matcher.Network
       Matcher.TMDB.Client

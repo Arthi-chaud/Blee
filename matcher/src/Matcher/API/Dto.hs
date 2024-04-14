@@ -1,28 +1,11 @@
-module Matcher.API.Dto (ArtistExternalId (..), BaseExternalId (..)) where
+module Matcher.API.Dto (
+    ArtistExternalId (..),
+    BaseExternalId (..),
+    Artist (..),
+    Package (..),
+    PackageExternalId (..),
+) where
 
-import Data.Aeson.Types
-
-data BaseExternalId = BaseExternalId
-    { url :: String,
-      value :: String,
-      description :: Maybe String,
-      rating :: Maybe Int,
-      providerName :: String
-    }
-
-jsonPairs :: BaseExternalId -> [Pair]
-jsonPairs i =
-    [ "url" .= url i,
-      "value" .= value i,
-      "description" .= description i,
-      "rating" .= rating i,
-      "provider_name" .= providerName i
-    ]
-
-data ArtistExternalId = ArtistExternalId
-    { artistId :: String,
-      externalId :: BaseExternalId
-    }
-
-instance ToJSON ArtistExternalId where
-    toJSON (ArtistExternalId i d) = object $ ("artist_id" .= i) : jsonPairs d
+import Matcher.API.Dto.Artist
+import Matcher.API.Dto.BaseExternalId
+import Matcher.API.Dto.Package
