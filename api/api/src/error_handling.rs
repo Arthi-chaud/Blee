@@ -78,8 +78,9 @@ impl<'r> Responder<'r, 'static> for ApiError {
 				status_code: Status::Conflict,
 				message: "Resource already exists.".to_owned(),
 			},
-			_ => {
+			x => {
 				// TODO: Log
+				println!("{:?}", x);
 				ErrorResponse {
 					status_code: Status::InternalServerError,
 					message: "An unknown error occured".to_owned(),

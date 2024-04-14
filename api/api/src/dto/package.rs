@@ -1,10 +1,10 @@
+use super::image::ImageResponse;
 use crate::swagger_examples::*;
 use chrono::{NaiveDate, NaiveDateTime};
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::okapi::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use super::image::ImageResponse;
 
 /// A PackageResponse with the related entitied
 #[derive(Serialize, JsonSchema)]

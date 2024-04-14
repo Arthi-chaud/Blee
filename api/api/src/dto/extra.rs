@@ -1,9 +1,7 @@
-use super::file::{FileResponse, NewFile};
-use super::{artist::ArtistResponse, package::PackageResponse};
+use super::file::NewFile;
 use crate::dto::image::ImageResponse;
 use crate::swagger_examples::*;
 use chrono::NaiveDateTime;
-use entity::extra;
 use entity::sea_orm_active_enums::ExtraTypeEnum;
 use rocket::serde::uuid::Uuid;
 use rocket_okapi::okapi::schemars;
@@ -14,15 +12,6 @@ pub struct ExtraResponseWithRelations {
 	#[serde(flatten)]
 	pub extra: ExtraResponse,
 	pub thumbnail: Option<ImageResponse>,
-	#[schemars(skip)]
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub package: Option<PackageResponse>,
-	#[schemars(skip)]
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub artist: Option<ArtistResponse>,
-	#[schemars(skip)]
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub file: Option<FileResponse>,
 }
 
 #[derive(Serialize, JsonSchema)]
@@ -43,24 +32,10 @@ pub struct ExtraResponse {
 	pub disc_index: Option<i32>,
 	#[schemars(example = "example_index")]
 	pub track_index: Option<i32>,
+	pub artist_name: Option<String>,
+	pub package_name: String,
+	pub duration: u64,
 	pub r#type: Vec<ExtraType>,
-}
-
-impl From<extra::Model> for ExtraResponse {
-	fn from(value: extra::Model) -> Self {
-		ExtraResponse {
-			id: value.id,
-			name: value.name,
-			thumbnail_id: value.thumbnail_id,
-			registered_at: value.registered_at.into(),
-			package_id: value.package_id,
-			artist_id: value.artist_id,
-			file_id: value.file_id,
-			disc_index: value.disc_index,
-			track_index: value.track_index,
-			r#type: value.r#type.iter().map(|e| e.clone().into()).collect(),
-		}
-	}
 }
 
 #[derive(Serialize, Deserialize, JsonSchema, Clone, Copy, FromFormField)]

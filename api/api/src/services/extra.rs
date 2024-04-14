@@ -1,15 +1,54 @@
 use crate::dto::{
-	extra::{ExtraFilter, ExtraResponseWithRelations, ExtraSort, ExtraType},
+	extra::{ExtraFilter, ExtraResponse, ExtraResponseWithRelations, ExtraSort, ExtraType},
 	page::Pagination,
 	sort::Sort,
 };
-use entity::{artist, extra, image, package, sea_orm_active_enums::ExtraTypeEnum};
+use chrono::NaiveDate;
+use entity::{artist, extra, file, image, package, sea_orm_active_enums::ExtraTypeEnum};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
-	sea_query::*, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, JoinType, QueryFilter,
-	QueryOrder, QuerySelect, QueryTrait, RelationTrait, Set,
+	sea_query::*, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, FromQueryResult, JoinType,
+	QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait, Set,
 };
 use slug::slugify;
+
+#[derive(FromQueryResult)]
+pub struct ExtraModel {
+	pub id: Uuid,
+	pub name: String,
+	pub name_slug: String,
+	pub thumbnail_id: Option<Uuid>,
+	pub registered_at: NaiveDate,
+	pub package_id: Uuid,
+	pub artist_id: Uuid,
+	pub file_id: Uuid,
+	pub artist_name: Option<String>,
+	pub package_name: String,
+	pub duration: i64,
+	pub disc_index: Option<i32>,
+	pub track_index: Option<i32>,
+	pub r#type: Vec<ExtraTypeEnum>,
+}
+
+impl From<ExtraModel> for ExtraResponse {
+	fn from(value: ExtraModel) -> Self {
+		ExtraResponse {
+			id: value.id,
+			name: value.name,
+			thumbnail_id: value.thumbnail_id,
+			registered_at: value.registered_at.into(),
+			package_id: value.package_id,
+			artist_id: value.artist_id,
+			file_id: value.file_id,
+			disc_index: value.disc_index,
+			track_index: value.track_index,
+			r#type: value.r#type.iter().map(|e| e.clone().into()).collect(),
+			artist_name: value.artist_name,
+			package_name: value.package_name,
+			duration: value.duration as u64,
+		}
+	}
+}
 
 pub async fn create<'s, 'a, C>(
 	extra_name: &'s str,
@@ -49,7 +88,14 @@ where
 	C: ConnectionTrait,
 {
 	let (extra, image) = extra::Entity::find_by_id(*uuid)
+		.column_as(artist::Column::Name, "artist_name")
+		.join(JoinType::InnerJoin, extra::Relation::Artist.def())
+		.column_as(package::Column::Name, "package_name")
+		.join(JoinType::InnerJoin, extra::Relation::Package.def())
+		.column_as(file::Column::Duration, "duration")
+		.join(JoinType::InnerJoin, extra::Relation::File.def())
 		.find_also_related(image::Entity)
+		.into_model::<ExtraModel, image::Model>()
 		.one(connection)
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Extra".to_string())), |r| Ok(r))?;
@@ -57,9 +103,6 @@ where
 	Ok(ExtraResponseWithRelations {
 		extra: extra.into(),
 		thumbnail: image.map(|x| x.into()),
-		artist: None,
-		package: None,
-		file: None,
 	})
 }
 
@@ -83,6 +126,16 @@ where
 			extra::Relation::Package.def(),
 			Alias::new("package"),
 		)
+		.column_as(
+			Expr::col((Alias::new("artist"), artist::Column::Name)),
+			"artist_name",
+		)
+		.column_as(
+			Expr::col((Alias::new("package"), package::Column::Name)),
+			"package_name",
+		)
+		.join(JoinType::InnerJoin, extra::Relation::File.def())
+		.column_as(file::Column::Duration, "duration")
 		.apply_if(filters.r#type, |q, r#type| {
 			//TODO
 			q.filter(extra::Column::Type.eq(vec![ExtraTypeEnum::from(r#type)]))
@@ -124,6 +177,7 @@ where
 	}
 	query
 		.find_also_related(image::Entity)
+		.into_model::<ExtraModel, image::Model>()
 		.all(connection)
 		.await
 		.map(|items| {
@@ -132,9 +186,6 @@ where
 				.map(|(extra, image)| ExtraResponseWithRelations {
 					extra: extra.into(),
 					thumbnail: image.map(|i| i.into()),
-					package: None,
-					artist: None,
-					file: None,
 				})
 				.collect()
 		})

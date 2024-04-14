@@ -115,6 +115,8 @@ mod test_movie {
 		assert_eq!(name, "Miss Americana");
 		let package_artist_id = package_value.get("artist_id").unwrap().as_str().unwrap();
 		assert_eq!(package_artist_id, artist_id);
+		let artist_name = package_value.get("artist_name").unwrap().as_str().unwrap();
+		assert_eq!(artist_name, "Taylor Swift");
 
 		// Check File
 		let file_response = client.get(format!("/files/{}", file_id)).dispatch();
