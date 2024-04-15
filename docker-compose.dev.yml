@@ -26,6 +26,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mq:
+        condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:8000/ || exit 1
       interval: 10s
@@ -48,6 +50,11 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBIT_PASS}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 10
   matcher:
     build:
       context: ./matcher
