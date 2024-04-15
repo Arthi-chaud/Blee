@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use crate::dto::{
 	artist::ArtistResponse,
 	package::{PackageFilter, PackageResponse, PackageResponseWithRelations, PackageSort},
@@ -106,7 +104,6 @@ where
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))?;
 
-	dbg!(package.artist_name.borrow());
 	Ok(PackageResponseWithRelations {
 		package: package.into(),
 		poster: poster.map(|x| x.into()),
