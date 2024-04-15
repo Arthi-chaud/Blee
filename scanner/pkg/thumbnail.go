@@ -3,11 +3,7 @@ package pkg
 import (
 	"bytes"
 	"fmt"
-	// "fmt"
 	"io"
-	"os"
-
-	// "time"
 
 	"github.com/u2takey/ffmpeg-go"
 )
@@ -18,6 +14,6 @@ func GetFrame(filepath string, timestamp int64) (io.Reader, error) {
 	err := ffmpeg_go.Input(filepath, ffmpeg_go.KwArgs{"ss": formattedDuration}).
 		Filter("select", ffmpeg_go.Args{"gte(n,1)"}).
 		Output("pipe:", ffmpeg_go.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
-		WithOutput(buf, os.Stdout).Run()
+		WithOutput(buf).Run()
 	return buf, err
 }
