@@ -8,7 +8,9 @@ use migration::MigratorTrait;
 use rocket::fairing::{self, AdHoc};
 use rocket::figment::providers::Serialized;
 use rocket::figment::Figment;
+use rocket::http::Method;
 use rocket::{Build, Rocket};
+use rocket_cors::*;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{mount_endpoints_and_merged_docs, swagger_ui::*};
 use sea_orm_rocket::Database;
@@ -87,6 +89,19 @@ fn create_server() -> Rocket<Build> {
 			}),
 		)
 		.mount("/", routes![index]);
+
+	if cfg!(debug_assertions) {
+		let cors = CorsOptions::default()
+			.allowed_origins(AllowedOrigins::all())
+			.allowed_methods(
+				vec![Method::Get, Method::Post, Method::Patch]
+					.into_iter()
+					.map(From::from)
+					.collect(),
+			)
+			.allow_credentials(true).to_cors().unwrap();
+		building_rocket = building_rocket.attach(cors);
+	}
 
 	let openapi_settings = OpenApiSettings {
 		json_path: "/swagger/openapi.json".to_owned(),

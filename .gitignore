@@ -1,3 +1,4 @@
 .env
 scanner.json
 data/
+.DS_Store
