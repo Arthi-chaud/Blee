@@ -28,10 +28,9 @@ class APIClient {
     body ??= {};
     params ?? {};
     http.Response response;
-    print(_host + (kDebugMode ? route : ("api" + route)));
     Uri fullRoute = Uri.parse(_host +
-        (kDebugMode ? route : ("api" + route)) +
-        (params == null ? "" : ("?" + Uri(queryParameters: params).query)));
+        (kDebugMode ? route : "api$route") +
+        (params == null ? "" : "?${Uri(queryParameters: params).query}"));
     final Map<String, String> headers = {
       'Content-type': 'application/json',
       'Accept': 'application/json',

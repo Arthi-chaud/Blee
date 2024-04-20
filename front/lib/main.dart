@@ -8,11 +8,11 @@ part 'main.g.dart';
 
 @riverpod
 Future<Artist> activity(ActivityRef ref) async {
-  return await new APIClient().getArtist("the-corrs");
+  return await APIClient().getArtist("the-corrs");
 }
 
 void main() {
-  runApp(ProviderScope(
+  runApp(const ProviderScope(
     child: MyApp(),
   ));
 }

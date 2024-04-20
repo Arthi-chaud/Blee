@@ -23,19 +23,19 @@ class Extra with _$Extra {
 
 enum ExtraType {
   @JsonValue("alternate_view")
-  AternateView,
+  aternateView,
   @JsonValue("backdrops")
-  Backdrops,
+  backdrops,
   @JsonValue("behind_the_scenes")
-  BehindTheScenes,
+  behindTheScenes,
   @JsonValue("interview")
-  Interview,
+  interview,
   @JsonValue("music_video")
-  MusicVideo,
+  musicVideo,
   @JsonValue("other")
-  Other,
+  other,
   @JsonValue("performance")
-  Performance,
+  performance,
   @JsonValue("trailer")
-  Trailer,
+  trailer,
 }

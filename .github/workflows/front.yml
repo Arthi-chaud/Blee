@@ -62,5 +62,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Flutter
         uses: ./.github/actions/cache-front
+      - name: Generate Source Code
+        run: dart run build_runner build
       - name: Run analyzer
         run: flutter analyze

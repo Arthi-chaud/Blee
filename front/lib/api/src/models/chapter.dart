@@ -22,11 +22,11 @@ class Chapter with _$Chapter {
 
 enum ChapterType {
   @JsonValue("interview")
-  Interview,
+  interview,
   @JsonValue("non_musical_interview")
-  NonMusicalInterview,
+  nonMusicalInterview,
   @JsonValue("other")
-  Other,
+  other,
   @JsonValue("performance")
-  Performance
+  performance
 }

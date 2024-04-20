@@ -22,7 +22,7 @@ class Movie with _$Movie {
 
 enum MovieType {
   @JsonValue("documentary")
-  Documentary,
+  documentary,
   @JsonValue("concert")
-  Concert,
+  concert,
 }
