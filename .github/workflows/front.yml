@@ -1,0 +1,44 @@
+name: "Front"
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./front
+
+jobs:
+  Changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      front: ${{ steps.filter.outputs.front }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            front:
+              - 'front/**'
+              - '.github/workflows/front.yml'
+  Build:
+    needs: changes
+    if: ${{ needs.changes.outputs.front == 'true' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: ./.github/actions/cache-front
+      - name: Generate Source Code
+        run: dart run build_runner build
+      - name: Build Web Project
+        run: flutter build web
