@@ -29,6 +29,7 @@ jobs:
             api:
               - 'api/**'
               - '.github/workflows/api.yml'
+              - '.github/actions/cache-api/*.yml'
   Build:
     needs: changes
     if: ${{ needs.changes.outputs.api == 'true' && github.event_name == 'pull_request' }}

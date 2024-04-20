@@ -6,12 +6,17 @@ runs:
     - name: Setup Rust
       shell: bash
       run: rustup toolchain install stable --profile minimal
-    # Src: https://github.com/marketplace/actions/rust-cache
-    - uses: Swatinem/rust-cache@v2
+    - uses: actions/cache@v3
+      name: Cache ~/.cargo
       with:
-        prefix-key: ""
-        shared-key: ""
-        key: ""
-        cache-directories: "./api/target"
-        cache-on-failure: true
-        cache-all-crates: true
+        path: ~/.cargo
+        key: cargo-global
+        restore-keys: |
+          cargo-global
+    - uses: actions/cache@v3
+      name: Cache target
+      with:
+        path: api/target
+        key: cargo-target
+        restore-keys: |
+          cargo-target
