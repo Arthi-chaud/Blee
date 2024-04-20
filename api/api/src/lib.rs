@@ -99,7 +99,9 @@ fn create_server() -> Rocket<Build> {
 					.map(From::from)
 					.collect(),
 			)
-			.allow_credentials(true).to_cors().unwrap();
+			.allow_credentials(true)
+			.to_cors()
+			.unwrap();
 		building_rocket = building_rocket.attach(cors);
 	}
 
