@@ -9,17 +9,15 @@ class Chapter with _$Chapter {
   const factory Chapter({
     required String id,
     required String name,
-    @JsonKey(name: "movie_id")
-    required String movieId,
-    @JsonKey(name: "start_time")
-    required int startTime,
-    @JsonKey(name: "end_time")
-    required int endTime,
+    @JsonKey(name: "movie_id") required String movieId,
+    @JsonKey(name: "start_time") required int startTime,
+    @JsonKey(name: "end_time") required int endTime,
     required Image? thumbnail,
     required List<ChapterType> type,
   }) = _Chapter;
 
-  factory Chapter.fromJson(Map<String, dynamic> json) => _$ChapterFromJson(json);
+  factory Chapter.fromJson(Map<String, dynamic> json) =>
+      _$ChapterFromJson(json);
 }
 
 enum ChapterType {

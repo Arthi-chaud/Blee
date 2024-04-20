@@ -12,11 +12,9 @@ Future<Artist> activity(ActivityRef ref) async {
 }
 
 void main() {
-  runApp(
-    ProviderScope(
-      child: MyApp(),
-    )
-  );
+  runApp(ProviderScope(
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -45,15 +43,13 @@ class MyHomePage extends StatelessWidget {
         final AsyncValue<Artist> data = ref.watch(activityProvider);
 
         return Center(
-          child: Skeletonizer (
-            enabled: data.isLoading,
-            child: switch (data) {
-              AsyncData(:final value) => Text(value.name),
-              AsyncError(:final error) => Text(error.toString()),
-              _ => Container(),
-            }
-          )
-        );
+            child: Skeletonizer(
+                enabled: data.isLoading,
+                child: switch (data) {
+                  AsyncData(:final value) => Text(value.name),
+                  AsyncError(:final error) => Text(error.toString()),
+                  _ => Container(),
+                }));
       },
     );
   }

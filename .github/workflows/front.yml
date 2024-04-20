@@ -42,3 +42,25 @@ jobs:
         run: dart run build_runner build
       - name: Build Web Project
         run: flutter build web
+  Format:
+    if: ${{ needs.changes.outputs.front == 'true' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    needs: [ Build ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: ./.github/actions/cache-front
+      - name: Check format
+        run: dart format lib --set-exit-if-changed
+  Lint:
+    if: ${{ needs.changes.outputs.front == 'true' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    needs: [ Build ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: ./.github/actions/cache-front
+      - name: Run analyzer
+        run: flutter analyze

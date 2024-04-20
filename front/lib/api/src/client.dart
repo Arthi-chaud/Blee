@@ -28,8 +28,7 @@ class APIClient {
     body ??= {};
     params ?? {};
     http.Response response;
-    print(_host +
-        (kDebugMode ? route : ("api" + route)));
+    print(_host + (kDebugMode ? route : ("api" + route)));
     Uri fullRoute = Uri.parse(_host +
         (kDebugMode ? route : ("api" + route)) +
         (params == null ? "" : ("?" + Uri(queryParameters: params).query)));

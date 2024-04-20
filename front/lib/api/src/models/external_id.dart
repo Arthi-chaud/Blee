@@ -10,9 +10,9 @@ class ExternalId with _$ExternalId {
     required String value,
     required String? description,
     required int? rating,
-    @JsonKey(name: "provider_name")
-    required String providerName,
+    @JsonKey(name: "provider_name") required String providerName,
   }) = _ExternalId;
 
-  factory ExternalId.fromJson(Map<String, dynamic> json) => _$ExternalIdFromJson(json);
+  factory ExternalId.fromJson(Map<String, dynamic> json) =>
+      _$ExternalIdFromJson(json);
 }
