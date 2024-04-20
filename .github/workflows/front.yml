@@ -66,3 +66,64 @@ jobs:
         run: dart run build_runner build
       - name: Run analyzer
         run: flutter analyze
+  Dockerize:
+    if: ${{ needs.changes.outputs.front == 'true' && github.event_name == 'pull_request' }}
+    needs: [ Build ]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to the GitHub Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker
+        uses: docker/build-push-action@v3
+        with:
+          context: ./front
+          push: false
+  Publish:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || (needs.changes.outputs.front == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to the GitHub Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            arthichaud/blee-front
+            ghcr.io/${{ github.repository }}-front
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          context: ./front
+          push: true
+          tags: ${{ github.event_name == 'release' && steps.meta.outputs.tags || 'arthichaud/blee-front:edge' }}
+          labels: ${{ steps.meta.outputs.labels }}
