@@ -23,6 +23,11 @@ class APIClient {
     return Artist.fromJson(responseBody);
   }
 
+  Future<Package> getPackage(String uuid) async {
+    var responseBody = await _request(RequestType.get, '/packages/$uuid');
+    return Package.fromJson(responseBody);
+  }
+
   Future<Map<String, dynamic>> _request(RequestType type, String route,
       {Map<String, dynamic>? body, Map<String, dynamic>? params}) async {
     body ??= {};

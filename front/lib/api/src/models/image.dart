@@ -8,7 +8,7 @@ class Image with _$Image {
   const factory Image({
     required String id,
     required String blurhash,
-    @JsonKey(name: "aspect_ratio") required int aspectRatio,
+    @JsonKey(name: "aspect_ratio") required double aspectRatio,
     required List<String> colors,
   }) = _Image;
 
