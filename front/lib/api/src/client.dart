@@ -18,6 +18,11 @@ class APIClient {
     }
   }
 
+  String buildImageUrl(String uuid) {
+    final route = "/images/$uuid";
+    return _host + (kDebugMode ? route : "api$route");
+  }
+
   Future<Artist> getArtist(String uuid) async {
     var responseBody = await _request(RequestType.get, '/artists/$uuid');
     return Artist.fromJson(responseBody);

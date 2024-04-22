@@ -1,6 +1,7 @@
 import 'package:blee/api/src/client.dart';
 import 'package:blee/api/src/models/package.dart';
 import 'package:blee/ui/src/breakpoints.dart';
+import 'package:blee/ui/src/image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,7 +25,12 @@ class PackagePage extends StatelessWidget {
 
         return MaxWidthBox(
           maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
-          child: Container(color: Colors.green),
+          child: Poster(
+            image: switch (package) {
+              AsyncData(:final value) => value.poster,
+              _ => null
+            },
+          ),
         );
       },
     );
