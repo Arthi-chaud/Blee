@@ -20,21 +20,32 @@ class Thumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _BleeImage(key: key, image: image, placeholderRatio: 4 / 3);
+    const aspectRatio = 16 / 9;
+    return _BleeImage(
+      key: key,
+      image: image,
+      placeholderRatio: aspectRatio,
+      forcedAspectRatio: aspectRatio,
+    );
   }
 }
 
 class _BleeImage extends StatelessWidget {
   final api.Image? image;
   final double? placeholderRatio;
-  const _BleeImage({super.key, required this.image, this.placeholderRatio});
+  final double? forcedAspectRatio;
+  const _BleeImage(
+      {super.key,
+      required this.image,
+      this.placeholderRatio,
+      this.forcedAspectRatio});
 
   @override
   Widget build(BuildContext context) {
     return Center(child: Builder(builder: (context) {
       if (this.image == null) {
         return AspectRatio(
-            aspectRatio: placeholderRatio ?? 1,
+            aspectRatio: forcedAspectRatio ?? placeholderRatio ?? 1,
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
@@ -43,12 +54,12 @@ class _BleeImage extends StatelessWidget {
       }
       var image = this.image!;
       return AspectRatio(
-          aspectRatio: image.aspectRatio,
+          aspectRatio: forcedAspectRatio ?? image.aspectRatio,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: flutter_image.Image.network(
               APIClient().buildImageUrl(image.id),
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) {
                   return child;

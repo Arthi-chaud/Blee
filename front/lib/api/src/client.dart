@@ -33,6 +33,19 @@ class APIClient {
     return Package.fromJson(responseBody);
   }
 
+  Future<Page<Movie>> getMovies(String packageUuid) async {
+    var responseBody =
+        await _request(RequestType.get, '/movies?package=$packageUuid');
+    return Page.fromJson(
+        responseBody, (x) => Movie.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<List<Chapter>> getChapters(String movieUuid) async {
+    var responseBody =
+        await _request(RequestType.get, '/movies/$movieUuid/chapters');
+    return (responseBody as List).map((e) => Chapter.fromJson(e)).toList();
+  }
+
   Future<Page<Extra>> getExtras(String packageUuid) async {
     var responseBody =
         await _request(RequestType.get, '/extras?package=$packageUuid');

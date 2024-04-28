@@ -6,20 +6,33 @@ class Tile extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final api.Image? thumbnail;
+  final Function? onTap;
   const Tile(
       {super.key,
       required this.title,
       required this.subtitle,
-      required this.thumbnail});
+      required this.thumbnail,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AspectRatio(
-          aspectRatio: 4 / 3,
-          child: Thumbnail(image: thumbnail),
+        Stack(
+          children: [
+            Thumbnail(image: thumbnail),
+            Positioned.fill(
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () { onTap?.call(); },
+                    ),
+                  )),
+            ),
+          ],
         ),
         Padding(
           padding: const EdgeInsets.only(top: 4, left: 4),

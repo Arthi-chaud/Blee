@@ -1,12 +1,11 @@
 import 'package:blee/api/api.dart';
-import 'package:blee/api/src/models/package.dart';
 import 'package:blee/api/src/models/page.dart' as page;
 import 'package:blee/api/src/models/image.dart' as blee_image;
 import 'package:blee/ui/src/breakpoints.dart';
+import 'package:blee/ui/src/grid.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -17,12 +16,22 @@ part 'package.g.dart';
 
 @riverpod
 Future<Package> getPackage(GetPackageRef ref) async {
-  return await APIClient().getPackage("madonna-the-video-collection-93-99");
+  return await APIClient().getPackage("the-corrs-live-at-lansdowne-road");
+}
+
+@riverpod
+Future<page.Page<Movie>> getMovies(GetMoviesRef ref) async {
+  return await APIClient().getMovies("2f4b09f6-ff62-41a2-b936-c0992a3b97d5");
+}
+
+@riverpod
+Future<List<Chapter>> getChapters(GetChaptersRef ref, String movieUuid) async {
+  return await APIClient().getChapters(movieUuid);
 }
 
 @riverpod
 Future<page.Page<Extra>> getExtras(GetExtrasRef ref) async {
-  return await APIClient().getExtras("ee1442ec-965b-4d3c-b6a1-4bb6db972a1b");
+  return await APIClient().getExtras("2f4b09f6-ff62-41a2-b936-c0992a3b97d5");
 }
 
 class _PackagePageHeader extends StatelessWidget {
@@ -94,6 +103,8 @@ class PackagePage extends StatelessWidget {
         final AsyncValue<Package> package = ref.watch(getPackageProvider);
         final AsyncValue<page.Page<Extra>> extras =
             ref.watch(getExtrasProvider);
+        final AsyncValue<page.Page<Movie>> movies =
+            ref.watch(getMoviesProvider);
 
         return MaxWidthBox(
             maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
@@ -109,7 +120,14 @@ class PackagePage extends StatelessWidget {
                           releaseDate: value.releaseDate,
                           poster: value.poster),
                       _ => Container()
-                    }
+                    },
+                    movies.asData?.value.metadata.count == 1
+                        ? ElevatedButton.icon(
+                            icon: const Icon(Icons.play_arrow),
+                            label: const Text('PLAY'),
+                            onPressed: () {},
+                          )
+                        : Container()
                   ],
                 ),
                 SliverGrid.builder(
@@ -117,27 +135,17 @@ class PackagePage extends StatelessWidget {
                   itemBuilder: (context, index) {
                     var item = extras.asData?.value.items[index];
                     return Padding(
-                      padding: const EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(4),
                       child: Tile(
-                          title: item?.name,
-                          subtitle: item != null
-                              ? formatDuration(item.duration)
-                              : null,
-                          thumbnail: item?.thumbnail),
+                        title: item?.name,
+                        subtitle:
+                            item != null ? formatDuration(item.duration) : null,
+                        thumbnail: item?.thumbnail,
+                        onTap: () {},
+                      ),
                     );
                   },
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: ResponsiveBreakpoints.of(context)
-                            .largerOrEqualTo(BreakpointEnum.xl.name)
-                        ? 5
-                        : ResponsiveBreakpoints.of(context)
-                                .largerOrEqualTo(BreakpointEnum.md.name)
-                            ? 4
-                            : ResponsiveBreakpoints.of(context)
-                                    .largerOrEqualTo(BreakpointEnum.sm.name)
-                                ? 3
-                                : 2,
-                  ),
+                  gridDelegate: DefaultGridDelegate(context),
                 ),
               ],
             ));
