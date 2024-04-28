@@ -14,6 +14,7 @@ class Extra with _$Extra {
     @JsonKey(name: "artist_id") required String artistId,
     @JsonKey(name: "file_id") required String fileId,
     required int? discIndex,
+    required int duration,
     required int? trackIndex,
     required List<ExtraType> type,
   }) = _Extra;

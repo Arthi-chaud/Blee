@@ -33,6 +33,13 @@ class APIClient {
     return Package.fromJson(responseBody);
   }
 
+  Future<Page<Extra>> getExtras(String packageUuid) async {
+    var responseBody =
+        await _request(RequestType.get, '/extras?package=$packageUuid');
+    return Page.fromJson(
+        responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
+  }
+
   Future<Map<String, dynamic>> _request(RequestType type, String route,
       {Map<String, dynamic>? body, Map<String, dynamic>? params}) async {
     body ??= {};

@@ -125,6 +125,10 @@ where
 			package::Relation::Artist.def(),
 			Alias::new("artist"),
 		)
+		.column_as(
+			Expr::col((Alias::new("artist"), artist::Column::Name)),
+			"artist_name",
+		)
 		.apply_if(filters.artist, |q, artist_uuid| {
 			q.filter(package::Column::ArtistId.eq(artist_uuid))
 		})
