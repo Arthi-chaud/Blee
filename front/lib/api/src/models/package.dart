@@ -12,6 +12,7 @@ class Package with _$Package {
       required String slug,
       @JsonKey(name: "release_year") required DateTime? releaseDate,
       @JsonKey(name: "artist_id") required String? artistId,
+      @JsonKey(name: "artist_name") required String? artistName,
       required Image? poster}) = _Package;
 
   factory Package.fromJson(Map<String, dynamic> json) =>
