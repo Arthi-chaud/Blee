@@ -44,6 +44,7 @@ class Tile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge,
+                
               ),
               Text(
                 subtitle ?? '',
