@@ -1,40 +1,19 @@
 import 'package:blee/api/api.dart';
 import 'package:blee/api/src/models/page.dart' as page;
 import 'package:blee/api/src/models/image.dart' as blee_image;
+import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/grid.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../utils/format_duration.dart';
-
-part 'package.g.dart';
-
-@riverpod
-Future<Package> getPackage(GetPackageRef ref) async {
-  return await APIClient().getPackage("ee1442ec-965b-4d3c-b6a1-4bb6db972a1b");
-}
-
-@riverpod
-Future<page.Page<Movie>> getMovies(GetMoviesRef ref) async {
-  return await APIClient().getMovies("ee1442ec-965b-4d3c-b6a1-4bb6db972a1b");
-}
-
-@riverpod
-Future<List<Chapter>> getChapters(GetChaptersRef ref, String movieUuid) async {
-  return await APIClient().getChapters(movieUuid);
-}
-
-@riverpod
-Future<page.Page<Extra>> getExtras(GetExtrasRef ref) async {
-  return await APIClient().getExtras("ee1442ec-965b-4d3c-b6a1-4bb6db972a1b");
-}
 
 class _PackagePageHeader extends StatelessWidget {
   final String? packageTitle;
@@ -125,11 +104,13 @@ class PackagePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
-        final AsyncValue<Package> package = ref.watch(getPackageProvider);
+        const String packageUuid = "fffc76f0-135f-43cf-924e-780c14057b9d";
+        final AsyncValue<Package> package =
+            ref.watch(getPackageProvider(packageUuid));
         final AsyncValue<page.Page<Extra>> extras =
-            ref.watch(getExtrasProvider);
+            ref.watch(getExtrasProvider(packageUuid: packageUuid));
         final AsyncValue<page.Page<Movie>> movies =
-            ref.watch(getMoviesProvider);
+            ref.watch(getMoviesProvider(packageUuid: packageUuid));
 
         return MaxWidthBox(
             maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
@@ -143,9 +124,36 @@ class PackagePage extends StatelessWidget {
                         artistName: package.asData?.value.artistName,
                         artistUuid: package.asData?.value.artistId,
                         isCompilation: package.asData?.value.artistId == null,
-                        releaseDate: package.asData?.value.releaseDate,
-                        poster: package.asData?.value.poster)
+                        releaseDate:
+                            DateTime.now(), //package.asData?.value.releaseDate,
+                        poster: package.asData?.value.poster),
                   ],
+                ),
+                SliverToBoxAdapter(
+                  child: (movies.asData?.value.metadata.count ?? 1) == 1
+                      ? Skeletonizer(
+                          enabled: movies.asData == null,
+                          child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: ElevatedButton.icon(
+                                icon: const Icon(Icons.play_arrow),
+                                label: const Text('Play'),
+                                onPressed: () {},
+                              )))
+                      : Container(),
+                ),
+                SliverToBoxAdapter(
+                  child: (extras.asData?.value.metadata.count ?? 1) > 0
+                      ? Skeletonizer(
+                          enabled: extras.asData == null,
+                          child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                'Extras',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              )))
+                      : Container(),
                 ),
                 SliverGrid.builder(
                   itemCount: extras.asData?.value.metadata.count ?? 2,

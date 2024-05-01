@@ -62,6 +62,8 @@ class _BleeImage extends StatelessWidget {
                               : APIClient().buildImageUrl(image!.id),
                           imageFit: BoxFit.cover,
                           color: const Color(0xEBEBF4),
+                          curve: Curves.easeIn,
+                          duration: const Duration(milliseconds: 500),
                           hash: this.image?.blurhash ??
                               "L5H2EC=PM+yV0g-mq.wG9c010J}I",
                         )
