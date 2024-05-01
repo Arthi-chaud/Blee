@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../utils/format_duration.dart';
 
@@ -53,21 +54,26 @@ class _PackagePageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var title = Text(
-      packageTitle ?? '',
-      style: Theme.of(context).textTheme.titleLarge,
-    );
-    var subtitle = TextButton(
-        onPressed: () => context.go('/artists/${artistUuid}'),
+    var isLoading = packageTitle == null;
+    var title = Skeletonizer(
+        enabled: isLoading,
         child: Text(
-          artistName ?? '',
-          style: Theme.of(context).textTheme.titleMedium,
+          packageTitle ?? 'No Package Name',
+          style: Theme.of(context).textTheme.titleLarge,
         ));
+    var subtitle = Skeletonizer(
+        enabled: isLoading,
+        child: TextButton(
+            onPressed: () => context.go('/artists/${artistUuid}'),
+            child: Text(
+              artistName ?? 'No Artist Name',
+              style: Theme.of(context).textTheme.titleMedium,
+            )));
     var info = Text(
       releaseDate?.year.toString() ?? '',
       style: Theme.of(context).textTheme.labelLarge,
     );
-    var paddingForVerticalText = (Widget w) => Padding(
+    paddingForVerticalText(Widget w) => Padding(
           padding: const EdgeInsets.only(left: 14),
           child: w,
         );
@@ -131,16 +137,14 @@ class PackagePage extends StatelessWidget {
               slivers: [
                 SliverList.list(
                   children: [
-                    switch (package) {
-                      AsyncData(:final value) => _PackagePageHeader(
-                          packageTitle: value.name,
-                          artistName: value.artistName,
-                          artistUuid: value.artistId,
-                          isCompilation: value.artistId == null,
-                          releaseDate: value.releaseDate,
-                          poster: value.poster),
-                      _ => Container()
-                    },
+                    SizedBox.fromSize(size: const Size.fromHeight(16)),
+                    _PackagePageHeader(
+                        packageTitle: package.asData?.value.name,
+                        artistName: package.asData?.value.artistName,
+                        artistUuid: package.asData?.value.artistId,
+                        isCompilation: package.asData?.value.artistId == null,
+                        releaseDate: package.asData?.value.releaseDate,
+                        poster: package.asData?.value.poster)
                   ],
                 ),
                 SliverGrid.builder(

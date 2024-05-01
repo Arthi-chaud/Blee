@@ -12,11 +12,14 @@ final router = GoRouter(
           Widget child,
         ) {
           return Scaffold(
-            // appBar: AppBar(
-            //   title: const Text('Blee'),
-            //   backgroundColor: Colors.primaries.first,
-            // ),
-            body: child,
+            appBar: AppBar(
+              title: const Text('Blee'),
+              backgroundColor: Colors.primaries.first,
+            ),
+            body: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16),
+              child: child,
+            ),
           );
         },
         routes: [

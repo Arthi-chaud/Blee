@@ -1,8 +1,8 @@
 import 'package:blee/api/src/client.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/image.dart' as flutter_image;
 import 'package:blee/api/api.dart' as api;
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class Poster extends StatelessWidget {
   final api.Image? image;
@@ -43,33 +43,31 @@ class _BleeImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(child: Builder(builder: (context) {
-      if (this.image == null) {
-        return AspectRatio(
-            aspectRatio: forcedAspectRatio ?? placeholderRatio ?? 1,
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  color: Theme.of(context).splashColor,
-                )));
-      }
-      var image = this.image!;
-      return AspectRatio(
-          aspectRatio: forcedAspectRatio ?? image.aspectRatio,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: flutter_image.Image.network(
-              APIClient().buildImageUrl(image.id),
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                }
-                return BlurHash(
-                  hash: image.blurhash,
-                );
-              },
-            ),
-          ));
+      return Skeletonizer(
+          enabled: image == null,
+          child: Builder(builder: (context) {
+            return AspectRatio(
+                aspectRatio: forcedAspectRatio ??
+                    image?.aspectRatio ??
+                    placeholderRatio ??
+                    1,
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Stack(
+                      children: [
+                        Container(color: Theme.of(context).splashColor),
+                        BlurHash(
+                          image: image == null
+                              ? null
+                              : APIClient().buildImageUrl(image!.id),
+                          imageFit: BoxFit.cover,
+                          color: const Color(0xEBEBF4),
+                          hash: this.image?.blurhash ??
+                              "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                        )
+                      ],
+                    )));
+          }));
     }));
   }
 }

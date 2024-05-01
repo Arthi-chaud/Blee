@@ -5,7 +5,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 // ignore: non_constant_identifier_names
 SliverGridDelegate DefaultTileGridDelegate(BuildContext context) {
   return SliverGridDelegateWithFixedCrossAxisCount(
-    childAspectRatio: 3.8/3,
+    childAspectRatio: 1.25,
     crossAxisSpacing: 4,
     mainAxisSpacing: 4,
     crossAxisCount: ResponsiveBreakpoints.of(context)

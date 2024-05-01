@@ -1,6 +1,7 @@
 import 'package:blee/api/api.dart' as api;
 import 'package:blee/ui/src/image.dart';
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class Tile extends StatelessWidget {
   final String? title;
@@ -16,6 +17,7 @@ class Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var isLoading = title == null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,9 +29,13 @@ class Tile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: Material(
                     color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () { onTap?.call(); },
-                    ),
+                    child: isLoading
+                        ? Container()
+                        : InkWell(
+                            onTap: () {
+                              onTap?.call();
+                            },
+                          ),
                   )),
             ),
           ],
@@ -39,19 +45,23 @@ class Tile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge,
-                
+              Skeletonizer(
+                enabled: isLoading,
+                child: Text(
+                  title ?? 'No Name',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
               ),
-              Text(
-                subtitle ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelSmall,
-              )
+              Skeletonizer(
+                  enabled: isLoading,
+                  child: Text(
+                    subtitle ?? '0:00',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ))
             ],
           ),
         )
