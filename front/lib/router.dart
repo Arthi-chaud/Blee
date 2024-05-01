@@ -12,10 +12,10 @@ final router = GoRouter(
           Widget child,
         ) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Blee'),
-              backgroundColor: Colors.primaries.first,
-            ),
+            // appBar: AppBar(
+            //   title: const Text('Blee'),
+            //   backgroundColor: Colors.primaries.first,
+            // ),
             body: child,
           );
         },
