@@ -9,6 +9,7 @@ import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -97,6 +98,40 @@ class _PackagePageHeader extends StatelessWidget {
   }
 }
 
+class _PackageChapterList extends StatelessWidget {
+  final String? movieUuid;
+  const _PackageChapterList({super.key, required this.movieUuid});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(builder: (context, ref, child) {
+      final AsyncValue<List<Chapter>> chapters = movieUuid == null
+          ? ref.watch(Provider((ref) => const AsyncLoading()))
+          : ref.watch(getChaptersProvider(movieUuid!));
+
+      return SliverGrid.builder(
+        itemCount: chapters.asData?.value.length ?? 2,
+        itemBuilder: (context, index) {
+          var item = chapters.asData?.value[index];
+
+          return Padding(
+            padding: const EdgeInsets.all(4),
+            child: Tile(
+              title: item?.name,
+              subtitle: item != null
+                  ? formatDuration(item.endTime - item.startTime)
+                  : null,
+              thumbnail: item?.thumbnail,
+              onTap: () {},
+            ),
+          );
+        },
+        gridDelegate: DefaultTileGridDelegate(context),
+      );
+    });
+  }
+}
+
 class PackagePage extends StatelessWidget {
   const PackagePage({super.key});
 
@@ -104,7 +139,7 @@ class PackagePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
-        const String packageUuid = "fffc76f0-135f-43cf-924e-780c14057b9d";
+        const String packageUuid = "2f4b09f6-ff62-41a2-b936-c0992a3b97d5";
         final AsyncValue<Package> package =
             ref.watch(getPackageProvider(packageUuid));
         final AsyncValue<page.Page<Extra>> extras =
@@ -142,8 +177,29 @@ class PackagePage extends StatelessWidget {
                               )))
                       : Container(),
                 ),
-                SliverToBoxAdapter(
-                  child: (extras.asData?.value.metadata.count ?? 1) > 0
+                ...(movies.asData?.value.items.map((movie) =>
+                        SliverStickyHeader(
+                            header: Skeletonizer(
+                                enabled: extras.asData == null,
+                                child: Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 8),
+                                    child: Text(
+                                      (movies.asData?.value.metadata.count ??
+                                                  1) >
+                                              1
+                                          ? movie.name
+                                          : 'Chapters',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall,
+                                    ))),
+                            sliver: _PackageChapterList(
+                              movieUuid: movie.id,
+                            ))) ??
+                    []),
+                SliverStickyHeader(
+                  header: (extras.asData?.value.metadata.count ?? 1) > 0
                       ? Skeletonizer(
                           enabled: extras.asData == null,
                           child: Padding(
@@ -154,24 +210,25 @@ class PackagePage extends StatelessWidget {
                                     Theme.of(context).textTheme.headlineSmall,
                               )))
                       : Container(),
-                ),
-                SliverGrid.builder(
-                  itemCount: extras.asData?.value.metadata.count ?? 2,
-                  itemBuilder: (context, index) {
-                    var item = extras.asData?.value.items[index];
-                    return Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Tile(
-                        title: item?.name,
-                        subtitle:
-                            item != null ? formatDuration(item.duration) : null,
-                        thumbnail: item?.thumbnail,
-                        onTap: () {},
-                      ),
-                    );
-                  },
-                  gridDelegate: DefaultTileGridDelegate(context),
-                ),
+                  sliver: SliverGrid.builder(
+                    itemCount: extras.asData?.value.metadata.count ?? 2,
+                    itemBuilder: (context, index) {
+                      var item = extras.asData?.value.items[index];
+                      return Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Tile(
+                          title: item?.name,
+                          subtitle: item != null
+                              ? formatDuration(item.duration)
+                              : null,
+                          thumbnail: item?.thumbnail,
+                          onTap: () {},
+                        ),
+                      );
+                    },
+                    gridDelegate: DefaultTileGridDelegate(context),
+                  ),
+                )
               ],
             ));
       },

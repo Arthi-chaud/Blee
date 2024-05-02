@@ -53,7 +53,7 @@ class APIClient {
         responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
   }
 
-  Future<Map<String, dynamic>> _request(RequestType type, String route,
+  Future<dynamic> _request(RequestType type, String route,
       {Map<String, dynamic>? body, Map<String, dynamic>? params}) async {
     body ??= {};
     params ?? {};
