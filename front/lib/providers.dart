@@ -8,7 +8,7 @@ Future<Package> getPackage(GetPackageRef ref, String packageUuid) async {
 }
 
 @riverpod
-Future<Page<Movie>> getMovies(GetMoviesRef ref, { String? packageUuid }) async {
+Future<Page<Movie>> getMovies(GetMoviesRef ref, {String? packageUuid}) async {
   return await APIClient().getMovies(packageUuid!);
 }
 
@@ -18,6 +18,7 @@ Future<List<Chapter>> getChapters(GetChaptersRef ref, String movieUuid) async {
 }
 
 @riverpod
-Future<Page<Extra>> getExtras(GetExtrasRef ref, { String? packageUuid }) async {
-  return await APIClient().getExtras(packageUuid!);
+Future<Page<Extra>> getExtras(GetExtrasRef ref,
+    {String? packageUuid, PageQuery page = const PageQuery()}) async {
+  return await APIClient().getExtras(packageUuid!, page);
 }

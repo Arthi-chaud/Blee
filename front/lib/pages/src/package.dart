@@ -5,11 +5,10 @@ import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/grid.dart';
 import 'package:blee/ui/src/image.dart';
+import 'package:blee/ui/src/infinite_scroll.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -126,7 +125,7 @@ class _PackageChapterList extends StatelessWidget {
             ),
           );
         },
-        gridDelegate: DefaultTileGridDelegate(context),
+        gridDelegate: DefaultThumbnailTileGridDelegate(context),
       );
     });
   }
@@ -142,8 +141,6 @@ class PackagePage extends StatelessWidget {
         const String packageUuid = "2f4b09f6-ff62-41a2-b936-c0992a3b97d5";
         final AsyncValue<Package> package =
             ref.watch(getPackageProvider(packageUuid));
-        final AsyncValue<page.Page<Extra>> extras =
-            ref.watch(getExtrasProvider(packageUuid: packageUuid));
         final AsyncValue<page.Page<Movie>> movies =
             ref.watch(getMoviesProvider(packageUuid: packageUuid));
 
@@ -177,58 +174,18 @@ class PackagePage extends StatelessWidget {
                               )))
                       : Container(),
                 ),
-                ...(movies.asData?.value.items.map((movie) =>
-                        SliverStickyHeader(
-                            header: Skeletonizer(
-                                enabled: extras.asData == null,
-                                child: Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    child: Text(
-                                      (movies.asData?.value.metadata.count ??
-                                                  1) >
-                                              1
-                                          ? movie.name
-                                          : 'Chapters',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall,
-                                    ))),
-                            sliver: _PackageChapterList(
-                              movieUuid: movie.id,
-                            ))) ??
-                    []),
-                SliverStickyHeader(
-                  header: (extras.asData?.value.metadata.count ?? 1) > 0
-                      ? Skeletonizer(
-                          enabled: extras.asData == null,
-                          child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Text(
-                                'Extras',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
-                              )))
-                      : Container(),
-                  sliver: SliverGrid.builder(
-                    itemCount: extras.asData?.value.metadata.count ?? 2,
-                    itemBuilder: (context, index) {
-                      var item = extras.asData?.value.items[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Tile(
+                ThumbnailGridView(
+                    header: Text('Extras', style: Theme.of(context).textTheme.labelLarge,),
+                    skeletonHeader: movies.value == null,
+                    query: (q) => APIClient().getExtras(packageUuid, q),
+                    tileBuilder: (context, item, index) => Tile(
                           title: item?.name,
                           subtitle: item != null
                               ? formatDuration(item.duration)
                               : null,
                           thumbnail: item?.thumbnail,
                           onTap: () {},
-                        ),
-                      );
-                    },
-                    gridDelegate: DefaultTileGridDelegate(context),
-                  ),
-                )
+                        ))
               ],
             ));
       },

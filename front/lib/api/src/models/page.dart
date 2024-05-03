@@ -25,3 +25,9 @@ class Page<T> with _$Page<T> {
           Map<String, dynamic> json, T Function(Object? json) fromJsonT) =>
       _$PageFromJson(json, fromJsonT);
 }
+
+class PageQuery {
+  final int take;
+  final int skip;
+  const PageQuery({this.take = 20, this.skip = 0});
+}

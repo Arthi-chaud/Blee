@@ -2,12 +2,11 @@ import 'package:blee/ui/src/breakpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-// ignore: non_constant_identifier_names
-SliverGridDelegate DefaultTileGridDelegate(BuildContext context) {
+SliverGridDelegate DefaultThumbnailTileGridDelegate(BuildContext context) {
   return SliverGridDelegateWithFixedCrossAxisCount(
     childAspectRatio: 1.25,
-    crossAxisSpacing: 4,
-    mainAxisSpacing: 4,
+    crossAxisSpacing: 8,
+    mainAxisSpacing: 8,
     crossAxisCount: ResponsiveBreakpoints.of(context)
             .largerOrEqualTo(BreakpointEnum.xl.name)
         ? 5
