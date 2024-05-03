@@ -67,6 +67,7 @@ class _ThumbnailGridViewState<T> extends State<ThumbnailGridView<T>> {
         gridDelegate: DefaultThumbnailTileGridDelegate(context),
         shrinkWrapFirstPageIndicators: true,
         builderDelegate: PagedChildBuilderDelegate<T>(
+          noItemsFoundIndicatorBuilder: (_) => Container(),
           firstPageProgressIndicatorBuilder: (context) => GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

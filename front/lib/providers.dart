@@ -13,8 +13,8 @@ Future<Page<Movie>> getMovies(GetMoviesRef ref, {String? packageUuid}) async {
 }
 
 @riverpod
-Future<List<Chapter>> getChapters(GetChaptersRef ref, String movieUuid) async {
-  return await APIClient().getChapters(movieUuid);
+Future<Page<Chapter>> getChapters(GetChaptersRef ref, String movieUuid) async {
+  return await APIClient().getChapters(movieUuid, const PageQuery());
 }
 
 @riverpod

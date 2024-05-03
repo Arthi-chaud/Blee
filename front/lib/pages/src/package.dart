@@ -3,7 +3,6 @@ import 'package:blee/api/src/models/page.dart' as page;
 import 'package:blee/api/src/models/image.dart' as blee_image;
 import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
-import 'package:blee/ui/src/grid.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/infinite_scroll.dart';
 import 'package:blee/ui/src/tile.dart';
@@ -43,7 +42,7 @@ class _PackagePageHeader extends StatelessWidget {
     var subtitle = Skeletonizer(
         enabled: isLoading,
         child: TextButton(
-            onPressed: () => context.go('/artists/${artistUuid}'),
+            onPressed: () => context.go('/artists/$artistUuid'),
             child: Text(
               artistName ?? 'No Artist Name',
               style: Theme.of(context).textTheme.titleMedium,
@@ -97,40 +96,6 @@ class _PackagePageHeader extends StatelessWidget {
   }
 }
 
-class _PackageChapterList extends StatelessWidget {
-  final String? movieUuid;
-  const _PackageChapterList({super.key, required this.movieUuid});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer(builder: (context, ref, child) {
-      final AsyncValue<List<Chapter>> chapters = movieUuid == null
-          ? ref.watch(Provider((ref) => const AsyncLoading()))
-          : ref.watch(getChaptersProvider(movieUuid!));
-
-      return SliverGrid.builder(
-        itemCount: chapters.asData?.value.length ?? 2,
-        itemBuilder: (context, index) {
-          var item = chapters.asData?.value[index];
-
-          return Padding(
-            padding: const EdgeInsets.all(4),
-            child: Tile(
-              title: item?.name,
-              subtitle: item != null
-                  ? formatDuration(item.endTime - item.startTime)
-                  : null,
-              thumbnail: item?.thumbnail,
-              onTap: () {},
-            ),
-          );
-        },
-        gridDelegate: DefaultThumbnailTileGridDelegate(context),
-      );
-    });
-  }
-}
-
 class PackagePage extends StatelessWidget {
   const PackagePage({super.key});
 
@@ -138,7 +103,7 @@ class PackagePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
-        const String packageUuid = "2f4b09f6-ff62-41a2-b936-c0992a3b97d5";
+        const String packageUuid = "fffc76f0-135f-43cf-924e-780c14057b9d";
         final AsyncValue<Package> package =
             ref.watch(getPackageProvider(packageUuid));
         final AsyncValue<page.Page<Movie>> movies =
@@ -156,8 +121,7 @@ class PackagePage extends StatelessWidget {
                         artistName: package.asData?.value.artistName,
                         artistUuid: package.asData?.value.artistId,
                         isCompilation: package.asData?.value.artistId == null,
-                        releaseDate:
-                            DateTime.now(), //package.asData?.value.releaseDate,
+                        releaseDate: package.asData?.value.releaseDate,
                         poster: package.asData?.value.poster),
                   ],
                 ),
@@ -166,7 +130,7 @@ class PackagePage extends StatelessWidget {
                       ? Skeletonizer(
                           enabled: movies.asData == null,
                           child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.only(bottom: 8, top: 16),
                               child: ElevatedButton.icon(
                                 icon: const Icon(Icons.play_arrow),
                                 label: const Text('Play'),
@@ -174,8 +138,34 @@ class PackagePage extends StatelessWidget {
                               )))
                       : Container(),
                 ),
+                ...(movies.asData?.value.items.map((movie) {
+                      var isOnlyMovie =
+                          (movies.asData?.value.metadata.count ?? 2) == 1;
+                      return ThumbnailGridView(
+                          header: Text(
+                            isOnlyMovie ? 'Chapters' : movie.name,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          skeletonHeader: movies.value == null,
+                          query: (q) => APIClient().getChapters(movie.id, q),
+                          tileBuilder: (context, item, index) => Tile(
+                                title: item?.name,
+                                subtitle: item != null
+                                    ? formatDuration(
+                                        item.endTime - item.startTime)
+                                    : null,
+                                thumbnail: item?.thumbnail,
+                                onTap: () {},
+                              ));
+                    }).toList()) ??
+                    [],
                 ThumbnailGridView(
-                    header: Text('Extras', style: Theme.of(context).textTheme.labelLarge,),
+                    header: (movies.asData?.value.metadata.count ?? 1) > 0
+                        ? Text(
+                            'Extras',
+                            style: Theme.of(context).textTheme.labelLarge,
+                          )
+                        : null,
                     skeletonHeader: movies.value == null,
                     query: (q) => APIClient().getExtras(packageUuid, q),
                     tileBuilder: (context, item, index) => Tile(

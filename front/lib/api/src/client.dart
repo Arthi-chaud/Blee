@@ -40,10 +40,11 @@ class APIClient {
         responseBody, (x) => Movie.fromJson(x as Map<String, dynamic>));
   }
 
-  Future<List<Chapter>> getChapters(String movieUuid) async {
+  Future<Page<Chapter>> getChapters(String movieUuid, PageQuery query) async {
     var responseBody =
-        await _request(RequestType.get, '/movies/$movieUuid/chapters');
-    return (responseBody as List).map((e) => Chapter.fromJson(e)).toList();
+        await _request(RequestType.get, '/movies/$movieUuid/chapters?take=${query.take}&skip=${query.skip}');
+    return Page.fromJson(
+        responseBody, (x) => Chapter.fromJson(x as Map<String, dynamic>));
   }
 
   Future<Page<Extra>> getExtras(String packageUuid, PageQuery query) async {

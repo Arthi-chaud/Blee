@@ -1,7 +1,10 @@
-use crate::dto::chapter::{ChapterResponseWithThumbnail, NewChapter};
+use crate::dto::{
+	chapter::{ChapterResponseWithThumbnail, NewChapter},
+	page::Pagination,
+};
 use entity::{chapter, image, sea_orm_active_enums::ChapterTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Set};
 
 pub async fn create_many<'s, 'a, C>(
 	chapters: &Vec<NewChapter>,
@@ -38,12 +41,15 @@ where
 
 pub async fn find_by_movie<'a, C>(
 	movie_uuid: &Uuid,
+	pagination: &Pagination,
 	connection: &'a C,
 ) -> Result<Vec<ChapterResponseWithThumbnail>, DbErr>
 where
 	C: ConnectionTrait,
 {
 	let movie_chapters: Vec<(chapter::Model, Option<image::Model>)> = chapter::Entity::find()
+		.offset(pagination.skip)
+		.limit(pagination.take)
 		.find_also_related(image::Entity)
 		.filter(chapter::Column::MovieId.eq(movie_uuid.clone()))
 		.order_by_asc(chapter::Column::StartTime)
