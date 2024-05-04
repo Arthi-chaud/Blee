@@ -33,6 +33,14 @@ class APIClient {
     return Package.fromJson(responseBody);
   }
 
+  Future<Page<Package>> getPackages(
+      {PageQuery page = const PageQuery()}) async {
+    var responseBody = await _request(
+        RequestType.get, '/packages?take=${page.take}&skip=${page.skip}');
+    return Page.fromJson(
+        responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
+  }
+
   Future<Page<Movie>> getMovies(String packageUuid) async {
     var responseBody =
         await _request(RequestType.get, '/movies?package=$packageUuid');
@@ -41,8 +49,8 @@ class APIClient {
   }
 
   Future<Page<Chapter>> getChapters(String movieUuid, PageQuery query) async {
-    var responseBody =
-        await _request(RequestType.get, '/movies/$movieUuid/chapters?take=${query.take}&skip=${query.skip}');
+    var responseBody = await _request(RequestType.get,
+        '/movies/$movieUuid/chapters?take=${query.take}&skip=${query.skip}');
     return Page.fromJson(
         responseBody, (x) => Chapter.fromJson(x as Map<String, dynamic>));
   }

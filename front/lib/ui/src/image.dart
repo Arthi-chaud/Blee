@@ -10,7 +10,13 @@ class Poster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _BleeImage(key: key, image: image, placeholderRatio: 3 / 4);
+    const aspectRatio = 3 / 4;
+    return _BleeImage(
+      key: key,
+      image: image,
+      placeholderRatio: aspectRatio,
+      forcedAspectRatio: aspectRatio,
+    );
   }
 }
 

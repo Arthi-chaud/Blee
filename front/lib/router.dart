@@ -24,9 +24,15 @@ final router = GoRouter(
         },
         routes: [
           GoRoute(
-            path: '/packages',
-            builder: (context, state) => const PackagePage(),
-          )
+              path: '/packages',
+              builder: (context, state) => const PackagesPage(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) =>
+                      PackagePage(packageUuid: state.pathParameters['id']!),
+                )
+              ]),
         ]),
   ],
 );

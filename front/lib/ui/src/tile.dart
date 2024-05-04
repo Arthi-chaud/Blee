@@ -3,16 +3,38 @@ import 'package:blee/ui/src/image.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class Tile extends StatelessWidget {
+class PosterTile extends Tile {
+  PosterTile(
+      {super.key,
+      required super.title,
+      required super.subtitle,
+      required super.thumbnail,
+      required super.onTap})
+      : super(imageWidgetBuilder: (image) => Poster(image: image));
+}
+
+class ThumbnailTile extends Tile {
+  ThumbnailTile(
+      {super.key,
+      required super.title,
+      required super.subtitle,
+      required super.thumbnail,
+      required super.onTap})
+      : super(imageWidgetBuilder: (image) => Thumbnail(image: image));
+}
+
+abstract class Tile extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final api.Image? thumbnail;
   final Function? onTap;
+  final Widget Function(api.Image?) imageWidgetBuilder;
   const Tile(
       {super.key,
       required this.title,
       required this.subtitle,
       required this.thumbnail,
+      required this.imageWidgetBuilder,
       required this.onTap});
 
   @override
@@ -23,7 +45,7 @@ class Tile extends StatelessWidget {
       children: [
         Stack(
           children: [
-            Thumbnail(image: thumbnail),
+            imageWidgetBuilder(thumbnail),
             Positioned.fill(
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),

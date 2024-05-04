@@ -97,13 +97,13 @@ class _PackagePageHeader extends StatelessWidget {
 }
 
 class PackagePage extends StatelessWidget {
-  const PackagePage({super.key});
+  final String packageUuid;
+  const PackagePage({super.key, required this.packageUuid});
 
   @override
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
-        const String packageUuid = "fffc76f0-135f-43cf-924e-780c14057b9d";
         final AsyncValue<Package> package =
             ref.watch(getPackageProvider(packageUuid));
         final AsyncValue<page.Page<Movie>> movies =
@@ -117,20 +117,21 @@ class PackagePage extends StatelessWidget {
                   children: [
                     SizedBox.fromSize(size: const Size.fromHeight(16)),
                     _PackagePageHeader(
-                        packageTitle: package.asData?.value.name,
-                        artistName: package.asData?.value.artistName,
-                        artistUuid: package.asData?.value.artistId,
-                        isCompilation: package.asData?.value.artistId == null,
-                        releaseDate: package.asData?.value.releaseDate,
-                        poster: package.asData?.value.poster),
+                        packageTitle: package.value?.name,
+                        artistName: package.value?.artistName,
+                        artistUuid: package.value?.artistId,
+                        isCompilation: package.value?.artistId == null,
+                        releaseDate: package.value?.releaseDate,
+                        poster: package.value?.poster),
                   ],
                 ),
                 SliverToBoxAdapter(
-                  child: (movies.asData?.value.metadata.count ?? 1) == 1
+                  child: (movies.value?.metadata.count ?? 1) == 1
                       ? Skeletonizer(
-                          enabled: movies.asData == null,
+                          enabled: movies.value == null,
                           child: Padding(
-                              padding: const EdgeInsets.only(bottom: 8, top: 16),
+                              padding:
+                                  const EdgeInsets.only(bottom: 8, top: 16),
                               child: ElevatedButton.icon(
                                 icon: const Icon(Icons.play_arrow),
                                 label: const Text('Play'),
@@ -138,17 +139,17 @@ class PackagePage extends StatelessWidget {
                               )))
                       : Container(),
                 ),
-                ...(movies.asData?.value.items.map((movie) {
+                ...(movies.value?.items.map((movie) {
                       var isOnlyMovie =
-                          (movies.asData?.value.metadata.count ?? 2) == 1;
-                      return ThumbnailGridView(
+                          (movies.value?.metadata.count ?? 2) == 1;
+                      return ThumbnailTileGridView(
                           header: Text(
                             isOnlyMovie ? 'Chapters' : movie.name,
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           skeletonHeader: movies.value == null,
                           query: (q) => APIClient().getChapters(movie.id, q),
-                          tileBuilder: (context, item, index) => Tile(
+                          tileBuilder: (context, item, index) => ThumbnailTile(
                                 title: item?.name,
                                 subtitle: item != null
                                     ? formatDuration(
@@ -159,8 +160,8 @@ class PackagePage extends StatelessWidget {
                               ));
                     }).toList()) ??
                     [],
-                ThumbnailGridView(
-                    header: (movies.asData?.value.metadata.count ?? 1) > 0
+                ThumbnailTileGridView(
+                    header: (movies.value?.metadata.count ?? 1) > 0
                         ? Text(
                             'Extras',
                             style: Theme.of(context).textTheme.labelLarge,
@@ -168,7 +169,7 @@ class PackagePage extends StatelessWidget {
                         : null,
                     skeletonHeader: movies.value == null,
                     query: (q) => APIClient().getExtras(packageUuid, q),
-                    tileBuilder: (context, item, index) => Tile(
+                    tileBuilder: (context, item, index) => ThumbnailTile(
                           title: item?.name,
                           subtitle: item != null
                               ? formatDuration(item.duration)

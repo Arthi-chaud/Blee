@@ -6,22 +6,44 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class ThumbnailGridView<T> extends StatefulWidget {
+class ThumbnailTileGridView<T> extends AbstractGridView<T> {
+  const ThumbnailTileGridView(
+      {super.key,
+      required super.tileBuilder,
+      required super.query,
+      super.skeletonHeader,
+      required super.header})
+      : super(delegate: DefaultThumbnailTileGridDelegate);
+}
+
+class PosterTileGridView<T> extends AbstractGridView<T> {
+  const PosterTileGridView(
+      {super.key,
+      required super.tileBuilder,
+      required super.query,
+      super.skeletonHeader,
+      required super.header})
+      : super(delegate: DefaultPosterTileGridDelegate);
+}
+
+abstract class AbstractGridView<T> extends StatefulWidget {
   final Future<page.Page<T>> Function(PageQuery) query;
   final Widget Function(BuildContext, T?, int) tileBuilder;
+  final SliverGridDelegate Function(BuildContext) delegate;
   final Widget? header;
   final bool? skeletonHeader;
-  const ThumbnailGridView(
+  const AbstractGridView(
       {super.key,
       required this.query,
       required this.tileBuilder,
       required this.header,
+      required this.delegate,
       this.skeletonHeader});
   @override
-  State<ThumbnailGridView<T>> createState() => _ThumbnailGridViewState<T>();
+  State<AbstractGridView<T>> createState() => _AbstractGridViewState<T>();
 }
 
-class _ThumbnailGridViewState<T> extends State<ThumbnailGridView<T>> {
+class _AbstractGridViewState<T> extends State<AbstractGridView<T>> {
   static const _pageSize = 20;
 
   final PagingController<int, T> _pagingController =
@@ -64,14 +86,14 @@ class _ThumbnailGridViewState<T> extends State<ThumbnailGridView<T>> {
           )),
       sliver: PagedSliverGrid<int, T>(
         pagingController: _pagingController,
-        gridDelegate: DefaultThumbnailTileGridDelegate(context),
+        gridDelegate: widget.delegate(context),
         shrinkWrapFirstPageIndicators: true,
         builderDelegate: PagedChildBuilderDelegate<T>(
           noItemsFoundIndicatorBuilder: (_) => Container(),
           firstPageProgressIndicatorBuilder: (context) => GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: DefaultThumbnailTileGridDelegate(context),
+            gridDelegate: widget.delegate(context),
             children: [0, 1]
                 .map((index) => widget.tileBuilder(context, null, index))
                 .toList(),

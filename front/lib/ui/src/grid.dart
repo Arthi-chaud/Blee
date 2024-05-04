@@ -19,3 +19,24 @@ SliverGridDelegate DefaultThumbnailTileGridDelegate(BuildContext context) {
                 : 2,
   );
 }
+
+SliverGridDelegate DefaultPosterTileGridDelegate(BuildContext context) {
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    childAspectRatio: 0.55,
+    crossAxisSpacing: 8,
+    mainAxisSpacing: 8,
+    crossAxisCount: ResponsiveBreakpoints.of(context)
+            .largerOrEqualTo(BreakpointEnum.xl.name)
+        ? 9
+        : ResponsiveBreakpoints.of(context)
+                .largerOrEqualTo(BreakpointEnum.lg.name)
+            ? 7
+            : ResponsiveBreakpoints.of(context)
+                    .largerOrEqualTo(BreakpointEnum.md.name)
+                ? 6
+                : ResponsiveBreakpoints.of(context)
+                        .largerOrEqualTo(BreakpointEnum.sm.name)
+                    ? 5
+                    : 3,
+  );
+}
