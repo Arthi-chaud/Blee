@@ -1,4 +1,5 @@
 import 'package:blee/pages/pages.dart';
+import 'package:blee/pages/src/extras.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -33,6 +34,10 @@ final router = GoRouter(
                       PackagePage(packageUuid: state.pathParameters['id']!),
                 )
               ]),
+          GoRoute(
+            path: '/extras',
+            builder: (context, state) => const ExtrasPage(),
+          ),
         ]),
   ],
 );

@@ -55,9 +55,9 @@ class APIClient {
         responseBody, (x) => Chapter.fromJson(x as Map<String, dynamic>));
   }
 
-  Future<Page<Extra>> getExtras(String packageUuid, PageQuery query) async {
+  Future<Page<Extra>> getExtras({String? packageUuid, PageQuery page = const PageQuery()}) async {
     var responseBody = await _request(RequestType.get,
-        '/extras?package=$packageUuid&take=${query.take}&skip=${query.skip}');
+        '/extras?package=$packageUuid&take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
   }

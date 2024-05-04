@@ -172,7 +172,8 @@ class PackagePage extends StatelessWidget {
                           )
                         : null,
                     skeletonHeader: movies.value == null,
-                    query: (q) => APIClient().getExtras(packageUuid, q),
+                    query: (q) => APIClient()
+                        .getExtras(packageUuid: packageUuid, page: q),
                     tileBuilder: (context, item, index) => ThumbnailTile(
                           key: Key('extra-${item?.id}'),
                           title: item?.name,

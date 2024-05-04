@@ -12,6 +12,7 @@ class Extra with _$Extra {
     required Image? thumbnail,
     @JsonKey(name: "package_id") required String? packageId,
     @JsonKey(name: "artist_id") required String artistId,
+    @JsonKey(name: "artist_name") required String artistName,
     @JsonKey(name: "file_id") required String fileId,
     required int? discIndex,
     required int duration,

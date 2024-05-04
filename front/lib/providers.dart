@@ -20,5 +20,5 @@ Future<Page<Chapter>> getChapters(GetChaptersRef ref, String movieUuid) async {
 @riverpod
 Future<Page<Extra>> getExtras(GetExtrasRef ref,
     {String? packageUuid, PageQuery page = const PageQuery()}) async {
-  return await APIClient().getExtras(packageUuid!, page);
+  return await APIClient().getExtras(packageUuid: packageUuid, page: page);
 }
