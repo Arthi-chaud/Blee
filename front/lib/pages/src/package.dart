@@ -117,6 +117,7 @@ class PackagePage extends StatelessWidget {
                   children: [
                     SizedBox.fromSize(size: const Size.fromHeight(16)),
                     _PackagePageHeader(
+                        key: Key('$packageUuid-header'),
                         packageTitle: package.value?.name,
                         artistName: package.value?.artistName,
                         artistUuid: package.value?.artistId,
@@ -143,6 +144,7 @@ class PackagePage extends StatelessWidget {
                       var isOnlyMovie =
                           (movies.value?.metadata.count ?? 2) == 1;
                       return ThumbnailTileGridView(
+                          key: Key('$movie-chapters'),
                           header: Text(
                             isOnlyMovie ? 'Chapters' : movie.name,
                             style: Theme.of(context).textTheme.labelLarge,
@@ -150,6 +152,7 @@ class PackagePage extends StatelessWidget {
                           skeletonHeader: movies.value == null,
                           query: (q) => APIClient().getChapters(movie.id, q),
                           tileBuilder: (context, item, index) => ThumbnailTile(
+                                key: Key('chapter-${item?.id}'),
                                 title: item?.name,
                                 subtitle: item != null
                                     ? formatDuration(
@@ -161,6 +164,7 @@ class PackagePage extends StatelessWidget {
                     }).toList()) ??
                     [],
                 ThumbnailTileGridView(
+                    key: Key('$packageUuid-extras'),
                     header: (movies.value?.metadata.count ?? 1) > 0
                         ? Text(
                             'Extras',
@@ -170,6 +174,7 @@ class PackagePage extends StatelessWidget {
                     skeletonHeader: movies.value == null,
                     query: (q) => APIClient().getExtras(packageUuid, q),
                     tileBuilder: (context, item, index) => ThumbnailTile(
+                          key: Key('extra-${item?.id}'),
                           title: item?.name,
                           subtitle: item != null
                               ? formatDuration(item.duration)
