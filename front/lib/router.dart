@@ -1,42 +1,47 @@
+import 'package:blee/navigation.dart';
 import 'package:blee/pages/pages.dart';
 import 'package:blee/pages/src/extras.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+final _parentKey = GlobalKey<NavigatorState>();
+final _shellKey = GlobalKey<NavigatorState>();
+
 final router = GoRouter(
   initialLocation: '/packages',
   routes: [
     ShellRoute(
-        builder: (
+        pageBuilder: (
           BuildContext context,
           GoRouterState state,
           Widget child,
         ) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Blee'),
-              backgroundColor: Colors.primaries.first,
-            ),
-            body: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
+          return NoTransitionPage(
+              child: ScaffoldWithNavBar(
+            location: state.matchedLocation,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: child,
             ),
-          );
+          ));
         },
         routes: [
           GoRoute(
               path: '/packages',
-              builder: (context, state) => const PackagesPage(),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: PackagesPage()),
               routes: [
                 GoRoute(
                   path: ':id',
-                  builder: (context, state) =>
-                      PackagePage(packageUuid: state.pathParameters['id']!),
+                  pageBuilder: (context, state) => NoTransitionPage(
+                      child: PackagePage(
+                          packageUuid: state.pathParameters['id']!)),
                 )
               ]),
           GoRoute(
             path: '/extras',
-            builder: (context, state) => const ExtrasPage(),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: ExtrasPage()),
           ),
         ]),
   ],

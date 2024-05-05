@@ -42,7 +42,7 @@ class _PackagePageHeader extends StatelessWidget {
     var subtitle = Skeletonizer(
         enabled: isLoading,
         child: TextButton(
-            onPressed: () => context.go('/artists/$artistUuid'),
+            onPressed: () => context.push('/artists/$artistUuid'),
             child: Text(
               artistName ?? 'No Artist Name',
               style: Theme.of(context).textTheme.titleMedium,
