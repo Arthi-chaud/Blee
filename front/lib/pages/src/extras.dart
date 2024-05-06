@@ -3,6 +3,7 @@ import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/infinite_scroll.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class ExtrasPage extends StatelessWidget {
@@ -16,7 +17,7 @@ class ExtrasPage extends StatelessWidget {
         child: CustomScrollView(slivers: [
           ThumbnailTileGridView<Extra>(
               tileBuilder: (context, item, index) => ThumbnailTile(
-                    onTap: () {},
+                    onTap: () => context.go('/player/extra:${item!.id}'),
                     title: item?.name,
                     subtitle: item?.artistName,
                     thumbnail: item?.thumbnail,
