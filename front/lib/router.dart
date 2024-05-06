@@ -4,9 +4,6 @@ import 'package:blee/pages/src/extras.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-final _parentKey = GlobalKey<NavigatorState>();
-final _shellKey = GlobalKey<NavigatorState>();
-
 final router = GoRouter(
   initialLocation: '/packages',
   routes: [
