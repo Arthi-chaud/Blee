@@ -246,6 +246,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_blurhash:
+    dependency: "direct main"
+    description:
+      name: flutter_blurhash
+      sha256: "5e67678e479ac639069d7af1e133f4a4702311491188ff3e0227486430db0c06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.2"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -262,6 +270,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.1"
+  flutter_sticky_header:
+    dependency: "direct main"
+    description:
+      name: flutter_sticky_header
+      sha256: "017f398fbb45a589e01491861ca20eb6570a763fd9f3888165a978e11248c709"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.5"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -304,6 +320,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  go_router:
+    dependency: "direct main"
+    description:
+      name: go_router
+      sha256: "771c8feb40ad0ef639973d7ecf1b43d55ffcedb2207fd43fab030f5639e40446"
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.2.4"
   graphs:
     dependency: transitive
     description:
@@ -352,6 +376,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  infinite_scroll_pagination:
+    dependency: "direct main"
+    description:
+      name: infinite_scroll_pagination
+      sha256: "9517328f4e373f08f57dbb11c5aac5b05554142024d6b60c903f3b73476d52db"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.0"
   io:
     dependency: transitive
     description:
@@ -496,6 +528,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
+  responsive_framework:
+    dependency: "direct main"
+    description:
+      name: responsive_framework
+      sha256: "52367ab0c3479b3a5342dec3b74a3d47c4cc1b45bb5d38f720c2e002ebccd4ee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   riverpod:
     dependency: transitive
     description:
@@ -528,6 +568,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  riverpod_infinite_scroll:
+    dependency: "direct main"
+    description:
+      name: riverpod_infinite_scroll
+      sha256: "94f177086c77dc17ca8d1e85117eed346ff6ac651ccbf4d51a449b212d68fd24"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.9"
   riverpod_lint:
     dependency: "direct dev"
     description:
@@ -564,15 +612,23 @@ packages:
     dependency: "direct main"
     description:
       name: skeletonizer
-      sha256: "9a3ae2f4ee4349bdbed3292d04586a1315a44745d2c454684f82f0c46dbeabf9"
+      sha256: "50c3fdf3d1bf6182129c03b53bc7ff6dca10ca0b8e71ccdee148b9322caabdba"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.2+1"
   sky_engine:
     dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.99"
+  sliver_tools:
+    dependency: transitive
+    description:
+      name: sliver_tools
+      sha256: eae28220badfb9d0559207badcbbc9ad5331aac829a88cb0964d330d2a4636a6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.12"
   source_gen:
     dependency: transitive
     description:
@@ -685,6 +741,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.4.0"
+  value_layout_builder:
+    dependency: transitive
+    description:
+      name: value_layout_builder
+      sha256: "98202ec1807e94ac72725b7f0d15027afde513c55c69ff3f41bcfccb950831bc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   vector_math:
     dependency: transitive
     description:
@@ -735,4 +799,4 @@ packages:
     version: "3.1.2"
 sdks:
   dart: ">=3.3.3 <4.0.0"
-  flutter: ">=3.0.0"
+  flutter: ">=3.16.0"

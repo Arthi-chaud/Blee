@@ -139,14 +139,16 @@ async fn get_movies(
 
 /// Get a Movie's Chapters
 #[openapi(tag = "Movies")]
-#[get("/<uuid>/chapters")]
+#[get("/<uuid>/chapters?<pagination..>")]
 async fn get_movie_chapters(
 	db: Database<'_>,
+	pagination: Pagination,
 	uuid: Uuid,
-) -> ApiResult<Vec<ChapterResponseWithThumbnail>> {
-	services::chapter::find_by_movie(&uuid, db.into_inner())
+) -> ApiPageResult<ChapterResponseWithThumbnail> {
+	services::chapter::find_by_movie(&uuid, &pagination, db.into_inner())
 		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+		.map(|items| Page::from(items))
+		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(v))
 }
 
 /// Upload a Movie's Thumbnail

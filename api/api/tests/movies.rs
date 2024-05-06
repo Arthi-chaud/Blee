@@ -87,7 +87,13 @@ mod test_movie {
 			.dispatch();
 		assert_eq!(chapter_response.status(), Status::Ok);
 		let chapter_value = response_json_value(chapter_response);
-		let chapters = chapter_value.as_array().unwrap();
+		let chapters = chapter_value
+			.as_object()
+			.unwrap()
+			.get("items")
+			.unwrap()
+			.as_array()
+			.unwrap();
 		assert_eq!(chapters.len(), 2);
 		let chapter_one = chapters.first().unwrap();
 		let chapter_name = chapter_one.get("name").unwrap().as_str().unwrap();

@@ -18,12 +18,52 @@ class APIClient {
     }
   }
 
+  String buildImageUrl(String uuid) {
+    final route = "/images/$uuid";
+    return _host + (kDebugMode ? route : "api$route");
+  }
+
   Future<Artist> getArtist(String uuid) async {
     var responseBody = await _request(RequestType.get, '/artists/$uuid');
     return Artist.fromJson(responseBody);
   }
 
-  Future<Map<String, dynamic>> _request(RequestType type, String route,
+  Future<Package> getPackage(String uuid) async {
+    var responseBody = await _request(RequestType.get, '/packages/$uuid');
+    return Package.fromJson(responseBody);
+  }
+
+  Future<Page<Package>> getPackages(
+      {PageQuery page = const PageQuery()}) async {
+    var responseBody = await _request(
+        RequestType.get, '/packages?take=${page.take}&skip=${page.skip}');
+    return Page.fromJson(
+        responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<Page<Movie>> getMovies(String packageUuid) async {
+    var responseBody =
+        await _request(RequestType.get, '/movies?package=$packageUuid');
+    return Page.fromJson(
+        responseBody, (x) => Movie.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<Page<Chapter>> getChapters(String movieUuid, PageQuery query) async {
+    var responseBody = await _request(RequestType.get,
+        '/movies/$movieUuid/chapters?take=${query.take}&skip=${query.skip}');
+    return Page.fromJson(
+        responseBody, (x) => Chapter.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<Page<Extra>> getExtras(
+      {String? packageUuid, PageQuery page = const PageQuery()}) async {
+    var responseBody = await _request(RequestType.get,
+        '/extras?package=$packageUuid&take=${page.take}&skip=${page.skip}');
+    return Page.fromJson(
+        responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<dynamic> _request(RequestType type, String route,
       {Map<String, dynamic>? body, Map<String, dynamic>? params}) async {
     body ??= {};
     params ?? {};
