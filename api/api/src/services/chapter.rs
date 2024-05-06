@@ -4,7 +4,9 @@ use crate::dto::{
 };
 use entity::{chapter, image, sea_orm_active_enums::ChapterTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Set};
+use sea_orm::{
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Set,
+};
 
 pub async fn create_many<'s, 'a, C>(
 	chapters: &Vec<NewChapter>,
