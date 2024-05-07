@@ -41,22 +41,21 @@ final router = GoRouter(
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ExtrasPage()),
           ),
-          GoRoute(
-            path: '/player/movie::id',
-            pageBuilder: (context, state) => NoTransitionPage(
-                child: PlayerPage(
-              movieUuid: state.pathParameters['id']!,
-            )),
-          ),
         ]),
     GoRoute(
+      path: '/player/movie::id',
+      pageBuilder: (context, state) => NoTransitionPage(
+          child: PlayerPage(
+        movieUuid: state.pathParameters['id']!,
+      )),
+    ),
+    GoRoute(
       path: '/player/extra::id',
-      pageBuilder: (BuildContext context, GoRouterState state) {
+      pageBuilder: (context, state) {
         return NoTransitionPage(
-            child: Scaffold(
-                body: PlayerPage(
+            child: PlayerPage(
           extraUuid: state.pathParameters['id']!,
-        )));
+        ));
       },
     ),
   ],

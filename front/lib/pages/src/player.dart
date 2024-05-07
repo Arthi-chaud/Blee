@@ -1,5 +1,7 @@
 import 'package:blee/models/models.dart';
 import 'package:blee/providers.dart';
+import 'package:blee/ui/src/image.dart';
+import 'package:blee/ui/src/player_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,34 +19,48 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
   late AutoDisposeFutureProvider<PlayerMetadata> videoMetadataProvider;
 
   @override
-  PlayerPageState() {
+  void initState() {
+    super.initState();
     videoMetadataProvider = widget.extraUuid != null
         ? getPlayerMetadataFromExtraUuidProvider(widget.extraUuid!)
         : getPlayerMetadataFromMovieUuidProvider(widget.movieUuid!);
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final metadata = ref.watch(videoMetadataProvider).when(
-        data: (_) {
-          setState(() {
-            flowStep = PlayerFlowStep.loadingPlayer;
-          });
-        },
-        error: (_, __) {
-          setState(() {
-            flowStep = PlayerFlowStep.errored;
-          });
-        },
-        loading: () {});
-    // .when(data: data, error: error, loading: loading);
-    return Container(
-      child: Text(flowStep.name),
-    );
+    final metadata = ref.watch(videoMetadataProvider)
+      ..when(
+          data: (_) {
+            setState(() {
+              flowStep = PlayerFlowStep.loadingPlayer;
+            });
+          },
+          error: (_, __) {
+            setState(() {
+              flowStep = PlayerFlowStep.errored;
+            });
+          },
+          loading: () {});
+    return Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            Thumbnail(
+                image: metadata.value?.thumbnail,
+                disableSlashFadein: true,
+                disableBorderRadius: true),
+            Container(color: Colors.black.withAlpha(200)),
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+            PlayerControls(
+              title: metadata.value?.videoTitle,
+              poster: metadata.value?.poster,
+              subtitle: metadata.value?.videoArtist,
+              duration: metadata.value?.videoFile.duration,
+              progress: null,
+            )
+          ],
+        ));
   }
 }
