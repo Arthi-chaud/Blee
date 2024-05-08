@@ -2,6 +2,7 @@ import 'package:blee/ui/src/image.dart';
 import 'package:blee/api/api.dart' as api;
 import 'package:blee/utils/format_duration.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
@@ -70,7 +71,7 @@ class _PlayerControlsState extends State<PlayerControls> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, size: 25),
+                  icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 20),
                   color: textColor.withAlpha(150),
                   onPressed: () {
                     // Only useful in debug mode
@@ -151,21 +152,20 @@ class _PlayerControlsState extends State<PlayerControls> {
                                         ),
                                         Center(
                                           child: IconButton(
-                                              onPressed: () {
-                                                if (widget.controller?.value
-                                                        .isPlaying ??
-                                                    false) {
-                                                  widget.controller?.pause();
-                                                } else {
-                                                  widget.controller?.play();
-                                                }
-                                              },
-                                              icon: Icon(
-                                                isPlaying
-                                                    ? Icons.pause
-                                                    : Icons.play_arrow,
-                                                color: Colors.white,
-                                              )),
+                                            onPressed: () {
+                                              if (widget.controller?.value
+                                                      .isPlaying ??
+                                                  false) {
+                                                widget.controller?.pause();
+                                              } else {
+                                                widget.controller?.play();
+                                              }
+                                            },
+                                            icon: isPlaying
+                                                ? const FaIcon(FontAwesomeIcons.pause, size: 20)
+                                                : const FaIcon(FontAwesomeIcons.play, size: 15),
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ],
                                     ),

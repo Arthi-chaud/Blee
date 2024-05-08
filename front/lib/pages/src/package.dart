@@ -8,6 +8,7 @@ import 'package:blee/ui/src/infinite_scroll.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -212,7 +213,7 @@ class PackagePage extends ConsumerWidget {
                       child: Padding(
                           padding: const EdgeInsets.only(bottom: 8, top: 8),
                           child: ElevatedButton.icon(
-                            icon: const Icon(Icons.play_arrow),
+                            icon: const FaIcon(FontAwesomeIcons.play, size: 15),
                             label: const Text('Play'),
                             onPressed: () => context.push(
                                 '/player/movie:${movies!.items.first.id}'),

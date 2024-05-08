@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class ScaffoldWithNavBar extends StatefulWidget {
@@ -17,12 +18,12 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
 
   static const List<MyNavigationDestination> tabs = [
     MyNavigationDestination(
-      icon: Icon(Icons.movie),
+      icon: FaIcon(FontAwesomeIcons.film),
       label: 'Movies',
       initialLocation: '/packages',
     ),
     MyNavigationDestination(
-      icon: Icon(Icons.music_video_sharp),
+      icon: FaIcon(FontAwesomeIcons.tv),
       label: 'Videos',
       initialLocation: '/extras',
     ),
