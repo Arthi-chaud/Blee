@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:blee/models/models.dart';
 import 'package:blee/api/api.dart' as api;
 import 'package:blee/providers.dart';
+import 'package:blee/ui/src/hide_on_inactivity.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/player_controls.dart';
 import 'package:flutter/material.dart';
@@ -151,15 +152,16 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
                     ))
                   : Container(),
             ),
-            PlayerControls(
-              title: metadata.value?.videoTitle,
-              poster: metadata.value?.poster,
-              subtitle: currentChapter != null
-                  ? '${currentChapter!.name} - ${metadata.value?.videoArtist ?? ''}'
-                  : metadata.value?.videoArtist,
-              duration: metadata.value?.videoFile.duration,
-              controller: _controller,
-            ),
+            HideOnInactivity(
+                child: PlayerControls(
+                  title: metadata.value?.videoTitle,
+                  poster: metadata.value?.poster,
+                  subtitle: currentChapter != null
+                      ? '${currentChapter!.name} - ${metadata.value?.videoArtist ?? ''}'
+                      : metadata.value?.videoArtist,
+                  duration: metadata.value?.videoFile.duration,
+                  controller: _controller,
+                )),
           ],
         ));
   }
