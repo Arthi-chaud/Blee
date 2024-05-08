@@ -118,7 +118,7 @@ class _PackageDescriptionBox extends StatelessWidget {
   final bool skeletonize;
 
   const _PackageDescriptionBox(
-      {super.key, required this.description, required this.skeletonize});
+      {required this.description, required this.skeletonize});
 
   @override
   Widget build(BuildContext context) {
@@ -198,6 +198,7 @@ class PackagePage extends ConsumerWidget {
                     isCompilation: package?.artistId == null,
                     releaseDate: package?.releaseDate,
                     poster: package?.poster),
+                SizedBox.fromSize(size: const Size.fromHeight(8)),
                 _PackageDescriptionBox(
                   description: externalIds?.items.firstOrNull?.description,
                   skeletonize: externalIds == null,
@@ -209,7 +210,7 @@ class PackagePage extends ConsumerWidget {
                   ? Skeletonizer(
                       enabled: movies == null,
                       child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8, top: 16),
+                          padding: const EdgeInsets.only(bottom: 8, top: 8),
                           child: ElevatedButton.icon(
                             icon: const Icon(Icons.play_arrow),
                             label: const Text('Play'),
@@ -219,14 +220,14 @@ class PackagePage extends ConsumerWidget {
                   : Container(),
             ),
             ...(movies?.items.map((movie) {
-                  var isOnlyMovie = (movies?.metadata.count ?? 2) == 1;
+                  var isOnlyMovie = movies.metadata.count == 1;
                   return ThumbnailTileGridView(
                       key: Key('$movie-chapters'),
                       header: Text(
                         isOnlyMovie ? 'Chapters' : movie.name,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
-                      skeletonHeader: movies == null,
+                      skeletonHeader: false,
                       query: (q) => APIClient().getChapters(movie.id, q),
                       tileBuilder: (context, item, index) => ThumbnailTile(
                             key: Key('chapter-${item?.id}'),

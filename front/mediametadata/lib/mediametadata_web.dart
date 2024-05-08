@@ -24,6 +24,7 @@ class MediametadataWeb extends MediametadataPlatform {
     return version;
   }
 
+  @override
   void setMediaMetadata(
       {required String artistName,
       required String? albumName,

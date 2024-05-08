@@ -75,15 +75,17 @@ class _AbstractGridViewState<T> extends State<AbstractGridView<T>> {
 
   @override
   Widget build(BuildContext context) => SliverStickyHeader(
-      header: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: Skeletonizer(
-            enabled:
-                widget.skeletonHeader ?? _pagingController.itemList == null,
-            child: (_pagingController.itemList?.isEmpty ?? false)
-                ? Container()
-                : widget.header ?? Container(),
-          )),
+      header: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Skeletonizer(
+          enabled: widget.skeletonHeader ?? _pagingController.itemList == null,
+          child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: (_pagingController.itemList?.isEmpty ?? false)
+                  ? Container()
+                  : widget.header ?? Container()),
+        ),
+      ),
       sliver: PagedSliverGrid<int, T>(
         pagingController: _pagingController,
         gridDelegate: widget.delegate(context),
