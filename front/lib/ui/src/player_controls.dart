@@ -62,7 +62,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                 if (context.canPop()) {
                   context.pop();
                 } else {
-                  context.push('/packages');
+                  context.push('/');
                 }
               },
             ),

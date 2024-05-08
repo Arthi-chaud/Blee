@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: '/packages',
+  initialLocation: '/',
   routes: [
+    GoRoute(
+      path: '/',
+      redirect: (_, __) => '/packages',
+    ),
     ShellRoute(
         pageBuilder: (
           BuildContext context,

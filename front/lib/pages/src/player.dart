@@ -6,6 +6,7 @@ import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/player_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 class PlayerPage extends ConsumerStatefulWidget {
@@ -41,7 +42,21 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
     return VideoPlayerController.networkUrl(Uri.parse(
         'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}/direct'))
       ..initialize().then((_) {
-        _controller?.play();
+        _controller!.play();
+        _controller!.addListener(() {
+          // BUG in video_player: `isCompleted` is fired twice
+          // need to check the actual position of the player to pop exactly one
+          if (_controller!.value.isCompleted &&
+              _controller!.value.position.inSeconds ==
+                  metadata.videoFile.duration) {
+            if (!mounted) return;
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          }
+        });
         setState(() {
           flowStep = PlayerFlowStep.playerStarted;
         });
