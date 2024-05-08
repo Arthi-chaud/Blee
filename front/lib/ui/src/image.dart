@@ -22,14 +22,22 @@ class Poster extends StatelessWidget {
 
 class Thumbnail extends StatelessWidget {
   final api.Image? image;
-  const Thumbnail({super.key, required this.image});
+  final bool disableBorderRadius;
+  final bool disableSlashFadein;
+  const Thumbnail(
+      {super.key,
+      required this.image,
+      this.disableBorderRadius = false,
+      this.disableSlashFadein = false});
 
   @override
   Widget build(BuildContext context) {
     const aspectRatio = 16 / 9;
     return _BleeImage(
       key: key,
+      disableBorderRadius: disableBorderRadius,
       image: image,
+      disableSlashFadein: disableSlashFadein,
       placeholderRatio: aspectRatio,
       forcedAspectRatio: aspectRatio,
     );
@@ -40,9 +48,13 @@ class _BleeImage extends StatelessWidget {
   final api.Image? image;
   final double? placeholderRatio;
   final double? forcedAspectRatio;
+  final bool disableBorderRadius;
+  final bool disableSlashFadein;
   const _BleeImage(
       {super.key,
       required this.image,
+      this.disableBorderRadius = false,
+      this.disableSlashFadein = false,
       this.placeholderRatio,
       this.forcedAspectRatio});
 
@@ -58,21 +70,30 @@ class _BleeImage extends StatelessWidget {
                     placeholderRatio ??
                     1,
                 child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: disableBorderRadius
+                        ? BorderRadius.zero
+                        : BorderRadius.circular(8),
                     child: Stack(
                       children: [
-                        Container(color: Theme.of(context).splashColor),
-                        BlurHash(
-                          image: image == null
-                              ? null
-                              : APIClient().buildImageUrl(image!.id),
-                          imageFit: BoxFit.cover,
-                          color: const Color(0xffebebf4),
-                          curve: Curves.easeIn,
-                          duration: const Duration(milliseconds: 500),
-                          hash:
-                              image?.blurhash ?? "L5H2EC=PM+yV0g-mq.wG9c010J}I",
-                        )
+                        Container(
+                            color: disableSlashFadein
+                                ? null
+                                : Theme.of(context).splashColor),
+                        image != null
+                            ? BlurHash(
+                                image: image == null
+                                    ? null
+                                    : APIClient().buildImageUrl(image!.id),
+                                imageFit: BoxFit.cover,
+                                color: disableSlashFadein
+                                    ? Colors.transparent
+                                    : const Color(0xffebebf4),
+                                curve: Curves.easeIn,
+                                duration: const Duration(milliseconds: 500),
+                                hash: image?.blurhash ??
+                                    "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                              )
+                            : Container()
                       ],
                     )));
           }));

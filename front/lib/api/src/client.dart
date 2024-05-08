@@ -33,12 +33,35 @@ class APIClient {
     return Package.fromJson(responseBody);
   }
 
+  Future<File> getFile(String uuid) async {
+    var responseBody = await _request(RequestType.get, '/files/$uuid');
+    return File.fromJson(responseBody);
+  }
+
+  Future<Extra> getExtra(String uuid) async {
+    var responseBody = await _request(RequestType.get, '/extras/$uuid');
+    return Extra.fromJson(responseBody);
+  }
+
+  Future<Movie> getMovie(String uuid) async {
+    var responseBody = await _request(RequestType.get, '/movies/$uuid');
+    return Movie.fromJson(responseBody);
+  }
+
   Future<Page<Package>> getPackages(
       {PageQuery page = const PageQuery()}) async {
     var responseBody = await _request(
         RequestType.get, '/packages?take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<Page<ExternalId>> getPackageExternalIds(String packageUuid,
+      {PageQuery page = const PageQuery()}) async {
+    var responseBody = await _request(RequestType.get,
+        '/external_ids?package=$packageUuid&take=${page.take}&skip=${page.skip}');
+    return Page.fromJson(
+        responseBody, (x) => ExternalId.fromJson(x as Map<String, dynamic>));
   }
 
   Future<Page<Movie>> getMovies(String packageUuid) async {

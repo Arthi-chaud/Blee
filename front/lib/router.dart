@@ -1,12 +1,17 @@
 import 'package:blee/navigation.dart';
 import 'package:blee/pages/pages.dart';
 import 'package:blee/pages/src/extras.dart';
+import 'package:blee/pages/src/player.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: '/packages',
+  initialLocation: '/',
   routes: [
+    GoRoute(
+      path: '/',
+      redirect: (_, __) => '/packages',
+    ),
     ShellRoute(
         pageBuilder: (
           BuildContext context,
@@ -41,5 +46,31 @@ final router = GoRouter(
                 const NoTransitionPage(child: ExtrasPage()),
           ),
         ]),
+    GoRoute(
+      path: '/player/movie::id',
+      pageBuilder: (context, state) {
+        var startPositionQuery = state.uri.queryParameters['start_pos'];
+        // ignore: avoid_init_to_null
+        var startPos = null;
+
+        if (startPositionQuery != null) {
+          startPos = int.tryParse(startPositionQuery);
+        }
+        return NoTransitionPage(
+            child: PlayerPage(
+          movieUuid: state.pathParameters['id']!,
+          startPosition: startPos,
+        ));
+      },
+    ),
+    GoRoute(
+      path: '/player/extra::id',
+      pageBuilder: (context, state) {
+        return NoTransitionPage(
+            child: PlayerPage(
+          extraUuid: state.pathParameters['id']!,
+        ));
+      },
+    ),
   ],
 );
