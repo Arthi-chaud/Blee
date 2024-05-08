@@ -58,6 +58,7 @@ class _PlayerControlsState extends State<PlayerControls> {
 
     return Stack(
       children: [
+        // Back Button / Header
         Positioned(
           left: 0,
           top: 0,
@@ -86,6 +87,7 @@ class _PlayerControlsState extends State<PlayerControls> {
             ),
           ),
         ),
+        // Footer
         Positioned(
             bottom: 0,
             left: 0,
@@ -105,11 +107,13 @@ class _PlayerControlsState extends State<PlayerControls> {
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
+                        // Poster
                         AspectRatio(
                             aspectRatio: 3 / 4,
                             child: Poster(
                               image: widget.poster,
                             )),
+                        // Slider + titles
                         Expanded(
                             child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -118,27 +122,53 @@ class _PlayerControlsState extends State<PlayerControls> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(widget.title ?? '',
-                                  style: TextStyle(
-                                      color: textColor,
-                                      fontSize: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.fontSize)),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              Text(
-                                widget.subtitle ?? '',
-                                style: TextStyle(
-                                    color: textColor,
-                                    fontSize: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge
-                                        ?.fontSize),
-                              ),
-                              const SizedBox(
-                                height: 8,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(widget.title ?? '',
+                                      style: TextStyle(
+                                          color: textColor,
+                                          fontSize: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.fontSize)),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 4),
+                                    child: Stack(
+                                      alignment: AlignmentDirectional.centerStart,
+                                      children: [
+                                        Text(
+                                          widget.subtitle ?? '',
+                                          style: TextStyle(
+                                              color: textColor,
+                                              fontSize: Theme.of(context)
+                                                  .textTheme
+                                                  .labelLarge
+                                                  ?.fontSize),
+                                        ),
+                                        Center(
+                                          child: IconButton(
+                                              onPressed: () {
+                                                if (widget.controller?.value
+                                                        .isPlaying ??
+                                                    false) {
+                                                  widget.controller?.pause();
+                                                } else {
+                                                  widget.controller?.play();
+                                                }
+                                              },
+                                              icon: Icon(
+                                                isPlaying
+                                                    ? Icons.pause
+                                                    : Icons.play_arrow,
+                                                color: Colors.white,
+                                              )),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                               Row(
                                 mainAxisAlignment:
@@ -190,20 +220,3 @@ class _PlayerControlsState extends State<PlayerControls> {
     );
   }
 }
-
-                                  // IconButton(
-                                  //     onPressed: () {
-                                  //       if (widget
-                                  //               .controller?.value.isPlaying ??
-                                  //           false) {
-                                  //         widget.controller?.pause();
-                                  //       } else {
-                                  //         widget.controller?.play();
-                                  //       }
-                                  //     },
-                                  //     icon: Icon(
-                                  //       isPlaying
-                                  //           ? Icons.pause
-                                  //           : Icons.play_arrow,
-                                  //       color: Colors.white,
-                                  //     )),
