@@ -100,7 +100,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                          Colors.transparent,
+                        Colors.transparent,
                         Colors.black.withAlpha(200),
                         Colors.black
                       ])),

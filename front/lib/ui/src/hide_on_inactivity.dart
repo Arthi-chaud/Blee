@@ -20,7 +20,8 @@ class _HideOnInactivityState extends State<HideOnInactivity> {
   @override
   void initState() {
     super.initState();
-    _internalTimer = Timer.periodic(const Duration(seconds: 5), (timer) => setIsVisible(false));
+    _internalTimer = Timer.periodic(
+        const Duration(seconds: 5), (timer) => setIsVisible(false));
   }
 
   @override
@@ -51,8 +52,7 @@ class _HideOnInactivityState extends State<HideOnInactivity> {
         // On Click/tap
         onPointerDown: (e) {
           // If tap and controls are already visible
-          if (e.kind == PointerDeviceKind.touch &&
-              isVisible) {
+          if (e.kind == PointerDeviceKind.touch && isVisible) {
             setIsVisible(false);
           } else {
             triggerVisibility();

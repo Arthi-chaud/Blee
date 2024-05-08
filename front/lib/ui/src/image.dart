@@ -79,19 +79,21 @@ class _BleeImage extends StatelessWidget {
                             color: disableSlashFadein
                                 ? null
                                 : Theme.of(context).splashColor),
-                        image != null ? BlurHash(
-                          image: image == null
-                              ? null
-                              : APIClient().buildImageUrl(image!.id),
-                          imageFit: BoxFit.cover,
-                          color: disableSlashFadein
-                              ? Colors.transparent
-                              : const Color(0xffebebf4),
-                          curve: Curves.easeIn,
-                          duration: const Duration(milliseconds: 500),
-                          hash:
-                              image?.blurhash ?? "L5H2EC=PM+yV0g-mq.wG9c010J}I",
-                        ) : Container()
+                        image != null
+                            ? BlurHash(
+                                image: image == null
+                                    ? null
+                                    : APIClient().buildImageUrl(image!.id),
+                                imageFit: BoxFit.cover,
+                                color: disableSlashFadein
+                                    ? Colors.transparent
+                                    : const Color(0xffebebf4),
+                                curve: Curves.easeIn,
+                                duration: const Duration(milliseconds: 500),
+                                hash: image?.blurhash ??
+                                    "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                              )
+                            : Container()
                       ],
                     )));
           }));

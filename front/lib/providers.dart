@@ -40,6 +40,12 @@ Future<Page<Extra>> getExtras(GetExtrasRef ref,
   return await APIClient().getExtras(packageUuid: packageUuid, page: page);
 }
 
+@riverpod
+Future<Page<ExternalId>> getPackageExternalIds(
+    GetPackageExternalIdsRef ref, String packageUuid) async {
+  return await APIClient().getPackageExternalIds(packageUuid);
+}
+
 //// Player
 
 @riverpod

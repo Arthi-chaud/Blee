@@ -56,6 +56,14 @@ class APIClient {
         responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
   }
 
+  Future<Page<ExternalId>> getPackageExternalIds(String packageUuid,
+      {PageQuery page = const PageQuery()}) async {
+    var responseBody = await _request(RequestType.get,
+        '/external_ids?package=$packageUuid&take=${page.take}&skip=${page.skip}');
+    return Page.fromJson(
+        responseBody, (x) => ExternalId.fromJson(x as Map<String, dynamic>));
+  }
+
   Future<Page<Movie>> getMovies(String packageUuid) async {
     var responseBody =
         await _request(RequestType.get, '/movies?package=$packageUuid');
