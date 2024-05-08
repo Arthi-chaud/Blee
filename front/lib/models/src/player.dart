@@ -19,6 +19,7 @@ class PlayerMetadata {
   final api.Image? poster;
   final api.Image? thumbnail;
   final api.File videoFile;
+  final List<api.Chapter> chapters;
 
   PlayerMetadata(
       {required this.videoTitle,
@@ -26,5 +27,6 @@ class PlayerMetadata {
       required this.videoArtist,
       required this.poster,
       required this.thumbnail,
+      required this.chapters,
       required this.videoFile});
 }

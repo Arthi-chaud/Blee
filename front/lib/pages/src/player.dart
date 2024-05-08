@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:blee/models/models.dart';
+import 'package:blee/api/api.dart' as api;
 import 'package:blee/providers.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/player_controls.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
+import 'package:collection/collection.dart';
 
 class PlayerPage extends ConsumerStatefulWidget {
   final String? extraUuid;
@@ -20,10 +22,13 @@ class PlayerPage extends ConsumerStatefulWidget {
   PlayerPageState createState() => PlayerPageState();
 }
 
+enum StreamMode { direct, hls }
+
 class PlayerPageState extends ConsumerState<PlayerPage> {
   PlayerFlowStep flowStep = PlayerFlowStep.loadingNeededMetadata;
   late AutoDisposeFutureProvider<PlayerMetadata> videoMetadataProvider;
   VideoPlayerController? _controller;
+  api.Chapter? currentChapter;
 
   @override
   void initState() {
@@ -40,38 +45,58 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
     _controller?.dispose();
   }
 
-  VideoPlayerController setupPlayer(PlayerMetadata metadata) {
-    return VideoPlayerController.networkUrl(
-        Uri.parse(
-            'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}/direct'),
-        httpHeaders: {"X-CLIENT-ID": "A"})
-      ..initialize().then((_) {
-        _controller?.setVolume(1);
-        if (widget.startPosition == null) {
-          _controller!.play();
-        } else {
-          _controller!
-              .seekTo(Duration(seconds: widget.startPosition!))
-              .then((_) => _controller!.play());
+  void _onPlayerInit(PlayerMetadata metadata) {
+    _controller?.setVolume(1);
+    if (widget.startPosition == null) {
+      _controller!.play();
+    } else {
+      _controller!
+          .seekTo(Duration(seconds: widget.startPosition!))
+          .then((_) => _controller!.play());
+    }
+    _controller!.addListener(() {
+      if (metadata.chapters.isNotEmpty) {
+        // If we are in a movie
+        var currentPlayerPosition = _controller!.value.position.inSeconds;
+        // If the chapter was not previously set
+        if (currentChapter == null ||
+            currentPlayerPosition < currentChapter!.startTime ||
+            currentChapter!.endTime < currentPlayerPosition) {
+          setState(() {
+            currentChapter = metadata.chapters.firstWhereOrNull((chapter) =>
+                chapter.startTime <= currentPlayerPosition &&
+                currentPlayerPosition < chapter.endTime);
+          });
         }
-        _controller!.addListener(() {
-          // BUG in video_player: `isCompleted` is fired twice
-          // need to check the actual position of the player to pop exactly one
-          if (_controller!.value.isCompleted &&
-              _controller!.value.position.inSeconds ==
-                  metadata.videoFile.duration) {
-            if (!mounted) return;
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/');
-            }
-          }
-        });
-        setState(() {
-          flowStep = PlayerFlowStep.playerStarted;
-        });
-      });
+      }
+      // BUG in video_player: `isCompleted` is fired twice
+      // need to check the actual position of the player to pop exactly one
+      if (_controller!.value.isCompleted &&
+          _controller!.value.position.inSeconds ==
+              metadata.videoFile.duration) {
+        if (!mounted) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/');
+        }
+      }
+    });
+    setState(() {
+      flowStep = PlayerFlowStep.playerStarted;
+    });
+  }
+
+  VideoPlayerController setupPlayer(PlayerMetadata metadata,
+      {StreamMode streamMode = StreamMode.direct}) {
+    final baseUrl =
+        'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}';
+    return VideoPlayerController.networkUrl(
+        Uri.parse(streamMode == StreamMode.direct
+            ? '$baseUrl/direct'
+            : '$baseUrl/original/index.m3u8'),
+        httpHeaders: {"X-CLIENT-ID": "A"})
+      ..initialize().then((_) => _onPlayerInit(metadata));
   }
 
   @override
@@ -129,7 +154,9 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
             PlayerControls(
               title: metadata.value?.videoTitle,
               poster: metadata.value?.poster,
-              subtitle: metadata.value?.videoArtist,
+              subtitle: currentChapter != null
+                  ? '${currentChapter!.name} - ${metadata.value?.videoArtist ?? ''}'
+                  : metadata.value?.videoArtist,
               duration: metadata.value?.videoFile.duration,
               controller: _controller,
             ),

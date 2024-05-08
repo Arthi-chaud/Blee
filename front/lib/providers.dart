@@ -1,4 +1,5 @@
 import 'package:blee/api/api.dart';
+import 'package:blee/api/src/models/page.dart';
 import 'package:blee/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
@@ -29,8 +30,9 @@ Future<Page<Movie>> getMovies(GetMoviesRef ref, {String? packageUuid}) async {
 }
 
 @riverpod
-Future<Page<Chapter>> getChapters(GetChaptersRef ref, String movieUuid) async {
-  return await APIClient().getChapters(movieUuid, const PageQuery());
+Future<Page<Chapter>> getChapters(
+    GetChaptersRef ref, String movieUuid, PageQuery page) async {
+  return await APIClient().getChapters(movieUuid, page);
 }
 
 @riverpod
@@ -54,6 +56,7 @@ Future<PlayerMetadata> getPlayerMetadataFromExtraUuid(
       videoArtist: extra.artistName,
       poster: package.poster,
       thumbnail: extra.thumbnail,
+      chapters: [],
       videoFile: file);
 }
 
@@ -63,6 +66,8 @@ Future<PlayerMetadata> getPlayerMetadataFromMovieUuid(
   final movie = await ref.watch(getMovieProvider(movieUuid).future);
   final file = await ref.watch(getFileProvider(movie.fileId).future);
   final package = await ref.watch(getPackageProvider(movie.packageId).future);
+  final chapters = await ref.watch(
+      getChaptersProvider(movie.id, const PageQuery(take: 100)).future); // TODO
 
   return PlayerMetadata(
       videoTitle: movie.name,
@@ -70,5 +75,6 @@ Future<PlayerMetadata> getPlayerMetadataFromMovieUuid(
       videoArtist: movie.artistName,
       poster: package.poster,
       thumbnail: movie.thumbnail,
+      chapters: chapters.items,
       videoFile: file);
 }
