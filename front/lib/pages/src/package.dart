@@ -136,7 +136,8 @@ class PackagePage extends StatelessWidget {
                               child: ElevatedButton.icon(
                                 icon: const Icon(Icons.play_arrow),
                                 label: const Text('Play'),
-                                onPressed: () {},
+                                onPressed: () => context.push(
+                                    '/player/movie:${movies.value!.items.first.id}'),
                               )))
                       : Container(),
                 ),
@@ -160,7 +161,8 @@ class PackagePage extends StatelessWidget {
                                     : null,
                                 thumbnail: item?.thumbnail,
                                 onTap: () {
-                                  // TODO
+                                  context.push(
+                                      '/player/movie:${movie.id}?start_pos=${item!.startTime}');
                                 },
                               ));
                     }).toList()) ??

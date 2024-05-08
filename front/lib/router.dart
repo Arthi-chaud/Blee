@@ -48,10 +48,20 @@ final router = GoRouter(
         ]),
     GoRoute(
       path: '/player/movie::id',
-      pageBuilder: (context, state) => NoTransitionPage(
-          child: PlayerPage(
-        movieUuid: state.pathParameters['id']!,
-      )),
+      pageBuilder: (context, state) {
+        var startPositionQuery = state.uri.queryParameters['start_pos'];
+        // ignore: avoid_init_to_null
+        var startPos = null;
+
+        if (startPositionQuery != null) {
+          startPos = int.tryParse(startPositionQuery);
+        }
+        return NoTransitionPage(
+            child: PlayerPage(
+          movieUuid: state.pathParameters['id']!,
+          startPosition: startPos,
+        ));
+      },
     ),
     GoRoute(
       path: '/player/extra::id',

@@ -12,7 +12,9 @@ import 'package:video_player/video_player.dart';
 class PlayerPage extends ConsumerStatefulWidget {
   final String? extraUuid;
   final String? movieUuid;
-  const PlayerPage({super.key, this.movieUuid, this.extraUuid});
+  final int? startPosition;
+  const PlayerPage(
+      {super.key, this.movieUuid, this.extraUuid, this.startPosition});
 
   @override
   PlayerPageState createState() => PlayerPageState();
@@ -39,10 +41,19 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
   }
 
   VideoPlayerController setupPlayer(PlayerMetadata metadata) {
-    return VideoPlayerController.networkUrl(Uri.parse(
-        'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}/direct'))
+    return VideoPlayerController.networkUrl(
+        Uri.parse(
+            'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}/direct'),
+        httpHeaders: {"X-CLIENT-ID": "A"})
       ..initialize().then((_) {
-        _controller!.play();
+        _controller?.setVolume(1);
+        if (widget.startPosition == null) {
+          _controller!.play();
+        } else {
+          _controller!
+              .seekTo(Duration(seconds: widget.startPosition!))
+              .then((_) => _controller!.play());
+        }
         _controller!.addListener(() {
           // BUG in video_player: `isCompleted` is fired twice
           // need to check the actual position of the player to pop exactly one

@@ -60,7 +60,7 @@ Future<PlayerMetadata> getPlayerMetadataFromExtraUuid(
 @riverpod
 Future<PlayerMetadata> getPlayerMetadataFromMovieUuid(
     GetPlayerMetadataFromMovieUuidRef ref, String movieUuid) async {
-  final movie = await ref.watch(getExtraProvider(movieUuid).future);
+  final movie = await ref.watch(getMovieProvider(movieUuid).future);
   final file = await ref.watch(getFileProvider(movie.fileId).future);
   final package = await ref.watch(getPackageProvider(movie.packageId).future);
 
