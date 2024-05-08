@@ -17,7 +17,7 @@ class ExtrasPage extends StatelessWidget {
         child: CustomScrollView(slivers: [
           ThumbnailTileGridView<Extra>(
               tileBuilder: (context, item, index) => ThumbnailTile(
-                    onTap: () => context.go('/player/extra:${item!.id}'),
+                    onTap: () => context.push('/player/extra:${item!.id}'),
                     title: item?.name,
                     subtitle: item?.artistName,
                     thumbnail: item?.thumbnail,

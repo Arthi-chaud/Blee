@@ -17,7 +17,7 @@ class PackagesPage extends StatelessWidget {
         child: CustomScrollView(slivers: [
           PosterTileGridView<Package>(
               tileBuilder: (context, item, index) => PosterTile(
-                    onTap: () => context.go('/packages/${item?.id}'),
+                    onTap: () => context.push('/packages/${item?.id}'),
                     title: item?.name,
                     subtitle: item?.artistName,
                     thumbnail: item?.poster,

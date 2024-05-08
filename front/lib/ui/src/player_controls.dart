@@ -38,11 +38,10 @@ class PlayerControls extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.arrow_back, size: 25),
               onPressed: () {
-                // TODO: make 'canPop' work
                 if (context.canPop()) {
                   context.pop();
                 } else {
-                  context.go('/packages');
+                  context.push('/packages');
                 }
               },
             ),

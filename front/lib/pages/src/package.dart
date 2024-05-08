@@ -159,7 +159,9 @@ class PackagePage extends StatelessWidget {
                                         item.endTime - item.startTime)
                                     : null,
                                 thumbnail: item?.thumbnail,
-                                onTap: () {},
+                                onTap: () {
+                                  // TODO
+                                },
                               ));
                     }).toList()) ??
                     [],
@@ -181,7 +183,9 @@ class PackagePage extends StatelessWidget {
                               ? formatDuration(item.duration)
                               : null,
                           thumbnail: item?.thumbnail,
-                          onTap: () {},
+                          onTap: () {
+                            context.push('/player/extra:${item!.id}');
+                          },
                         ))
               ],
             ));
