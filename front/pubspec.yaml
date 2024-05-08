@@ -22,6 +22,8 @@ dependencies:
   riverpod_annotation: ^2.3.5
   riverpod_infinite_scroll: ^1.0.9
   skeletonizer: ^1.1.2+1
+  video_player: ^2.8.6
+  video_player_web_hls: ^1.2.1
 
 dev_dependencies:
   flutter_test:
