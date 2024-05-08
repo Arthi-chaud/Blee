@@ -10,9 +10,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../utils/format_duration.dart';
+part 'package.g.dart';
+
+//// Package Page
+
+@riverpod
+Future<(Package, page.Page<Movie>)> getPackagePageData(
+    GetPackagePageDataRef ref, String packageUuid) async {
+  final Package package =
+      await ref.watch(getPackageProvider(packageUuid).future);
+  final page.Page<Movie> movies =
+      await ref.watch(getMoviesProvider(packageUuid: packageUuid).future);
+  return (package, movies);
+}
 
 class _PackagePageHeader extends StatelessWidget {
   final String? packageTitle;
@@ -96,102 +110,93 @@ class _PackagePageHeader extends StatelessWidget {
   }
 }
 
-class PackagePage extends StatelessWidget {
+class PackagePage extends ConsumerWidget {
   final String packageUuid;
   const PackagePage({super.key, required this.packageUuid});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final AsyncValue<Package> package =
-            ref.watch(getPackageProvider(packageUuid));
-        final AsyncValue<page.Page<Movie>> movies =
-            ref.watch(getMoviesProvider(packageUuid: packageUuid));
+  Widget build(context, ref) {
+    final data = ref.watch(getPackagePageDataProvider(packageUuid));
+    final package = data.value?.$1;
+    final movies = data.value?.$2;
 
-        return MaxWidthBox(
-            maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
-            child: CustomScrollView(
-              slivers: [
-                SliverList.list(
-                  children: [
-                    SizedBox.fromSize(size: const Size.fromHeight(16)),
-                    _PackagePageHeader(
-                        key: Key('$packageUuid-header'),
-                        packageTitle: package.value?.name,
-                        artistName: package.value?.artistName,
-                        artistUuid: package.value?.artistId,
-                        isCompilation: package.value?.artistId == null,
-                        releaseDate: package.value?.releaseDate,
-                        poster: package.value?.poster),
-                  ],
-                ),
-                SliverToBoxAdapter(
-                  child: (movies.value?.metadata.count ?? 1) == 1
-                      ? Skeletonizer(
-                          enabled: movies.value == null,
-                          child: Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 8, top: 16),
-                              child: ElevatedButton.icon(
-                                icon: const Icon(Icons.play_arrow),
-                                label: const Text('Play'),
-                                onPressed: () => context.push(
-                                    '/player/movie:${movies.value!.items.first.id}'),
-                              )))
-                      : Container(),
-                ),
-                ...(movies.value?.items.map((movie) {
-                      var isOnlyMovie =
-                          (movies.value?.metadata.count ?? 2) == 1;
-                      return ThumbnailTileGridView(
-                          key: Key('$movie-chapters'),
-                          header: Text(
-                            isOnlyMovie ? 'Chapters' : movie.name,
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          skeletonHeader: movies.value == null,
-                          query: (q) => APIClient().getChapters(movie.id, q),
-                          tileBuilder: (context, item, index) => ThumbnailTile(
-                                key: Key('chapter-${item?.id}'),
-                                title: item?.name,
-                                subtitle: item != null
-                                    ? formatDuration(
-                                        item.endTime - item.startTime)
-                                    : null,
-                                thumbnail: item?.thumbnail,
-                                onTap: () {
-                                  context.push(
-                                      '/player/movie:${movie.id}?start_pos=${item!.startTime}');
-                                },
-                              ));
-                    }).toList()) ??
-                    [],
-                ThumbnailTileGridView(
-                    key: Key('$packageUuid-extras'),
-                    header: (movies.value?.metadata.count ?? 1) > 0
-                        ? Text(
-                            'Extras',
-                            style: Theme.of(context).textTheme.labelLarge,
-                          )
-                        : null,
-                    skeletonHeader: movies.value == null,
-                    query: (q) => APIClient()
-                        .getExtras(packageUuid: packageUuid, page: q),
-                    tileBuilder: (context, item, index) => ThumbnailTile(
-                          key: Key('extra-${item?.id}'),
-                          title: item?.name,
-                          subtitle: item != null
-                              ? formatDuration(item.duration)
-                              : null,
-                          thumbnail: item?.thumbnail,
-                          onTap: () {
-                            context.push('/player/extra:${item!.id}');
-                          },
-                        ))
+    return MaxWidthBox(
+        maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
+        child: CustomScrollView(
+          slivers: [
+            SliverList.list(
+              children: [
+                SizedBox.fromSize(size: const Size.fromHeight(16)),
+                _PackagePageHeader(
+                    key: Key('$packageUuid-header'),
+                    packageTitle: package?.name,
+                    artistName: package?.artistName,
+                    artistUuid: package?.artistId,
+                    isCompilation: package?.artistId == null,
+                    releaseDate: package?.releaseDate,
+                    poster: package?.poster),
               ],
-            ));
-      },
-    );
+            ),
+            SliverToBoxAdapter(
+              child: (movies?.metadata.count ?? 1) == 1
+                  ? Skeletonizer(
+                      enabled: movies == null,
+                      child: Padding(
+                          padding: const EdgeInsets.only(bottom: 8, top: 16),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.play_arrow),
+                            label: const Text('Play'),
+                            onPressed: () => context.push(
+                                '/player/movie:${movies!.items.first.id}'),
+                          )))
+                  : Container(),
+            ),
+            ...(movies?.items.map((movie) {
+                  var isOnlyMovie = (movies?.metadata.count ?? 2) == 1;
+                  return ThumbnailTileGridView(
+                      key: Key('$movie-chapters'),
+                      header: Text(
+                        isOnlyMovie ? 'Chapters' : movie.name,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      skeletonHeader: movies == null,
+                      query: (q) => APIClient().getChapters(movie.id, q),
+                      tileBuilder: (context, item, index) => ThumbnailTile(
+                            key: Key('chapter-${item?.id}'),
+                            title: item?.name,
+                            subtitle: item != null
+                                ? formatDuration(item.endTime - item.startTime)
+                                : null,
+                            thumbnail: item?.thumbnail,
+                            onTap: () {
+                              context.push(
+                                  '/player/movie:${movie.id}?start_pos=${item!.startTime}');
+                            },
+                          ));
+                }).toList()) ??
+                [],
+            ThumbnailTileGridView(
+                key: Key('$packageUuid-extras'),
+                header: (movies?.metadata.count ?? 1) > 0
+                    ? Text(
+                        'Extras',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      )
+                    : null,
+                skeletonHeader: movies == null,
+                query: (q) =>
+                    APIClient().getExtras(packageUuid: packageUuid, page: q),
+                tileBuilder: (context, item, index) => ThumbnailTile(
+                      key: Key('extra-${item?.id}'),
+                      title: item?.name,
+                      subtitle:
+                          item != null ? formatDuration(item.duration) : null,
+                      thumbnail: item?.thumbnail,
+                      onTap: () {
+                        context.push('/player/extra:${item!.id}');
+                      },
+                    ))
+          ],
+        ));
   }
 }
