@@ -100,8 +100,9 @@ class _PlayerControlsState extends State<PlayerControls> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                        Colors.transparent,
-                        Colors.white.withAlpha(50)
+                          Colors.transparent,
+                        Colors.black.withAlpha(200),
+                        Colors.black
                       ])),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
