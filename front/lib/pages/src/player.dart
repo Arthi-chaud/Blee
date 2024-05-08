@@ -11,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:collection/collection.dart';
-import 'dart:html' as html;
+import 'package:mediametadata/mediametadata.dart';
 
 class PlayerPage extends ConsumerStatefulWidget {
   final String? extraUuid;
@@ -107,22 +107,17 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
         Uri.parse(streamMode == StreamMode.direct
             ? '$baseUrl/direct'
             : '$baseUrl/master.m3u8'),
+        //TODO
         httpHeaders: {"X-CLIENT-ID": "A"})
       ..initialize().then((_) => _onPlayerInit(metadata));
   }
 
   void _refreshMediaMetadata(PlayerMetadata m) {
-    // TODO Might not work on mobile
-    html.window.navigator.mediaSession!.metadata = html.MediaMetadata({
-      'title': currentChapter?.name ?? m.videoTitle,
-      'album': currentChapter != null ? m.videoTitle : '',
-      'artist': m.videoArtist,
-      'artwork': [
-        {
-          'src': APIClient().buildImageUrl((m.poster ?? m.thumbnail!).id),
-        },
-      ],
-    });
+    Mediametadata().setMediaMetadata(
+        artistName: m.videoArtist,
+        albumName: currentChapter != null ? m.videoTitle : '',
+        songName: currentChapter?.name ?? m.videoTitle,
+        imageUri: APIClient().buildImageUrl((m.poster ?? m.thumbnail!).id));
   }
 
   @override
