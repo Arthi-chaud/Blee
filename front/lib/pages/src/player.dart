@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:js_interop';
-
 import 'package:blee/api/src/client.dart';
 import 'package:blee/models/models.dart';
 import 'package:blee/api/api.dart' as api;
@@ -50,7 +48,6 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
   }
 
   void _onPlayerInit(PlayerMetadata metadata) {
-    _controller?.setVolume(1);
     if (widget.startPosition == null) {
       _controller!.play();
     } else {
@@ -59,8 +56,8 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
           .then((_) => _controller!.play());
     }
     _controller!.addListener(() {
+      // If we are in a movie
       if (metadata.chapters.isNotEmpty) {
-        // If we are in a movie
         var currentPlayerPosition = _controller!.value.position.inSeconds;
         // If the chapter was not previously set
         if (currentChapter == null ||
@@ -73,6 +70,16 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
             _refreshMediaMetadata(metadata);
           });
         }
+      }
+      if (!_controller!.value.isBuffering &&
+          flowStep == PlayerFlowStep.buffering) {
+        setState(() {
+          flowStep = PlayerFlowStep.playerStarted;
+        });
+      } else if (_controller!.value.isBuffering) {
+        setState(() {
+          flowStep = PlayerFlowStep.buffering;
+        });
       }
       // BUG in video_player: `isCompleted` is fired twice
       // need to check the actual position of the player to pop exactly one
@@ -93,13 +100,13 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
   }
 
   VideoPlayerController setupPlayer(PlayerMetadata metadata,
-      {StreamMode streamMode = StreamMode.direct}) {
+      {StreamMode streamMode = StreamMode.hls}) {
     final baseUrl =
         'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}';
     return VideoPlayerController.networkUrl(
         Uri.parse(streamMode == StreamMode.direct
             ? '$baseUrl/direct'
-            : '$baseUrl/original/index.m3u8'),
+            : '$baseUrl/master.m3u8'),
         httpHeaders: {"X-CLIENT-ID": "A"})
       ..initialize().then((_) => _onPlayerInit(metadata));
   }
@@ -145,24 +152,19 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
         body: Stack(
           children: [
             AnimatedOpacity(
-                duration: const Duration(milliseconds: 2000),
-                opacity: flowStep == PlayerFlowStep.playerStarted ? 0 : 1,
-                child: Stack(
-                  children: [
-                    // TODO: Thumbnail should fill screen
-                    Thumbnail(
-                        image: metadata.value?.thumbnail,
-                        disableSlashFadein: true,
-                        disableBorderRadius: true),
-                    Container(color: Colors.black.withAlpha(200)),
-                    const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ],
-                )),
+              duration: const Duration(milliseconds: 200),
+              opacity: flowStep == PlayerFlowStep.playerStarted ? 0 : 1,
+              child: Thumbnail(
+                  image: metadata.value?.thumbnail,
+                  disableSlashFadein: true,
+                  disableBorderRadius: true),
+            ),
             AnimatedOpacity(
               duration: const Duration(milliseconds: 500),
-              opacity: flowStep != PlayerFlowStep.playerStarted ? 0 : 1,
+              opacity: flowStep == PlayerFlowStep.playerStarted ||
+                      flowStep == PlayerFlowStep.buffering
+                  ? 1
+                  : 0,
               child: _controller?.value.isInitialized ?? false
                   ? Center(
                       child: AspectRatio(
@@ -171,6 +173,17 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
                     ))
                   : Container(),
             ),
+            AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: flowStep != PlayerFlowStep.playerStarted ? 1 : 0,
+                child: Stack(
+                  children: [
+                    Container(color: Colors.black.withAlpha(200)),
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+                )),
             HideOnInactivity(
                 child: PlayerControls(
               title: metadata.value?.videoTitle,

@@ -8,7 +8,8 @@ enum PlayerFlowStep {
   // playback started
   playerStarted,
   // an error occured while loading resources
-  errored
+  errored,
+  buffering
 }
 
 class PlayerMetadata {

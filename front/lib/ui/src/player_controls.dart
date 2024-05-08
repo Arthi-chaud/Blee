@@ -133,10 +133,11 @@ class _PlayerControlsState extends State<PlayerControls> {
                                               .titleMedium
                                               ?.fontSize)),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 4),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
                                     child: Stack(
-                                      alignment: AlignmentDirectional.centerStart,
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
                                       children: [
                                         Text(
                                           widget.subtitle ?? '',
@@ -195,6 +196,14 @@ class _PlayerControlsState extends State<PlayerControls> {
                                       child: Slider(
                                           min: 0,
                                           max: (widget.duration ?? 1)
+                                              .ceilToDouble(),
+                                          secondaryTrackValue: widget
+                                              .controller
+                                              ?.value
+                                              .buffered
+                                              .lastOrNull
+                                              ?.end
+                                              .inSeconds
                                               .ceilToDouble(),
                                           value:
                                               position.inSeconds.ceilToDouble(),
