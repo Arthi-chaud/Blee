@@ -25,6 +25,8 @@ class PlayerControls extends StatefulWidget {
 
 class _PlayerControlsState extends State<PlayerControls> {
   Duration position = Duration.zero;
+  bool isPlaying = true;
+
   String formatProgress(int? progress) {
     if (progress == null) {
       return '--:--';
@@ -33,16 +35,21 @@ class _PlayerControlsState extends State<PlayerControls> {
   }
 
   void listener() {
+    final controller = widget.controller!;
     if (mounted) {
       setState(() {
-        position = widget.controller!.value.position;
+        isPlaying = controller.value.isPlaying;
+        position = controller.value.position;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final durationTextStyle = TextStyle(color: Theme.of(context).dividerColor);
+    const textColor = Colors.white60;
+    final durationTextStyle = TextStyle(
+        color: textColor,
+        fontSize: Theme.of(context).textTheme.labelMedium?.fontSize);
 
     if (widget.controller != null) {
       widget.controller!.removeListener(listener);
@@ -54,17 +61,28 @@ class _PlayerControlsState extends State<PlayerControls> {
         Positioned(
           left: 0,
           top: 0,
+          right: 0,
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, size: 25),
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.push('/');
-                }
-              },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, size: 25),
+                  color: textColor.withAlpha(150),
+                  onPressed: () {
+                    // Only useful in debug mode
+                    widget.controller?.pause();
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.push('/');
+                    }
+                  },
+                ),
+                Container(),
+              ],
             ),
           ),
         ),
@@ -93,13 +111,36 @@ class _PlayerControlsState extends State<PlayerControls> {
                               image: widget.poster,
                             )),
                         Expanded(
-                            child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              child: Row(
+                            child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(widget.title ?? '',
+                                  style: TextStyle(
+                                      color: textColor,
+                                      fontSize: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.fontSize)),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                widget.subtitle ?? '',
+                                style: TextStyle(
+                                    color: textColor,
+                                    fontSize: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.fontSize),
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
@@ -108,22 +149,38 @@ class _PlayerControlsState extends State<PlayerControls> {
                                           ? null
                                           : position.inSeconds),
                                       style: durationTextStyle),
-                                  Text(widget.title ?? '',
-                                      style: durationTextStyle),
+                                  Flexible(
+                                      child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: SliderTheme(
+                                      data: SliderTheme.of(context).copyWith(
+                                        trackHeight: 4.0,
+                                        thumbColor: Colors.transparent,
+                                        overlayShape:
+                                            SliderComponentShape.noThumb,
+                                        thumbShape: const RoundSliderThumbShape(
+                                            enabledThumbRadius: 0.0),
+                                      ),
+                                      child: Slider(
+                                          min: 0,
+                                          max: (widget.duration ?? 1)
+                                              .ceilToDouble(),
+                                          value:
+                                              position.inSeconds.ceilToDouble(),
+                                          onChanged: (scrollPosition) {
+                                            widget.controller?.seekTo(Duration(
+                                                seconds:
+                                                    scrollPosition.ceil()));
+                                          }),
+                                    ),
+                                  )),
                                   Text(formatProgress(widget.duration),
                                       style: durationTextStyle)
                                 ],
                               ),
-                            ),
-                            Slider(
-                                min: 0,
-                                max: (widget.duration ?? 1).ceilToDouble(),
-                                value: position.inSeconds.ceilToDouble(),
-                                onChanged: (scrollPosition) {
-                                  widget.controller?.seekTo(
-                                      Duration(seconds: scrollPosition.ceil()));
-                                }),
-                          ],
+                            ],
+                          ),
                         ))
                       ],
                     ),
@@ -133,3 +190,20 @@ class _PlayerControlsState extends State<PlayerControls> {
     );
   }
 }
+
+                                  // IconButton(
+                                  //     onPressed: () {
+                                  //       if (widget
+                                  //               .controller?.value.isPlaying ??
+                                  //           false) {
+                                  //         widget.controller?.pause();
+                                  //       } else {
+                                  //         widget.controller?.play();
+                                  //       }
+                                  //     },
+                                  //     icon: Icon(
+                                  //       isPlaying
+                                  //           ? Icons.pause
+                                  //           : Icons.play_arrow,
+                                  //       color: Colors.white,
+                                  //     )),
