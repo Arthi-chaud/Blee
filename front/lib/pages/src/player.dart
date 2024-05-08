@@ -37,6 +37,17 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
     _controller?.dispose();
   }
 
+  VideoPlayerController setupPlayer(PlayerMetadata metadata) {
+    return VideoPlayerController.networkUrl(Uri.parse(
+        'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}/direct'))
+      ..initialize().then((_) {
+        _controller?.play();
+        setState(() {
+          flowStep = PlayerFlowStep.playerStarted;
+        });
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
     final metadata = ref.watch(videoMetadataProvider)
@@ -48,14 +59,7 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
             if (_controller == null) {
               setState(() {
                 flowStep = PlayerFlowStep.loadingPlayer;
-                _controller = VideoPlayerController.networkUrl(Uri.parse(
-                    'http://localhost:7666/${base64Encode(utf8.encode(m.videoFile.path))}/direct'))
-                  ..initialize().then((_) {
-                    _controller?.play();
-                    setState(() {
-                      flowStep = PlayerFlowStep.playerStarted;
-                    });
-                  });
+                _controller = setupPlayer(m);
               });
             }
           },
@@ -85,23 +89,23 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
                     ),
                   ],
                 )),
-             AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
-                opacity: flowStep != PlayerFlowStep.playerStarted ? 0 : 1,
-                child: _controller?.value.isInitialized ?? false
-                ? Center(
-                    child: AspectRatio(
-                    aspectRatio: _controller!.value.aspectRatio,
-                    child: VideoPlayer(_controller!),
-                  ))
-                : Container(),
-             ),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 500),
+              opacity: flowStep != PlayerFlowStep.playerStarted ? 0 : 1,
+              child: _controller?.value.isInitialized ?? false
+                  ? Center(
+                      child: AspectRatio(
+                      aspectRatio: _controller!.value.aspectRatio,
+                      child: VideoPlayer(_controller!),
+                    ))
+                  : Container(),
+            ),
             PlayerControls(
               title: metadata.value?.videoTitle,
               poster: metadata.value?.poster,
               subtitle: metadata.value?.videoArtist,
               duration: metadata.value?.videoFile.duration,
-              progress: null,
+              controller: _controller,
             ),
           ],
         ));

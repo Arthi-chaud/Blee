@@ -3,21 +3,28 @@ import 'package:blee/api/api.dart' as api;
 import 'package:blee/utils/format_duration.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
 
-class PlayerControls extends StatelessWidget {
+class PlayerControls extends StatefulWidget {
   final String? title;
   final String? subtitle;
   final api.Image? poster;
-  final int? progress;
   final int? duration;
+  final VideoPlayerController? controller;
   const PlayerControls(
       {super.key,
       required this.title,
       required this.poster,
       required this.subtitle,
-      required this.progress,
+      required this.controller,
       required this.duration});
 
+  @override
+  State<PlayerControls> createState() => _PlayerControlsState();
+}
+
+class _PlayerControlsState extends State<PlayerControls> {
+  Duration position = Duration.zero;
   String formatProgress(int? progress) {
     if (progress == null) {
       return '--:--';
@@ -25,9 +32,23 @@ class PlayerControls extends StatelessWidget {
     return formatDuration(progress);
   }
 
+  void listener() {
+    if (mounted) {
+      setState(() {
+        position = widget.controller!.value.position;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final durationTextStyle = TextStyle(color: Theme.of(context).dividerColor);
+
+    if (widget.controller != null) {
+      widget.controller!.removeListener(listener);
+      widget.controller!.addListener(listener);
+    }
+
     return Stack(
       children: [
         Positioned(
@@ -52,7 +73,7 @@ class PlayerControls extends StatelessWidget {
             left: 0,
             right: 0,
             child: SizedBox(
-                height: 180,
+                height: 140,
                 child: Container(
                   decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -69,7 +90,7 @@ class PlayerControls extends StatelessWidget {
                         AspectRatio(
                             aspectRatio: 3 / 4,
                             child: Poster(
-                              image: poster,
+                              image: widget.poster,
                             )),
                         Expanded(
                             child: Column(
@@ -82,17 +103,26 @@ class PlayerControls extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(formatProgress(progress),
+                                  Text(
+                                      formatProgress(widget.controller == null
+                                          ? null
+                                          : position.inSeconds),
                                       style: durationTextStyle),
-                                  Text(title ?? '', style: durationTextStyle),
-                                  Text(formatProgress(duration),
+                                  Text(widget.title ?? '',
+                                      style: durationTextStyle),
+                                  Text(formatProgress(widget.duration),
                                       style: durationTextStyle)
                                 ],
                               ),
                             ),
                             Slider(
-                                value: progress?.ceilToDouble() ?? 0,
-                                onChanged: (_) {}),
+                                min: 0,
+                                max: (widget.duration ?? 1).ceilToDouble(),
+                                value: position.inSeconds.ceilToDouble(),
+                                onChanged: (scrollPosition) {
+                                  widget.controller?.seekTo(
+                                      Duration(seconds: scrollPosition.ceil()));
+                                }),
                           ],
                         ))
                       ],
