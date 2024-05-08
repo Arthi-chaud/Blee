@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:js_interop';
 
+import 'package:blee/api/src/client.dart';
 import 'package:blee/models/models.dart';
 import 'package:blee/api/api.dart' as api;
 import 'package:blee/providers.dart';
@@ -11,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:collection/collection.dart';
+import 'dart:html' as html;
 
 class PlayerPage extends ConsumerStatefulWidget {
   final String? extraUuid;
@@ -67,6 +70,7 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
             currentChapter = metadata.chapters.firstWhereOrNull((chapter) =>
                 chapter.startTime <= currentPlayerPosition &&
                 currentPlayerPosition < chapter.endTime);
+            _refreshMediaMetadata(metadata);
           });
         }
       }
@@ -100,6 +104,20 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
       ..initialize().then((_) => _onPlayerInit(metadata));
   }
 
+  void _refreshMediaMetadata(PlayerMetadata m) {
+    // TODO Might not work on mobile
+    html.window.navigator.mediaSession!.metadata = html.MediaMetadata({
+      'title': currentChapter?.name ?? m.videoTitle,
+      'album': currentChapter != null ? m.videoTitle : '',
+      'artist': m.videoArtist,
+      'artwork': [
+        {
+          'src': APIClient().buildImageUrl((m.poster ?? m.thumbnail!).id),
+        },
+      ],
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final metadata = ref.watch(videoMetadataProvider)
@@ -109,6 +127,7 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
             // How to listen to videoMetadataProvider
             // so that we can setup the controller outside the build method
             if (_controller == null) {
+              _refreshMediaMetadata(m);
               setState(() {
                 flowStep = PlayerFlowStep.loadingPlayer;
                 _controller = setupPlayer(m);
@@ -154,14 +173,14 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
             ),
             HideOnInactivity(
                 child: PlayerControls(
-                  title: metadata.value?.videoTitle,
-                  poster: metadata.value?.poster,
-                  subtitle: currentChapter != null
-                      ? '${currentChapter!.name} - ${metadata.value?.videoArtist ?? ''}'
-                      : metadata.value?.videoArtist,
-                  duration: metadata.value?.videoFile.duration,
-                  controller: _controller,
-                )),
+              title: metadata.value?.videoTitle,
+              poster: metadata.value?.poster,
+              subtitle: currentChapter != null
+                  ? '${currentChapter!.name} - ${metadata.value?.videoArtist ?? ''}'
+                  : metadata.value?.videoArtist,
+              duration: metadata.value?.videoFile.duration,
+              controller: _controller,
+            )),
           ],
         ));
   }
