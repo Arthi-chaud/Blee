@@ -6,6 +6,7 @@ import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/description_box.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/infinite_scroll.dart';
+import 'package:blee/ui/src/poster_page_header.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,88 +34,6 @@ Future<(Package, page.Page<Movie>, page.Page<ExternalId>)> getPackagePageData(
   return (package, movies, externalId);
 }
 
-class _PackagePageHeader extends StatelessWidget {
-  final String? packageTitle;
-  final String? artistName;
-  final String? artistUuid;
-  final DateTime? releaseDate;
-  final blee_image.Image? poster;
-  final bool isCompilation;
-  const _PackagePageHeader(
-      {super.key,
-      required this.packageTitle,
-      required this.artistName,
-      required this.artistUuid,
-      required this.releaseDate,
-      required this.isCompilation,
-      required this.poster});
-
-  @override
-  Widget build(BuildContext context) {
-    var isLoading = packageTitle == null;
-    var title = Skeletonizer(
-        enabled: isLoading,
-        child: Text(
-          packageTitle ?? 'No Package Name',
-          style: Theme.of(context).textTheme.titleLarge,
-        ));
-    var subtitle = Skeletonizer(
-        enabled: isLoading,
-        child: TextButton(
-            onPressed: () => context.push('/artists/$artistUuid'),
-            child: Text(
-              artistName ?? 'No Artist Name',
-              style: Theme.of(context).textTheme.titleMedium,
-            )));
-    var info = Text(
-      releaseDate?.year.toString() ?? '',
-      style: Theme.of(context).textTheme.labelLarge,
-    );
-    paddingForVerticalText(Widget w) => Padding(
-          padding: const EdgeInsets.only(left: 14),
-          child: w,
-        );
-    if (ResponsiveBreakpoints.of(context).smallerThan(BreakpointEnum.sm.name)) {
-      return Column(mainAxisSize: MainAxisSize.min, children: [
-        Center(
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Poster(image: poster),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 4),
-          child: title,
-        ),
-        subtitle,
-        info
-      ]);
-    }
-    return IntrinsicHeight(
-      child: Row(
-        children: [
-          Flexible(child: Poster(image: poster)),
-          Flexible(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  paddingForVerticalText(title),
-                  subtitle,
-                  paddingForVerticalText(info)
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
 class PackagePage extends ConsumerWidget {
   final String packageUuid;
   const PackagePage({super.key, required this.packageUuid});
@@ -134,13 +53,24 @@ class PackagePage extends ConsumerWidget {
             SliverList.list(
               children: [
                 SizedBox.fromSize(size: const Size.fromHeight(16)),
-                _PackagePageHeader(
+                PosterPageHeader(
                     key: Key('$packageUuid-header'),
-                    packageTitle: package?.name,
-                    artistName: package?.artistName,
-                    artistUuid: package?.artistId,
-                    isCompilation: package?.artistId == null,
-                    releaseDate: package?.releaseDate,
+                    isLoading: package == null,
+                    title: Text(
+                      package?.name ?? 'No Package Name',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    subtitle: TextButton(
+                        onPressed: () =>
+                            context.push('/artists/${package?.artistId}'),
+                        child: Text(
+                          package?.artistName ?? 'No Artist Name',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        )),
+                    thirdTitle: Text(
+                      package?.releaseDate?.year.toString() ?? '',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
                     poster: package?.poster),
                 SizedBox.fromSize(size: const Size.fromHeight(8)),
                 DescriptionBox(
