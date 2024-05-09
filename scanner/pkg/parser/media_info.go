@@ -1,6 +1,9 @@
 package parser
 
 import (
+	"strings"
+	"unicode"
+
 	"github.com/Arthi-chaud/Blee/scanner/pkg"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
 	"github.com/zoriya/go-mediainfo"
@@ -36,16 +39,29 @@ func GetMediaInfo(path string) (MediaInfo, error) {
 		Size:     pkg.ParseUint64(mi.Parameter(mediainfo.StreamGeneral, 0, "FileSize")),
 		Duration: uint64(pkg.ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000),
 		Chapters: pkg.Map(make([]MediaChapter, max(chapters_end-chapters_begin, 1)-1), func(_ MediaChapter, i int) MediaChapter {
+			index := 0
+			time := mi.GetI(mediainfo.StreamMenu, index, int(chapters_begin)+i, mediainfo.InfoName)
+			if len(time) > 0 && !unicode.IsDigit(rune(time[0])) {
+				index = index + 1
+			}
 			return MediaChapter{
-				StartTime: uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName))),
-				EndTime:   uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName))),
-				Name:      mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
+				StartTime: uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, index, int(chapters_begin)+i, mediainfo.InfoName))),
+				EndTime:   uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, index, int(chapters_begin)+i+1, mediainfo.InfoName))),
+				Name:      parseChapterName(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText)),
 				//TODO
 				Types: []models.ChapterType{models.COther},
 			}
 		}),
 	}
 	return info, nil
+}
+
+func parseChapterName(name string) string {
+	index := strings.Index(name, ":")
+	if index == -1 {
+		return name
+	}
+	return name[index+1:]
 }
 
 func qualityFromHeight(height uint64) models.Quality {
