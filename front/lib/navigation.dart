@@ -34,7 +34,6 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
     return Scaffold(
       body: SafeArea(child: widget.child),
       bottomNavigationBar: NavigationBar(
-        height: 70,
         destinations: tabs,
         onDestinationSelected: (int index) {
           _goOtherTab(context, index);

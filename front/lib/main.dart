@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:blee/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'theme.dart';
 
 void main() {
   // usePathUrlStrategy();
@@ -18,13 +19,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = View.of(context).platformDispatcher.platformBrightness;
+    MaterialTheme theme = MaterialTheme();
     return MaterialApp.router(
       title: 'Blee',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-          fontFamily: 'Rubik'),
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
         breakpoints: Breakpoints.getList(),

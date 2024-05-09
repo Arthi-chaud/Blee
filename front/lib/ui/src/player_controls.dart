@@ -1,6 +1,7 @@
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/api/api.dart' as api;
 import 'package:blee/utils/format_duration.dart';
+import 'package:blee/utils/hex_color.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -162,8 +163,12 @@ class _PlayerControlsState extends State<PlayerControls> {
                                               }
                                             },
                                             icon: isPlaying
-                                                ? const FaIcon(FontAwesomeIcons.pause, size: 20)
-                                                : const FaIcon(FontAwesomeIcons.play, size: 15),
+                                                ? const FaIcon(
+                                                    FontAwesomeIcons.pause,
+                                                    size: 20)
+                                                : const FaIcon(
+                                                    FontAwesomeIcons.play,
+                                                    size: 15),
                                             color: Colors.white,
                                           ),
                                         ),
