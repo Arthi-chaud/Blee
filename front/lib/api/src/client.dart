@@ -24,6 +24,13 @@ class APIClient {
     return _host + (kDebugMode ? route : "/api$route");
   }
 
+  String buildTranscoderUrl(String transcoderRoute) {
+    if (kDebugMode) {
+      return 'http://localhost:7666$transcoderRoute';
+    }
+    return "$_host/transcoder$transcoderRoute";
+  }
+
   Future<Artist> getArtist(String uuid) async {
     var responseBody = await _request(RequestType.get, '/artists/$uuid');
     return Artist.fromJson(responseBody);
@@ -111,7 +118,7 @@ class APIClient {
     params ?? {};
     http.Response response;
     Uri fullRoute = Uri.parse(_host +
-        (kDebugMode ? route : "api$route") +
+        (kDebugMode ? route : "/api$route") +
         (params == null ? "" : "?${Uri(queryParameters: params).query}"));
     final Map<String, String> headers = {
       'Content-type': 'application/json',
