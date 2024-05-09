@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 enum RequestType { get, post, put, delete }
 
 class APIClient {
-  String _host = Uri.base.toString();
+  String _host =
+      Uri.base.toString().substring(0, Uri.base.toString().indexOf('/#/'));
 
   final http.Client client = http.Client();
 
@@ -20,7 +21,7 @@ class APIClient {
 
   String buildImageUrl(String uuid) {
     final route = "/images/$uuid";
-    return _host + (kDebugMode ? route : "api$route");
+    return _host + (kDebugMode ? route : "/api$route");
   }
 
   Future<Artist> getArtist(String uuid) async {
