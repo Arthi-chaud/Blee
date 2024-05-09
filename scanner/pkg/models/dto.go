@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type NewFileDto struct {
 	Path     string `validate:"required" json:"path"`
 	Size     uint64 `validate:"required" json:"size"`
@@ -15,7 +13,7 @@ type NewMovieDto struct {
 	MovieType          string          `validate:"required" json:"movie_type"`
 	PackageArtistName  string          `json:"package_artist_name"`
 	PackageName        string          `validate:"required" json:"package_name"`
-	PackageReleaseDate time.Time       `json:"package_release_date"`
+	PackageReleaseDate string          `json:"package_release_date,omitempty"`
 	Chapters           []NewChapterDto `validate:"required,dive,required" json:"chapters"`
 	File               NewFileDto      `validate:"required" json:"file"`
 }
@@ -35,6 +33,6 @@ type NewExtraDto struct {
 	PackageName        string     `validate:"required" json:"package_name"`
 	DiscIndex          int        `json:"disc_index"`
 	TrackIndex         int        `json:"track_index"`
-	PackageReleaseDate time.Time  `json:"package_release_date"`
+	PackageReleaseDate string     `json:"package_release_date,omitempty"`
 	File               NewFileDto `validate:"required" json:"file"`
 }
