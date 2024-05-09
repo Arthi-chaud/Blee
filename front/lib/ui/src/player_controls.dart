@@ -128,6 +128,8 @@ class _PlayerControlsState extends State<PlayerControls> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(widget.title ?? '',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           color: textColor,
                                           fontSize: Theme.of(context)

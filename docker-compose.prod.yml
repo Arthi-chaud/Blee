@@ -15,8 +15,7 @@ x-transcoder: &transcoder-base
 # This compose allows to build the whole project in a "production"-like environment 
 services:
   front:
-    build:
-      context: ./front
+    image: arthichaud/blee-front:edge
     restart: on-failure
     depends_on:
       api:
@@ -26,8 +25,7 @@ services:
     ports:
       - "3000:3000"
   api:
-    build:
-      context: ./api
+    image: arthichaud/blee-api:edge
     ports:
       - "8000:8000"
     restart: on-failure
@@ -60,22 +58,20 @@ services:
       timeout: 3s
       retries: 10
   scanner:
-    build:
-      context: ./scanner
+    image: arthichaud/blee-scanner:edge
     depends_on:
       api:
         condition: service_healthy
     volumes:
-      - ${DATA_DIR}:/videos
-      - ./scanner.example.json:/app/scanner.json
+      - ${DATA_DIR}:/videos:ro
+      - ./scanner.json:/app/scanner.json
     environment:
       - API_URL=http://api:8000
       - WATCH_DIR=/videos
       - SCANNER_API_KEY=${SCANNER_API_KEY}
       - CONFIG_DIR=/app
   matcher:
-    build:
-      context: ./matcher
+    image: arthichaud/blee-matcher:edge
     restart: on-failure
     depends_on:
       api:

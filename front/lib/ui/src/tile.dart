@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class PosterTile extends Tile {
+  static double aspectRatio = 0.55;
   PosterTile(
       {super.key,
       required super.title,
@@ -14,6 +15,7 @@ class PosterTile extends Tile {
 }
 
 class ThumbnailTile extends Tile {
+  static double aspectRatio = 1.22;
   ThumbnailTile(
       {super.key,
       required super.title,

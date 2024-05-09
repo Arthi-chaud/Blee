@@ -1,7 +1,7 @@
 import 'package:blee/api/api.dart';
 import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
-import 'package:blee/ui/src/infinite_scroll.dart';
+import 'package:blee/ui/src/infinite_scroll/infinite_grid.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +17,7 @@ class PackagesPage extends ConsumerWidget {
     return MaxWidthBox(
         maxWidth: Breakpoints.getSized(BreakpointEnum.lg),
         child: CustomScrollView(slivers: [
-          PosterTileGridView<Package>(
+          PosterGridView<Package>(
               tileBuilder: (context, item, index) => PosterTile(
                     onTap: () => context.push('/packages/${item?.id}'),
                     title: item?.name,
@@ -25,7 +25,7 @@ class PackagesPage extends ConsumerWidget {
                     thumbnail: item?.poster,
                   ),
               query: (q) => client.getPackages(page: q),
-              header: Container())
+              header: null)
         ]));
   }
 }

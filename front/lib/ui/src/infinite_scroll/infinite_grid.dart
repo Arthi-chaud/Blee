@@ -1,13 +1,13 @@
 import 'package:blee/api/api.dart';
 import 'package:blee/api/src/models/page.dart' as page;
-import 'package:blee/ui/src/grid.dart';
+import 'package:blee/ui/src/infinite_scroll/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class ThumbnailTileGridView<T> extends AbstractGridView<T> {
-  const ThumbnailTileGridView(
+class ThumbnailGridView<T> extends AbstractGridView<T> {
+  const ThumbnailGridView(
       {super.key,
       required super.tileBuilder,
       required super.query,
@@ -16,8 +16,8 @@ class ThumbnailTileGridView<T> extends AbstractGridView<T> {
       : super(delegate: DefaultThumbnailTileGridDelegate);
 }
 
-class PosterTileGridView<T> extends AbstractGridView<T> {
-  const PosterTileGridView(
+class PosterGridView<T> extends AbstractGridView<T> {
+  const PosterGridView(
       {super.key,
       required super.tileBuilder,
       required super.query,
@@ -44,33 +44,18 @@ abstract class AbstractGridView<T> extends StatefulWidget {
 }
 
 class _AbstractGridViewState<T> extends State<AbstractGridView<T>> {
-  static const _pageSize = 20;
-
   final PagingController<int, T> _pagingController =
       PagingController(firstPageKey: 0);
 
   @override
   void initState() {
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
+      InfiniteScrollHelper.fetchPage(
+          query: widget.query,
+          skip: pageKey,
+          pagingController: _pagingController);
     });
     super.initState();
-  }
-
-  Future<void> _fetchPage(int pageKey) async {
-    try {
-      final newPage =
-          await widget.query(PageQuery(skip: pageKey, take: _pageSize));
-      final isLastPage = newPage.metadata.count < _pageSize;
-      if (isLastPage) {
-        _pagingController.appendLastPage(newPage.items);
-      } else {
-        final nextPageKey = pageKey + newPage.metadata.count;
-        _pagingController.appendPage(newPage.items, nextPageKey);
-      }
-    } catch (error) {
-      _pagingController.error = error;
-    }
   }
 
   @override

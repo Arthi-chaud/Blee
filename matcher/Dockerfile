@@ -22,6 +22,9 @@ RUN mv "$(stack path --local-install-root --system-ghc)/bin" /opt/build/bin
 # stage should run
 # We use the same base image as the base of the haskell image
 FROM debian:buster-slim as runner
+RUN apt-get update; apt-get install -y --no-install-recommends ca-certificates openssl
+ENV SSL_CERT_DIR=/etc/ssl/certs
+RUN update-ca-certificates
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
 COPY --from=build /opt/build/bin /opt/app

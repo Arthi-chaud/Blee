@@ -101,8 +101,8 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
 
   VideoPlayerController setupPlayer(PlayerMetadata metadata,
       {StreamMode streamMode = StreamMode.hls}) {
-    final baseUrl =
-        'http://localhost:7666/${base64Encode(utf8.encode(metadata.videoFile.path))}';
+    final baseUrl = ref.read(apiClientProvider).buildTranscoderUrl(
+        "/${base64Encode(utf8.encode(metadata.videoFile.path))}");
     return VideoPlayerController.networkUrl(
         Uri.parse(streamMode == StreamMode.direct
             ? '$baseUrl/direct'

@@ -26,12 +26,12 @@ func RegisterFile(path string, c *config.Config) error {
 	if err != nil {
 		glg.Failf("Getting MediaInfo on '%s' failed:", filepath.Base(path))
 		glg.Fail(err)
+		return err
 	}
 	var resourceUuid = ""
 	var packageUuid = ""
 	if parsedPath.Movie != nil {
-		dto, err := buildMovieDto(path, parsedPath.Movie, mediainfo)
-
+		dto, err := buildMovieDto(path, parsedPath.Movie, &mediainfo)
 		if err != nil {
 			glg.Failf(err.Error())
 			return err
@@ -51,7 +51,7 @@ func RegisterFile(path string, c *config.Config) error {
 			}
 		}
 	} else if parsedPath.Extra != nil {
-		dto, err := buildExtraDto(path, parsedPath.Extra, mediainfo)
+		dto, err := buildExtraDto(path, parsedPath.Extra, &mediainfo)
 
 		if err != nil {
 			glg.Failf(err.Error())

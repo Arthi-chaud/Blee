@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 enum RequestType { get, post, put, delete }
 
 class APIClient {
-  String _host = Uri.base.toString();
+  String _host =
+      Uri.base.toString().substring(0, Uri.base.toString().indexOf('/#/'));
 
   final http.Client client = http.Client();
 
@@ -20,7 +21,14 @@ class APIClient {
 
   String buildImageUrl(String uuid) {
     final route = "/images/$uuid";
-    return _host + (kDebugMode ? route : "api$route");
+    return _host + (kDebugMode ? route : "/api$route");
+  }
+
+  String buildTranscoderUrl(String transcoderRoute) {
+    if (kDebugMode) {
+      return 'http://localhost:7666$transcoderRoute';
+    }
+    return "$_host/transcoder$transcoderRoute";
   }
 
   Future<Artist> getArtist(String uuid) async {
@@ -49,17 +57,33 @@ class APIClient {
   }
 
   Future<Page<Package>> getPackages(
-      {PageQuery page = const PageQuery()}) async {
-    var responseBody = await _request(
-        RequestType.get, '/packages?take=${page.take}&skip=${page.skip}');
+      {PageQuery page = const PageQuery(), String? artistUuid}) async {
+    var responseBody = await _request(RequestType.get,
+        '/packages?artist=${artistUuid ?? ''}&take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<Page<Artist>> getArtists(
+      {PageQuery page = const PageQuery(), String? package}) async {
+    var responseBody = await _request(RequestType.get,
+        '/artists?package=$package&take=${page.take}&skip=${page.skip}');
+    return Page.fromJson(
+        responseBody, (x) => Artist.fromJson(x as Map<String, dynamic>));
   }
 
   Future<Page<ExternalId>> getPackageExternalIds(String packageUuid,
       {PageQuery page = const PageQuery()}) async {
     var responseBody = await _request(RequestType.get,
         '/external_ids?package=$packageUuid&take=${page.take}&skip=${page.skip}');
+    return Page.fromJson(
+        responseBody, (x) => ExternalId.fromJson(x as Map<String, dynamic>));
+  }
+
+  Future<Page<ExternalId>> getArtistExternalIds(String artistUuid,
+      {PageQuery page = const PageQuery()}) async {
+    var responseBody = await _request(RequestType.get,
+        '/external_ids?artist=$artistUuid&take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => ExternalId.fromJson(x as Map<String, dynamic>));
   }
@@ -79,9 +103,11 @@ class APIClient {
   }
 
   Future<Page<Extra>> getExtras(
-      {String? packageUuid, PageQuery page = const PageQuery()}) async {
+      {String? packageUuid,
+      String? artistUuid,
+      PageQuery page = const PageQuery()}) async {
     var responseBody = await _request(RequestType.get,
-        '/extras?package=$packageUuid&take=${page.take}&skip=${page.skip}');
+        '/extras?package=$packageUuid&artist=$artistUuid&take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
   }
@@ -92,7 +118,7 @@ class APIClient {
     params ?? {};
     http.Response response;
     Uri fullRoute = Uri.parse(_host +
-        (kDebugMode ? route : "api$route") +
+        (kDebugMode ? route : "/api$route") +
         (params == null ? "" : "?${Uri(queryParameters: params).query}"));
     final Map<String, String> headers = {
       'Content-type': 'application/json',

@@ -1,6 +1,8 @@
+import 'package:blee/ui/src/breakpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class ScaffoldWithNavBar extends StatefulWidget {
   final String location;
@@ -14,7 +16,7 @@ class ScaffoldWithNavBar extends StatefulWidget {
 }
 
 class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
-  int _currentIndex = 0;
+  int _currentIndex = 1;
 
   @override
   void initState() {
@@ -30,6 +32,11 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
 
   static const List<MyNavigationDestination> tabs = [
     MyNavigationDestination(
+      icon: FaIcon(FontAwesomeIcons.user),
+      label: 'Artists',
+      initialLocation: '/artists',
+    ),
+    MyNavigationDestination(
       icon: FaIcon(FontAwesomeIcons.film),
       label: 'Movies',
       initialLocation: '/packages',
@@ -44,14 +51,42 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(child: widget.child),
-      bottomNavigationBar: NavigationBar(
-        destinations: tabs,
-        onDestinationSelected: (int index) {
-          _goOtherTab(context, index);
-        },
-        selectedIndex: _currentIndex,
+      body: SafeArea(
+          child: Row(
+        children: [
+          ResponsiveBreakpoints.of(context)
+                  .largerOrEqualTo(BreakpointEnum.sm.name)
+              ? NavigationRail(
+                  labelType: NavigationRailLabelType.all,
+                  onDestinationSelected: (int index) {
+                    _goOtherTab(context, index);
+                  },
+                  destinations: tabs
+                      .map((tab) => tab.toRailDestination(context))
+                      .toList(),
+                  selectedIndex: _currentIndex)
+              : Container(),
+          Expanded(child: widget.child)
+        ],
+      )),
+      appBar: AppBar(
+        centerTitle: false,
+        title: const Text(
+          'Blee',
+          style: TextStyle(
+              fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+        ),
       ),
+      bottomNavigationBar: ResponsiveBreakpoints.of(context)
+              .smallerOrEqualTo(BreakpointEnum.xs.name)
+          ? NavigationBar(
+              destinations: tabs,
+              onDestinationSelected: (int index) {
+                _goOtherTab(context, index);
+              },
+              selectedIndex: _currentIndex,
+            )
+          : null,
     );
   }
 
@@ -73,6 +108,11 @@ class MyNavigationDestination extends NavigationDestination {
       {super.key,
       required this.initialLocation,
       required super.icon,
+      super.selectedIcon,
       required super.label})
-      : super(selectedIcon: icon);
+      : super();
+  NavigationRailDestination toRailDestination(BuildContext context) {
+    return NavigationRailDestination(
+        icon: icon, label: Text(label), selectedIcon: selectedIcon);
+  }
 }

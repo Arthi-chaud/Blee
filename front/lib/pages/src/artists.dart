@@ -8,23 +8,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class ExtrasPage extends ConsumerWidget {
-  const ExtrasPage({super.key});
+class ArtistsPage extends ConsumerWidget {
+  const ArtistsPage({super.key});
   @override
   Widget build(BuildContext context, ref) {
-    final client = ref.read(apiClientProvider);
+    APIClient client = ref.read(apiClientProvider);
 
     return MaxWidthBox(
-        maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
+        maxWidth: Breakpoints.getSized(BreakpointEnum.lg),
         child: CustomScrollView(slivers: [
-          ThumbnailGridView<Extra>(
-              tileBuilder: (context, item, index) => ThumbnailTile(
-                    onTap: () => context.push('/player/extra:${item!.id}'),
+          PosterGridView<Artist>(
+              tileBuilder: (context, item, index) => PosterTile(
+                    onTap: () => context.push('/artists/${item?.id}'),
                     title: item?.name,
-                    subtitle: item?.artistName,
-                    thumbnail: item?.thumbnail,
+                    subtitle: '',
+                    thumbnail: item?.poster,
                   ),
-              query: (q) => client.getExtras(page: q),
+              query: (q) => client.getArtists(page: q),
               header: null)
         ]));
   }
