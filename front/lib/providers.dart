@@ -63,6 +63,13 @@ Future<Page<Extra>> getExtras(GetExtrasRef ref,
 }
 
 @riverpod
+Future<Page<Artist>> getArtists(GetArtistsRef ref,
+    {String? packageUuid, PageQuery page = const PageQuery()}) async {
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getArtists(page: page, package: packageUuid);
+}
+
+@riverpod
 Future<Page<ExternalId>> getPackageExternalIds(
     GetPackageExternalIdsRef ref, String packageUuid) async {
   APIClient client = ref.watch(apiClientProvider);

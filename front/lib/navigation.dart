@@ -30,6 +30,11 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
 
   static const List<MyNavigationDestination> tabs = [
     MyNavigationDestination(
+      icon: FaIcon(FontAwesomeIcons.user),
+      label: 'Artists',
+      initialLocation: '/artists',
+    ),
+    MyNavigationDestination(
       icon: FaIcon(FontAwesomeIcons.film),
       label: 'Movies',
       initialLocation: '/packages',
