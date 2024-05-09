@@ -3,6 +3,7 @@ import 'package:blee/api/src/models/page.dart' as page;
 import 'package:blee/api/src/models/image.dart' as blee_image;
 import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
+import 'package:blee/ui/src/description_box.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/ui/src/infinite_scroll.dart';
 import 'package:blee/ui/src/tile.dart';
@@ -114,65 +115,6 @@ class _PackagePageHeader extends StatelessWidget {
   }
 }
 
-class _PackageDescriptionBox extends StatelessWidget {
-  final String? description;
-  final bool skeletonize;
-
-  const _PackageDescriptionBox(
-      {required this.description, required this.skeletonize});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
-          child: skeletonize
-              ? Column(
-                  children: List.generate(3, (index) => index)
-                      .map((i) => Skeletonizer(
-                              child: Text(
-                            List.generate(200, (index) => ' ').toString(),
-                            maxLines: 1,
-                          )))
-                      .toList())
-              : Text(
-                  description ?? '',
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-        ),
-        Positioned.fill(
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Material(
-                    color: Colors.transparent,
-                    child: description == null
-                        ? Container()
-                        : InkWell(
-                            onTap: () => _showFullTextDialog(context),
-                          )))),
-      ],
-    );
-  }
-
-  Future<void> _showFullTextDialog(BuildContext context) {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Description'),
-            content: Text(description!),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'))
-            ],
-          );
-        });
-  }
-}
-
 class PackagePage extends ConsumerWidget {
   final String packageUuid;
   const PackagePage({super.key, required this.packageUuid});
@@ -201,7 +143,7 @@ class PackagePage extends ConsumerWidget {
                     releaseDate: package?.releaseDate,
                     poster: package?.poster),
                 SizedBox.fromSize(size: const Size.fromHeight(8)),
-                _PackageDescriptionBox(
+                DescriptionBox(
                   description: externalIds?.items.firstOrNull?.description,
                   skeletonize: externalIds == null,
                 )

@@ -1,5 +1,6 @@
 import 'package:blee/navigation.dart';
 import 'package:blee/pages/pages.dart';
+import 'package:blee/pages/src/artist.dart';
 import 'package:blee/pages/src/extras.dart';
 import 'package:blee/pages/src/player.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,11 @@ final router = GoRouter(
           ));
         },
         routes: [
+          GoRoute(
+            path: '/artists/:id',
+            pageBuilder: (context, state) => NoTransitionPage(
+                child: ArtistPage(artistUuid: state.pathParameters['id']!)),
+          ),
           GoRoute(
             path: '/packages',
             pageBuilder: (context, state) =>

@@ -19,6 +19,12 @@ Future<Package> getPackage(GetPackageRef ref, String packageUuid) async {
 }
 
 @riverpod
+Future<Artist> getArtist(GetArtistRef ref, String artistUuid) async {
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getArtist(artistUuid);
+}
+
+@riverpod
 Future<File> getFile(GetFileRef ref, String fileUuid) async {
   APIClient client = ref.watch(apiClientProvider);
   return await client.getFile(fileUuid);
@@ -61,6 +67,13 @@ Future<Page<ExternalId>> getPackageExternalIds(
     GetPackageExternalIdsRef ref, String packageUuid) async {
   APIClient client = ref.watch(apiClientProvider);
   return await client.getPackageExternalIds(packageUuid);
+}
+
+@riverpod
+Future<Page<ExternalId>> getArtistExternalIds(
+    GetArtistExternalIdsRef ref, String artistUuid) async {
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getArtistExternalIds(artistUuid);
 }
 
 //// Player
