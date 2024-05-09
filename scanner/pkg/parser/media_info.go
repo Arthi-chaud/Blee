@@ -20,10 +20,10 @@ type MediaChapter struct {
 	Types     []models.ChapterType `validate:"required,dive,required"`
 }
 
-func GetMediaInfo(path string) (*MediaInfo, error) {
+func GetMediaInfo(path string) (MediaInfo, error) {
 	mi, err := mediainfo.Open(path)
 	if err != nil {
-		return nil, err
+		return MediaInfo{}, err
 	}
 	defer mi.Close()
 
@@ -45,8 +45,7 @@ func GetMediaInfo(path string) (*MediaInfo, error) {
 			}
 		}),
 	}
-
-	return &info, nil
+	return info, nil
 }
 
 func qualityFromHeight(height uint64) models.Quality {
