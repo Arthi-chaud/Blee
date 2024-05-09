@@ -179,7 +179,7 @@ class PackagePage extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    final client = ref.watch(apiClientProvider);
+    final client = ref.read(apiClientProvider);
     final data = ref.watch(getPackagePageDataProvider(packageUuid));
     final package = data.value?.$1;
     final movies = data.value?.$2;

@@ -12,7 +12,7 @@ class ExtrasPage extends ConsumerWidget {
   const ExtrasPage({super.key});
   @override
   Widget build(BuildContext context, ref) {
-    final client = ref.watch(apiClientProvider);
+    final client = ref.read(apiClientProvider);
 
     return MaxWidthBox(
         maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
