@@ -4,6 +4,7 @@ import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:blee/api/src/models/page.dart' as page;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class PosterTileListView<T> extends AbstractHorizontalListView<T> {
   final Widget Function(BuildContext, T?, int) itemBuilder;
@@ -12,6 +13,7 @@ class PosterTileListView<T> extends AbstractHorizontalListView<T> {
       required this.itemBuilder,
       required super.query,
       super.skeletonHeader,
+      super.height = 200,
       required super.header})
       : super(
             tileBuilder: (context, item, index) => AspectRatio(
@@ -24,8 +26,10 @@ abstract class AbstractHorizontalListView<T> extends StatefulWidget {
   final Widget Function(BuildContext, T?, int) tileBuilder;
   final Widget? header;
   final bool? skeletonHeader;
+  final int height;
   const AbstractHorizontalListView(
       {super.key,
+      required this.height,
       required this.query,
       required this.tileBuilder,
       required this.header,
@@ -56,21 +60,41 @@ class _AbstractHorizontalListViewState<T>
 
   @override
   Widget build(BuildContext context) {
-    return PagedListView<int, T>(
-      primary: false,
-      pagingController: _pagingController,
-      scrollDirection: Axis.horizontal,
-      builderDelegate: PagedChildBuilderDelegate<T>(
-        noItemsFoundIndicatorBuilder: (_) => Container(),
-        firstPageProgressIndicatorBuilder: (context) => Row(
-          children: [0, 1]
-              .map((index) =>
-                  _itemBuilder(widget.tileBuilder(context, null, index)))
-              .toList(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Skeletonizer(
+            enabled:
+                widget.skeletonHeader ?? (_pagingController.itemList == null),
+            child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                child: (_pagingController.itemList?.isEmpty ?? false)
+                    ? Container()
+                    : widget.header ?? Container()),
+          ),
         ),
-        itemBuilder: (context, item, index) =>
-            _itemBuilder(widget.tileBuilder(context, item, index)),
-      ),
+        SizedBox(
+          height: widget.height.ceilToDouble(),
+          child: PagedListView<int, T>(
+            primary: false,
+            pagingController: _pagingController,
+            scrollDirection: Axis.horizontal,
+            builderDelegate: PagedChildBuilderDelegate<T>(
+              noItemsFoundIndicatorBuilder: (_) => Container(),
+              firstPageProgressIndicatorBuilder: (context) => Row(
+                children: [0, 1]
+                    .map((index) =>
+                        _itemBuilder(widget.tileBuilder(context, null, index)))
+                    .toList(),
+              ),
+              itemBuilder: (context, item, index) =>
+                  _itemBuilder(widget.tileBuilder(context, item, index)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

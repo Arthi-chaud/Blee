@@ -46,18 +46,17 @@ class ArtistPage extends ConsumerWidget {
           ),
           artist.value == null
               ? Container()
-              : SizedBox(
-                  height: 200,
-                  child: PosterTileListView<Package>(
-                      itemBuilder: (context, item, index) => PosterTile(
-                            onTap: () => context.push('/packages/${item?.id}'),
-                            title: item?.name,
-                            subtitle: item?.releaseDate?.year.toString() ?? '',
-                            thumbnail: item?.poster,
-                          ),
-                      query: (q) => client.getPackages(
-                          page: q, artistUuid: artist.value?.id),
-                      header: const Text('Packages')))
+              : PosterTileListView<Package>(
+                  itemBuilder: (context, item, index) => PosterTile(
+                        onTap: () => context.push('/packages/${item?.id}'),
+                        title: item?.name,
+                        subtitle: item?.releaseDate?.year.toString() ?? '',
+                        thumbnail: item?.poster,
+                      ),
+                  query: (q) =>
+                      client.getPackages(page: q, artistUuid: artist.value?.id),
+                  skeletonHeader: false,
+                  header: const Text('Packages'))
         ]));
   }
 }
