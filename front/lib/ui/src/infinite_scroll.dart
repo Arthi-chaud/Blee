@@ -112,3 +112,91 @@ class _AbstractGridViewState<T> extends State<AbstractGridView<T>> {
     super.dispose();
   }
 }
+
+class PosterTileListView<T> extends AbstractHorizontalListView<T> {
+  const PosterTileListView(
+      {super.key,
+      required super.tileBuilder,
+      required super.query,
+      super.skeletonHeader,
+      required super.header});
+}
+
+abstract class AbstractHorizontalListView<T> extends StatefulWidget {
+  final Future<page.Page<T>> Function(PageQuery) query;
+  final Widget Function(BuildContext, T?, int) tileBuilder;
+  final Widget? header;
+  final bool? skeletonHeader;
+  const AbstractHorizontalListView(
+      {super.key,
+      required this.query,
+      required this.tileBuilder,
+      required this.header,
+      this.skeletonHeader});
+  @override
+  State<AbstractHorizontalListView<T>> createState() =>
+      _AbstractHorizontalListViewState<T>();
+}
+
+class _AbstractHorizontalListViewState<T>
+    extends State<AbstractHorizontalListView<T>> {
+  static const _pageSize = 20;
+
+  final PagingController<int, T> _pagingController =
+      PagingController(firstPageKey: 0);
+
+  @override
+  void initState() {
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
+    super.initState();
+  }
+
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      final newPage =
+          await widget.query(PageQuery(skip: pageKey, take: _pageSize));
+      final isLastPage = newPage.metadata.count < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newPage.items);
+      } else {
+        final nextPageKey = pageKey + newPage.metadata.count;
+        _pagingController.appendPage(newPage.items, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => PagedListView<int, T>(
+        primary: false,
+        pagingController: _pagingController,
+        scrollDirection: Axis.horizontal,
+        builderDelegate: PagedChildBuilderDelegate<T>(
+          noItemsFoundIndicatorBuilder: (_) => Container(),
+          firstPageProgressIndicatorBuilder: (context) => Row(
+            children: [0, 1]
+                .map((index) => Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: AspectRatio(
+                        aspectRatio: 0.55,
+                        child: widget.tileBuilder(context, null, index))))
+                .toList(),
+          ),
+          itemBuilder: (context, item, index) => Padding(
+            padding: const EdgeInsets.all(4),
+            child: AspectRatio(
+                aspectRatio: 0.55,
+                child: widget.tileBuilder(context, item, index)),
+          ),
+        ),
+      );
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+}

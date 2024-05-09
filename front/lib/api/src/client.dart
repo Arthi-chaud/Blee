@@ -49,17 +49,17 @@ class APIClient {
   }
 
   Future<Page<Package>> getPackages(
-      {PageQuery page = const PageQuery()}) async {
-    var responseBody = await _request(
-        RequestType.get, '/packages?take=${page.take}&skip=${page.skip}');
+      {PageQuery page = const PageQuery(), String? artistUuid}) async {
+    var responseBody = await _request(RequestType.get,
+        '/packages?artist=${artistUuid ?? ''}&take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
   }
 
   Future<Page<Artist>> getArtists(
       {PageQuery page = const PageQuery(), String? package}) async {
-    var responseBody = await _request(
-        RequestType.get, '/artists?package=$package&take=${page.take}&skip=${page.skip}');
+    var responseBody = await _request(RequestType.get,
+        '/artists?package=$package&take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => Artist.fromJson(x as Map<String, dynamic>));
   }
