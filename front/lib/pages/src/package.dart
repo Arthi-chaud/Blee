@@ -179,6 +179,7 @@ class PackagePage extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
+    final client = ref.watch(apiClientProvider);
     final data = ref.watch(getPackagePageDataProvider(packageUuid));
     final package = data.value?.$1;
     final movies = data.value?.$2;
@@ -229,7 +230,7 @@ class PackagePage extends ConsumerWidget {
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       skeletonHeader: false,
-                      query: (q) => APIClient().getChapters(movie.id, q),
+                      query: (q) => client.getChapters(movie.id, q),
                       tileBuilder: (context, item, index) => ThumbnailTile(
                             key: Key('chapter-${item?.id}'),
                             title: item?.name,
@@ -254,7 +255,7 @@ class PackagePage extends ConsumerWidget {
                     : null,
                 skeletonHeader: movies == null,
                 query: (q) =>
-                    APIClient().getExtras(packageUuid: packageUuid, page: q),
+                    client.getExtras(packageUuid: packageUuid, page: q),
                 tileBuilder: (context, item, index) => ThumbnailTile(
                       key: Key('extra-${item?.id}'),
                       title: item?.name,
