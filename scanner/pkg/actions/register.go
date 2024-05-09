@@ -2,6 +2,7 @@ package actions
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -103,13 +104,18 @@ func RegisterFile(path string, c *config.Config) error {
 
 func buildMovieDto(path string, parsedPath *parser.MovieMetadataFromPath, mediainfo *parser.MediaInfo) (models.NewMovieDto, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
+	var stringYear string = ""
+	year := parsedPath.Package_.ReleaseYear
+	if year.Year() != 1 {
+		stringYear = fmt.Sprintf("%d-%02d-%02d", year.Year(), year.Month(), year.Day())
+	}
 	dto := models.NewMovieDto{
 		ArtistName:         parsedPath.ArtistName,
 		MovieName:          parsedPath.Name,
 		MovieType:          string(parsedPath.Type_),
 		PackageArtistName:  parsedPath.Package_.ArtistName,
 		PackageName:        parsedPath.Package_.Name,
-		PackageReleaseDate: parsedPath.Package_.ReleaseYear,
+		PackageReleaseDate: stringYear,
 		Chapters: pkg.Map(make([]models.NewChapterDto, len(mediainfo.Chapters)), func(_ models.NewChapterDto, i int) models.NewChapterDto {
 			return models.NewChapterDto{
 				Name:           mediainfo.Chapters[i].Name,
@@ -130,6 +136,11 @@ func buildMovieDto(path string, parsedPath *parser.MovieMetadataFromPath, mediai
 
 func buildExtraDto(path string, parsedPath *parser.ExtraMetadataFromPath, mediainfo *parser.MediaInfo) (models.NewExtraDto, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
+	var stringYear string = ""
+	year := parsedPath.Package_.ReleaseYear
+	if year.Year() != 1 {
+		stringYear = fmt.Sprintf("%d-%02d-%02d", year.Year(), year.Month(), year.Day())
+	}
 	dto := models.NewExtraDto{
 		ArtistName: parsedPath.ArtistName,
 		ExtraName:  parsedPath.Name,
@@ -138,7 +149,7 @@ func buildExtraDto(path string, parsedPath *parser.ExtraMetadataFromPath, mediai
 		}),
 		PackageArtistName:  parsedPath.Package_.ArtistName,
 		PackageName:        parsedPath.Package_.Name,
-		PackageReleaseDate: parsedPath.Package_.ReleaseYear,
+		PackageReleaseDate: stringYear,
 		DiscIndex:          parsedPath.DiscIndex,
 		TrackIndex:         parsedPath.TrackIndex,
 		File:               buildFileDto(path, mediainfo),
