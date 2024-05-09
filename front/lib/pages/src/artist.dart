@@ -5,6 +5,7 @@ import 'package:blee/ui/src/description_box.dart';
 import 'package:blee/ui/src/infinite_scroll/infinite_horizontal_list.dart';
 import 'package:blee/ui/src/poster_page_header.dart';
 import 'package:blee/ui/src/tile.dart';
+import 'package:blee/utils/format_duration.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,19 +45,33 @@ class ArtistPage extends ConsumerWidget {
               skeletonize: externalIds.value == null,
             ),
           ),
-          artist.value == null
-              ? Container()
-              : PosterTileListView<Package>(
-                  itemBuilder: (context, item, index) => PosterTile(
-                        onTap: () => context.push('/packages/${item?.id}'),
-                        title: item?.name,
-                        subtitle: item?.releaseDate?.year.toString() ?? '',
-                        thumbnail: item?.poster,
-                      ),
-                  query: (q) =>
-                      client.getPackages(page: q, artistUuid: artist.value?.id),
-                  skeletonHeader: false,
-                  header: const Text('Packages'))
+          ...(artist.value == null
+              ? []
+              : [
+                  PosterListView<Package>(
+                      itemBuilder: (context, item, index) => PosterTile(
+                            onTap: () => context.push('/packages/${item?.id}'),
+                            title: item?.name,
+                            subtitle: item?.releaseDate?.year.toString() ?? '',
+                            thumbnail: item?.poster,
+                          ),
+                      query: (q) => client.getPackages(
+                          page: q, artistUuid: artist.value?.id),
+                      header: const Text('Movies')),
+                  ThumbnailListView<Extra>(
+                      itemBuilder: (context, item, index) => ThumbnailTile(
+                            onTap: () =>
+                                context.push('/player/extra:${item?.id}'),
+                            title: item?.name,
+                            subtitle: item != null
+                                ? formatDuration(item.duration)
+                                : '',
+                            thumbnail: item?.thumbnail,
+                          ),
+                      query: (q) => client.getExtras(
+                          page: q, artistUuid: artist.value?.id),
+                      header: const Text('Videos'))
+                ])
         ]));
   }
 }

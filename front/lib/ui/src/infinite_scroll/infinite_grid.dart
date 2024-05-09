@@ -6,8 +6,8 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class ThumbnailTileGridView<T> extends AbstractGridView<T> {
-  const ThumbnailTileGridView(
+class ThumbnailGridView<T> extends AbstractGridView<T> {
+  const ThumbnailGridView(
       {super.key,
       required super.tileBuilder,
       required super.query,
@@ -16,8 +16,8 @@ class ThumbnailTileGridView<T> extends AbstractGridView<T> {
       : super(delegate: DefaultThumbnailTileGridDelegate);
 }
 
-class PosterTileGridView<T> extends AbstractGridView<T> {
-  const PosterTileGridView(
+class PosterGridView<T> extends AbstractGridView<T> {
+  const PosterGridView(
       {super.key,
       required super.tileBuilder,
       required super.query,

@@ -6,9 +6,9 @@ import 'package:blee/api/src/models/page.dart' as page;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class PosterTileListView<T> extends AbstractHorizontalListView<T> {
+class PosterListView<T> extends AbstractHorizontalListView<T> {
   final Widget Function(BuildContext, T?, int) itemBuilder;
-  PosterTileListView(
+  PosterListView(
       {super.key,
       required this.itemBuilder,
       required super.query,
@@ -18,6 +18,21 @@ class PosterTileListView<T> extends AbstractHorizontalListView<T> {
       : super(
             tileBuilder: (context, item, index) => AspectRatio(
                 aspectRatio: PosterTile.aspectRatio,
+                child: itemBuilder(context, item, index)));
+}
+
+class ThumbnailListView<T> extends AbstractHorizontalListView<T> {
+  final Widget Function(BuildContext, T?, int) itemBuilder;
+  ThumbnailListView(
+      {super.key,
+      required this.itemBuilder,
+      required super.query,
+      super.skeletonHeader,
+      super.height = 150,
+      required super.header})
+      : super(
+            tileBuilder: (context, item, index) => AspectRatio(
+                aspectRatio: ThumbnailTile.aspectRatio,
                 child: itemBuilder(context, item, index)));
 }
 
@@ -48,9 +63,10 @@ class _AbstractHorizontalListViewState<T>
   void initState() {
     _pagingController.addPageRequestListener((pageKey) {
       InfiniteScrollHelper.fetchPage(
-          query: widget.query,
-          skip: pageKey,
-          pagingController: _pagingController);
+              query: widget.query,
+              skip: pageKey,
+              pagingController: _pagingController)
+          .then((value) => setState(() {}));
     });
     super.initState();
   }

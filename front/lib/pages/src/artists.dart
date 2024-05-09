@@ -17,7 +17,7 @@ class ArtistsPage extends ConsumerWidget {
     return MaxWidthBox(
         maxWidth: Breakpoints.getSized(BreakpointEnum.lg),
         child: CustomScrollView(slivers: [
-          PosterTileGridView<Artist>(
+          PosterGridView<Artist>(
               tileBuilder: (context, item, index) => PosterTile(
                     onTap: () => context.push('/artists/${item?.id}'),
                     title: item?.name,

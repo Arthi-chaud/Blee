@@ -93,7 +93,7 @@ class PackagePage extends ConsumerWidget {
             ),
             ...(movies?.items.map((movie) {
                   var isOnlyMovie = movies.metadata.count == 1;
-                  return ThumbnailTileGridView(
+                  return ThumbnailGridView(
                       key: Key('$movie-chapters'),
                       header: Text(
                         isOnlyMovie ? 'Chapters' : movie.name,
@@ -115,7 +115,7 @@ class PackagePage extends ConsumerWidget {
                           ));
                 }).toList()) ??
                 [],
-            ThumbnailTileGridView(
+            ThumbnailGridView(
                 key: Key('$packageUuid-extras'),
                 header: (movies?.metadata.count ?? 1) > 0
                     ? Text(

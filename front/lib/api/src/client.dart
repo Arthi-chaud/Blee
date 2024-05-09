@@ -95,9 +95,11 @@ class APIClient {
   }
 
   Future<Page<Extra>> getExtras(
-      {String? packageUuid, PageQuery page = const PageQuery()}) async {
+      {String? packageUuid,
+      String? artistUuid,
+      PageQuery page = const PageQuery()}) async {
     var responseBody = await _request(RequestType.get,
-        '/extras?package=$packageUuid&take=${page.take}&skip=${page.skip}');
+        '/extras?package=$packageUuid&artist=$artistUuid&take=${page.take}&skip=${page.skip}');
     return Page.fromJson(
         responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
   }

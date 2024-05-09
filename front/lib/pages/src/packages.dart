@@ -17,7 +17,7 @@ class PackagesPage extends ConsumerWidget {
     return MaxWidthBox(
         maxWidth: Breakpoints.getSized(BreakpointEnum.lg),
         child: CustomScrollView(slivers: [
-          PosterTileGridView<Package>(
+          PosterGridView<Package>(
               tileBuilder: (context, item, index) => PosterTile(
                     onTap: () => context.push('/packages/${item?.id}'),
                     title: item?.name,

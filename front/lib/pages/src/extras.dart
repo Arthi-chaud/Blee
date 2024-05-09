@@ -17,7 +17,7 @@ class ExtrasPage extends ConsumerWidget {
     return MaxWidthBox(
         maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
         child: CustomScrollView(slivers: [
-          ThumbnailTileGridView<Extra>(
+          ThumbnailGridView<Extra>(
               tileBuilder: (context, item, index) => ThumbnailTile(
                     onTap: () => context.push('/player/extra:${item!.id}'),
                     title: item?.name,
