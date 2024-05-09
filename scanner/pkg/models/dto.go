@@ -15,7 +15,7 @@ type NewMovieDto struct {
 	MovieType          string          `validate:"required" json:"movie_type"`
 	PackageArtistName  string          `json:"package_artist_name"`
 	PackageName        string          `validate:"required" json:"package_name"`
-	PackageReleaseDate time.Time       `json:"package-release-date"`
+	PackageReleaseDate time.Time       `json:"package_release_date"`
 	Chapters           []NewChapterDto `validate:"required,dive,required" json:"chapters"`
 	File               NewFileDto      `validate:"required" json:"file"`
 }
@@ -35,6 +35,6 @@ type NewExtraDto struct {
 	PackageName        string     `validate:"required" json:"package_name"`
 	DiscIndex          int        `json:"disc_index"`
 	TrackIndex         int        `json:"track_index"`
-	PackageReleaseDate time.Time  `json:"package-release-date"`
+	PackageReleaseDate time.Time  `json:"package_release_date"`
 	File               NewFileDto `validate:"required" json:"file"`
 }
