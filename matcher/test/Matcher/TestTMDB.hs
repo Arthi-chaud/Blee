@@ -22,7 +22,7 @@ specs = describe "TMDB" $ do
                             name res `shouldBe` "Madonna"
                             originalName res `shouldBe` "Madonna"
                             profilePath res
-                                `shouldBe` Just "https://image.tmdb.org/t/p/original/pI6g1iVlUy7cUAZ6AspVXWq4kli.jpg"
+                                `shouldBe` Just "https://image.tmdb.org/t/p/original/8XtGxpB4z428QDgwKlFYPktYHFC.jpg"
                     )
         it "Should Fail to find band" $ do
             searchArtist tmdbClient "Garbage"
@@ -38,7 +38,7 @@ specs = describe "TMDB" $ do
                         Right (ArtistDetails Nothing) -> expectationFailure "No biography found"
                         Right (ArtistDetails (Just description)) -> do
                             take 10 description `shouldBe` "Madonna (b"
-                            reverse (take 10 $ reverse description) `shouldBe` " industry."
+                            reverse (take 10 $ reverse description) `shouldBe` "le artist."
                     )
     describe "Search Package" $ do
         it "Should Get Package" $ do
