@@ -16,6 +16,18 @@ class ScaffoldWithNavBar extends StatefulWidget {
 class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
   int _currentIndex = 0;
 
+  @override
+  void initState() {
+    GoRouter router = GoRouter.of(context);
+    final currentRoute = router.routeInformationProvider.value.uri.toString();
+    super.initState();
+    for (var tab in tabs) {
+      if (tab.initialLocation == currentRoute) {
+        _currentIndex = tabs.indexOf(tab);
+      }
+    }
+  }
+
   static const List<MyNavigationDestination> tabs = [
     MyNavigationDestination(
       icon: FaIcon(FontAwesomeIcons.film),
@@ -50,7 +62,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
     setState(() {
       _currentIndex = index;
     });
-    router.go(location);
+    router.replace(location);
   }
 }
 

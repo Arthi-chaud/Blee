@@ -75,6 +75,7 @@ class _AbstractGridViewState<T> extends State<AbstractGridView<T>> {
 
   @override
   Widget build(BuildContext context) => SliverStickyHeader(
+      sticky: widget.header != null,
       header: Container(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: Skeletonizer(

@@ -61,7 +61,7 @@ services:
       - .env
     volumes:
       - ./api:/app
-      - ./data:/data
+      - api_images:/data
       - api_target:/app/target
       - api_cargo:/usr/local/cargo
   mq:
@@ -138,5 +138,6 @@ services:
 volumes:
   db:
   api_target:
+  api_images:
   api_cargo:
   metadata:
