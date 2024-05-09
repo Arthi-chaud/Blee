@@ -21,7 +21,6 @@ func SetupWatcher(w *fsnotify.Watcher, rootDir string) []string {
 	for _, e := range entries {
 		entryName := path.Join(rootDir, e.Name())
 		if e.IsDir() {
-			glg.Logf("Watching directory %s", entryName)
 			watchedFiles = append(watchedFiles, SetupWatcher(w, entryName)...)
 		} else {
 			watchedFiles = append(watchedFiles, entryName)
