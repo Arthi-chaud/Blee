@@ -1,49 +1,66 @@
 import 'package:blee/api/api.dart';
+import 'package:blee/api/src/client.dart' as api;
 import 'package:blee/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
 
 @riverpod
+class ApiClient extends _$ApiClient {
+  @override
+  api.APIClient build() {
+    return api.APIClient();
+  }
+}
+
+@riverpod
 Future<Package> getPackage(GetPackageRef ref, String packageUuid) async {
-  return await APIClient().getPackage(packageUuid);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getPackage(packageUuid);
 }
 
 @riverpod
 Future<File> getFile(GetFileRef ref, String fileUuid) async {
-  return await APIClient().getFile(fileUuid);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getFile(fileUuid);
 }
 
 @riverpod
 Future<Extra> getExtra(GetExtraRef ref, String extraUuid) async {
-  return await APIClient().getExtra(extraUuid);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getExtra(extraUuid);
 }
 
 @riverpod
 Future<Movie> getMovie(GetMovieRef ref, String movieUuid) async {
-  return await APIClient().getMovie(movieUuid);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getMovie(movieUuid);
 }
 
 @riverpod
 Future<Page<Movie>> getMovies(GetMoviesRef ref, {String? packageUuid}) async {
-  return await APIClient().getMovies(packageUuid!);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getMovies(packageUuid!);
 }
 
 @riverpod
 Future<Page<Chapter>> getChapters(
     GetChaptersRef ref, String movieUuid, PageQuery page) async {
-  return await APIClient().getChapters(movieUuid, page);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getChapters(movieUuid, page);
 }
 
 @riverpod
 Future<Page<Extra>> getExtras(GetExtrasRef ref,
     {String? packageUuid, PageQuery page = const PageQuery()}) async {
-  return await APIClient().getExtras(packageUuid: packageUuid, page: page);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getExtras(packageUuid: packageUuid, page: page);
 }
 
 @riverpod
 Future<Page<ExternalId>> getPackageExternalIds(
     GetPackageExternalIdsRef ref, String packageUuid) async {
-  return await APIClient().getPackageExternalIds(packageUuid);
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getPackageExternalIds(packageUuid);
 }
 
 //// Player

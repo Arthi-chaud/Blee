@@ -29,17 +29,15 @@ final router = GoRouter(
         },
         routes: [
           GoRoute(
-              path: '/packages',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: PackagesPage()),
-              routes: [
-                GoRoute(
-                  path: ':id',
-                  pageBuilder: (context, state) => NoTransitionPage(
-                      child: PackagePage(
-                          packageUuid: state.pathParameters['id']!)),
-                )
-              ]),
+            path: '/packages',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: PackagesPage()),
+          ),
+          GoRoute(
+            path: '/packages/:id',
+            pageBuilder: (context, state) => NoTransitionPage(
+                child: PackagePage(packageUuid: state.pathParameters['id']!)),
+          ),
           GoRoute(
             path: '/extras',
             pageBuilder: (context, state) =>

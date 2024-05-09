@@ -8,6 +8,7 @@ import 'package:blee/ui/src/infinite_scroll.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -178,6 +179,7 @@ class PackagePage extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
+    final client = ref.read(apiClientProvider);
     final data = ref.watch(getPackagePageDataProvider(packageUuid));
     final package = data.value?.$1;
     final movies = data.value?.$2;
@@ -212,7 +214,7 @@ class PackagePage extends ConsumerWidget {
                       child: Padding(
                           padding: const EdgeInsets.only(bottom: 8, top: 8),
                           child: ElevatedButton.icon(
-                            icon: const Icon(Icons.play_arrow),
+                            icon: const FaIcon(FontAwesomeIcons.play, size: 15),
                             label: const Text('Play'),
                             onPressed: () => context.push(
                                 '/player/movie:${movies!.items.first.id}'),
@@ -228,7 +230,7 @@ class PackagePage extends ConsumerWidget {
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       skeletonHeader: false,
-                      query: (q) => APIClient().getChapters(movie.id, q),
+                      query: (q) => client.getChapters(movie.id, q),
                       tileBuilder: (context, item, index) => ThumbnailTile(
                             key: Key('chapter-${item?.id}'),
                             title: item?.name,
@@ -253,7 +255,7 @@ class PackagePage extends ConsumerWidget {
                     : null,
                 skeletonHeader: movies == null,
                 query: (q) =>
-                    APIClient().getExtras(packageUuid: packageUuid, page: q),
+                    client.getExtras(packageUuid: packageUuid, page: q),
                 tileBuilder: (context, item, index) => ThumbnailTile(
                       key: Key('extra-${item?.id}'),
                       title: item?.name,

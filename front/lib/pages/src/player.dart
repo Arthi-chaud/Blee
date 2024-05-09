@@ -113,11 +113,12 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
   }
 
   void _refreshMediaMetadata(PlayerMetadata m) {
+    APIClient client = ref.read(apiClientProvider);
     Mediametadata().setMediaMetadata(
         artistName: m.videoArtist,
         albumName: currentChapter != null ? m.videoTitle : '',
         songName: currentChapter?.name ?? m.videoTitle,
-        imageUri: APIClient().buildImageUrl((m.poster ?? m.thumbnail!).id));
+        imageUri: client.buildImageUrl((m.poster ?? m.thumbnail!).id));
   }
 
   @override

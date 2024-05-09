@@ -1,7 +1,9 @@
 import 'package:blee/api/src/client.dart';
+import 'package:blee/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:blee/api/api.dart' as api;
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class Poster extends StatelessWidget {
@@ -44,7 +46,7 @@ class Thumbnail extends StatelessWidget {
   }
 }
 
-class _BleeImage extends StatelessWidget {
+class _BleeImage extends ConsumerWidget {
   final api.Image? image;
   final double? placeholderRatio;
   final double? forcedAspectRatio;
@@ -59,7 +61,8 @@ class _BleeImage extends StatelessWidget {
       this.forcedAspectRatio});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    APIClient client = ref.read(apiClientProvider);
     return Center(child: Builder(builder: (context) {
       return Skeletonizer(
           enabled: image == null,
@@ -83,7 +86,7 @@ class _BleeImage extends StatelessWidget {
                             ? BlurHash(
                                 image: image == null
                                     ? null
-                                    : APIClient().buildImageUrl(image!.id),
+                                    : client.buildImageUrl(image!.id),
                                 imageFit: BoxFit.cover,
                                 color: disableSlashFadein
                                     ? Colors.transparent

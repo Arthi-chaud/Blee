@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class ScaffoldWithNavBar extends StatefulWidget {
@@ -15,14 +16,26 @@ class ScaffoldWithNavBar extends StatefulWidget {
 class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
   int _currentIndex = 0;
 
+  @override
+  void initState() {
+    GoRouter router = GoRouter.of(context);
+    final currentRoute = router.routeInformationProvider.value.uri.toString();
+    super.initState();
+    for (var tab in tabs) {
+      if (tab.initialLocation == currentRoute) {
+        _currentIndex = tabs.indexOf(tab);
+      }
+    }
+  }
+
   static const List<MyNavigationDestination> tabs = [
     MyNavigationDestination(
-      icon: Icon(Icons.movie),
+      icon: FaIcon(FontAwesomeIcons.film),
       label: 'Movies',
       initialLocation: '/packages',
     ),
     MyNavigationDestination(
-      icon: Icon(Icons.music_video_sharp),
+      icon: FaIcon(FontAwesomeIcons.tv),
       label: 'Videos',
       initialLocation: '/extras',
     ),
@@ -33,7 +46,6 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
     return Scaffold(
       body: SafeArea(child: widget.child),
       bottomNavigationBar: NavigationBar(
-        height: 70,
         destinations: tabs,
         onDestinationSelected: (int index) {
           _goOtherTab(context, index);
@@ -50,7 +62,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
     setState(() {
       _currentIndex = index;
     });
-    router.go(location);
+    router.replace(location);
   }
 }
 

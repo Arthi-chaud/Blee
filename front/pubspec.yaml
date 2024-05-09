@@ -27,6 +27,7 @@ dependencies:
   video_player_web_hls: ^1.2.1
   mediametadata:
     path: ./mediametadata
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:
