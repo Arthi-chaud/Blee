@@ -2,7 +2,7 @@ import 'package:blee/api/api.dart';
 import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/description_box.dart';
-import 'package:blee/ui/src/infinite_scroll.dart';
+import 'package:blee/ui/src/infinite_scroll/infinite_horizontal_list.dart';
 import 'package:blee/ui/src/poster_page_header.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:collection/collection.dart';
@@ -49,7 +49,7 @@ class ArtistPage extends ConsumerWidget {
               : SizedBox(
                   height: 200,
                   child: PosterTileListView<Package>(
-                      tileBuilder: (context, item, index) => PosterTile(
+                      itemBuilder: (context, item, index) => PosterTile(
                             onTap: () => context.push('/packages/${item?.id}'),
                             title: item?.name,
                             subtitle: item?.releaseDate?.year.toString() ?? '',
@@ -57,7 +57,7 @@ class ArtistPage extends ConsumerWidget {
                           ),
                       query: (q) => client.getPackages(
                           page: q, artistUuid: artist.value?.id),
-                      header: Text('Packages')))
+                      header: const Text('Packages')))
         ]));
   }
 }

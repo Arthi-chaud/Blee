@@ -1,11 +1,9 @@
 import 'package:blee/api/api.dart';
 import 'package:blee/api/src/models/page.dart' as page;
-import 'package:blee/api/src/models/image.dart' as blee_image;
 import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/description_box.dart';
-import 'package:blee/ui/src/image.dart';
-import 'package:blee/ui/src/infinite_scroll.dart';
+import 'package:blee/ui/src/infinite_scroll/infinite_grid.dart';
 import 'package:blee/ui/src/poster_page_header.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
