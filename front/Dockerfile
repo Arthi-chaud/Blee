@@ -18,7 +18,7 @@ WORKDIR $APP
 
 RUN flutter clean
 RUN flutter pub get
-RUN dart run build_runner build
+RUN dart run build_runner build --delete-conflicting-outputs
 RUN flutter build web
 
 FROM nginx:1.25.2-alpine
