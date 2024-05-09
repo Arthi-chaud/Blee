@@ -25,7 +25,7 @@ class PackagesPage extends ConsumerWidget {
                     thumbnail: item?.poster,
                   ),
               query: (q) => client.getPackages(page: q),
-              header: Container())
+              header: null)
         ]));
   }
 }

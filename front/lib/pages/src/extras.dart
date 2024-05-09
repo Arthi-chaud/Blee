@@ -25,7 +25,7 @@ class ExtrasPage extends ConsumerWidget {
                     thumbnail: item?.thumbnail,
                   ),
               query: (q) => client.getExtras(page: q),
-              header: Container())
+              header: null)
         ]));
   }
 }
