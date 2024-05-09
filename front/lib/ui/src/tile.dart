@@ -15,7 +15,7 @@ class PosterTile extends Tile {
 }
 
 class ThumbnailTile extends Tile {
-  static double aspectRatio = 1.25;
+  static double aspectRatio = 1.22;
   ThumbnailTile(
       {super.key,
       required super.title,

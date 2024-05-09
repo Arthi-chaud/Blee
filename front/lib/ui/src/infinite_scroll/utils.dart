@@ -34,7 +34,6 @@ SliverGridDelegate DefaultThumbnailTileGridDelegate(BuildContext context) {
   return SliverGridDelegateWithFixedCrossAxisCount(
     childAspectRatio: ThumbnailTile.aspectRatio,
     crossAxisSpacing: padding,
-    mainAxisSpacing: padding,
     crossAxisCount: ResponsiveBreakpoints.of(context)
             .largerOrEqualTo(BreakpointEnum.xl.name)
         ? 5
@@ -58,13 +57,13 @@ SliverGridDelegate DefaultPosterTileGridDelegate(BuildContext context) {
         ? 9
         : ResponsiveBreakpoints.of(context)
                 .largerOrEqualTo(BreakpointEnum.lg.name)
-            ? 7
+            ? 8
             : ResponsiveBreakpoints.of(context)
                     .largerOrEqualTo(BreakpointEnum.md.name)
                 ? 6
                 : ResponsiveBreakpoints.of(context)
                         .largerOrEqualTo(BreakpointEnum.sm.name)
-                    ? 5
+                    ? 4
                     : 3,
   );
 }
