@@ -7,12 +7,16 @@ import 'package:http/http.dart' as http;
 enum RequestType { get, post, put, delete }
 
 class APIClient {
-  String _host =
-      Uri.base.toString().substring(0, Uri.base.toString().indexOf('/#/'));
+  late String _host;
 
   final http.Client client = http.Client();
 
   APIClient() {
+    _host = Uri.base.toString();
+    var poundPos = Uri.base.toString().indexOf('/#/');
+    if (poundPos != -1) {
+      _host = Uri.base.toString().substring(0, poundPos);
+    }
     if (kDebugMode) {
       const url = String.fromEnvironment("API_URL");
       _host = url;
