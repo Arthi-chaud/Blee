@@ -6,58 +6,40 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class Poster extends StatelessWidget {
-  final api.Image? image;
-  const Poster({super.key, required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    const aspectRatio = 3 / 4;
-    return _BleeImage(
-      key: key,
-      image: image,
-      fitToPlaceholder: false,
-      placeholderAspectRatio: aspectRatio,
-    );
-  }
+class Poster extends _BleeImage {
+  const Poster(
+      {super.key,
+      required super.image,
+      super.disableBorderRadius = false,
+      super.onTap,
+      super.disableSlashFadein = false})
+      : super(placeholderAspectRatio: 3 / 4, fitToPlaceholder: false);
 }
 
-class Thumbnail extends StatelessWidget {
-  final api.Image? image;
-  final bool disableBorderRadius;
-  final bool disableSlashFadein;
+class Thumbnail extends _BleeImage {
   const Thumbnail(
       {super.key,
-      required this.image,
-      this.disableBorderRadius = false,
-      this.disableSlashFadein = false});
-
-  @override
-  Widget build(BuildContext context) {
-    const aspectRatio = 16 / 9;
-    return _BleeImage(
-      key: key,
-      disableBorderRadius: disableBorderRadius,
-      image: image,
-      fitToPlaceholder: true,
-      disableSlashFadein: disableSlashFadein,
-      placeholderAspectRatio: aspectRatio,
-    );
-  }
+      required super.image,
+      super.onTap,
+      super.disableBorderRadius = false,
+      super.disableSlashFadein = false})
+      : super(placeholderAspectRatio: 16 / 9, fitToPlaceholder: true);
 }
 
-class _BleeImage extends ConsumerWidget {
+abstract class _BleeImage extends ConsumerWidget {
   final api.Image? image;
   final double placeholderAspectRatio;
   final bool fitToPlaceholder;
   final bool disableBorderRadius;
   final bool disableSlashFadein;
+  final Function? onTap;
   const _BleeImage(
       {super.key,
       required this.image,
       this.disableBorderRadius = false,
       this.disableSlashFadein = false,
       this.fitToPlaceholder = true,
+      this.onTap,
       required this.placeholderAspectRatio});
 
   Widget roundedContainer(Widget child) {
@@ -76,7 +58,7 @@ class _BleeImage extends ConsumerWidget {
     APIClient client = ref.read(apiClientProvider);
     return Center(child: Builder(builder: (context) {
       return Skeletonizer(
-          enabled: image == null,
+          enabled: false,
           child: AspectRatio(
               aspectRatio: placeholderAspectRatio,
               child: Stack(
@@ -90,21 +72,37 @@ class _BleeImage extends ConsumerWidget {
                       aspectRatio: fitToPlaceholder
                           ? placeholderAspectRatio
                           : image?.aspectRatio ?? placeholderAspectRatio,
-                      child: image != null
-                          ? roundedContainer(BlurHash(
-                              image: image == null
-                                  ? null
-                                  : client.buildImageUrl(image!.id),
-                              imageFit: BoxFit.cover,
-                              color: disableSlashFadein
-                                  ? Colors.transparent
-                                  : const Color(0xffebebf4),
-                              curve: Curves.easeIn,
-                              duration: const Duration(milliseconds: 200),
-                              hash: image?.blurhash ??
-                                  "L5H2EC=PM+yV0g-mq.wG9c010J}I",
-                            ))
-                          : Container())
+                      child: Stack(children: [
+                        image != null
+                            ? roundedContainer(BlurHash(
+                                image: image == null
+                                    ? null
+                                    : client.buildImageUrl(image!.id),
+                                imageFit: BoxFit.cover,
+                                color: disableSlashFadein
+                                    ? Colors.transparent
+                                    : const Color(0xffebebf4),
+                                curve: Curves.easeIn,
+                                duration: const Duration(milliseconds: 200),
+                                hash: image?.blurhash ??
+                                    "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                              ))
+                            : Container(),
+                        onTap != null
+                            ? Positioned.fill(
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          onTap!.call();
+                                        },
+                                      ),
+                                    )),
+                              )
+                            : Container(),
+                      ]))
                 ],
               )));
     }));
