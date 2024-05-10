@@ -16,8 +16,8 @@ class Poster extends StatelessWidget {
     return _BleeImage(
       key: key,
       image: image,
-      placeholderRatio: aspectRatio,
-      forcedAspectRatio: aspectRatio,
+      fitToPlaceholder: false,
+      placeholderAspectRatio: aspectRatio,
     );
   }
 }
@@ -39,17 +39,17 @@ class Thumbnail extends StatelessWidget {
       key: key,
       disableBorderRadius: disableBorderRadius,
       image: image,
+      fitToPlaceholder: true,
       disableSlashFadein: disableSlashFadein,
-      placeholderRatio: aspectRatio,
-      forcedAspectRatio: aspectRatio,
+      placeholderAspectRatio: aspectRatio,
     );
   }
 }
 
 class _BleeImage extends ConsumerWidget {
   final api.Image? image;
-  final double? placeholderRatio;
-  final double? forcedAspectRatio;
+  final double placeholderAspectRatio;
+  final bool fitToPlaceholder;
   final bool disableBorderRadius;
   final bool disableSlashFadein;
   const _BleeImage(
@@ -57,8 +57,19 @@ class _BleeImage extends ConsumerWidget {
       required this.image,
       this.disableBorderRadius = false,
       this.disableSlashFadein = false,
-      this.placeholderRatio,
-      this.forcedAspectRatio});
+      this.fitToPlaceholder = true,
+      required this.placeholderAspectRatio});
+
+  Widget roundedContainer(Widget child) {
+    return ClipRRect(
+        borderRadius:
+            disableBorderRadius ? BorderRadius.zero : BorderRadius.circular(8),
+        child: AspectRatio(
+            aspectRatio: fitToPlaceholder
+                ? placeholderAspectRatio
+                : image?.aspectRatio ?? placeholderAspectRatio,
+            child: child));
+  }
 
   @override
   Widget build(BuildContext context, ref) {
@@ -66,40 +77,36 @@ class _BleeImage extends ConsumerWidget {
     return Center(child: Builder(builder: (context) {
       return Skeletonizer(
           enabled: image == null,
-          child: Builder(builder: (context) {
-            return AspectRatio(
-                aspectRatio: forcedAspectRatio ??
-                    image?.aspectRatio ??
-                    placeholderRatio ??
-                    1,
-                child: ClipRRect(
-                    borderRadius: disableBorderRadius
-                        ? BorderRadius.zero
-                        : BorderRadius.circular(8),
-                    child: Stack(
-                      children: [
-                        Container(
-                            color: disableSlashFadein
-                                ? null
-                                : Theme.of(context).splashColor),
-                        image != null
-                            ? BlurHash(
-                                image: image == null
-                                    ? null
-                                    : client.buildImageUrl(image!.id),
-                                imageFit: BoxFit.cover,
-                                color: disableSlashFadein
-                                    ? Colors.transparent
-                                    : const Color(0xffebebf4),
-                                curve: Curves.easeIn,
-                                duration: const Duration(milliseconds: 200),
-                                hash: image?.blurhash ??
-                                    "L5H2EC=PM+yV0g-mq.wG9c010J}I",
-                              )
-                            : Container()
-                      ],
-                    )));
-          }));
+          child: AspectRatio(
+              aspectRatio: placeholderAspectRatio,
+              child: Stack(
+                alignment: AlignmentDirectional.center,
+                children: [
+                  roundedContainer(Container(
+                      color: disableSlashFadein
+                          ? null
+                          : Theme.of(context).splashColor)),
+                  AspectRatio(
+                      aspectRatio: fitToPlaceholder
+                          ? placeholderAspectRatio
+                          : image?.aspectRatio ?? placeholderAspectRatio,
+                      child: image != null
+                          ? roundedContainer(BlurHash(
+                              image: image == null
+                                  ? null
+                                  : client.buildImageUrl(image!.id),
+                              imageFit: BoxFit.cover,
+                              color: disableSlashFadein
+                                  ? Colors.transparent
+                                  : const Color(0xffebebf4),
+                              curve: Curves.easeIn,
+                              duration: const Duration(milliseconds: 200),
+                              hash: image?.blurhash ??
+                                  "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                            ))
+                          : Container())
+                ],
+              )));
     }));
   }
 }
