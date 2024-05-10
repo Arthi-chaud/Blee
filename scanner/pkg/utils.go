@@ -2,27 +2,22 @@ package pkg
 
 import (
 	"fmt"
+	"mime"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/gabriel-vasile/mimetype"
 )
 
-func FileIsVideo(path string) bool {
-	mime, err := mimetype.DetectFile(path)
-	if err != nil {
-		return false
-	}
-	return strings.HasPrefix(mime.String(), "video/")
+func FileIsVideo(filePath string) bool {
+	stringMime := mime.TypeByExtension(path.Ext(filePath))
+
+	return strings.HasPrefix(stringMime, "video/")
 }
 
-func FileIsImage(path string) bool {
-	mime, err := mimetype.DetectFile(path)
-	if err != nil {
-		return false
-	}
-	return strings.HasPrefix(mime.String(), "image/")
+func FileIsImage(filePath string) bool {
+	stringMime := mime.TypeByExtension(path.Ext(filePath))
+	return strings.HasPrefix(stringMime, "image/")
 }
 
 func ParseUint64(str string) uint64 {
