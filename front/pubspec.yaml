@@ -28,6 +28,9 @@ dependencies:
   mediametadata:
     path: ./mediametadata
   font_awesome_flutter: ^10.7.0
+  uuid: ^4.4.0
+  flutter_native_splash: ^2.4.0
+  better_player: ^0.0.66
 
 dev_dependencies:
   flutter_test:
@@ -42,8 +45,18 @@ dev_dependencies:
   riverpod_lint: ^2.3.10
 
 flutter:
+  assets:
+    - web/icons/Icon-192.png
   uses-material-design: true
   fonts:
     - family: Rubik
       fonts:
         - asset: fonts/rubik.ttf
+
+flutter_native_splash:
+  color: "#f5fafb"
+  image: web/icons/Icon-512.png
+  color_dark: "#0e1415"
+  web: true
+  web_image_mode: center
+ 

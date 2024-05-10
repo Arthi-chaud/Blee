@@ -128,17 +128,17 @@ func request(method string, url string, body io.Reader, config config.Config) (s
 	resp, err := client.Do(req)
 
 	if err != nil {
-		glg.Fatalln(err)
+		glg.Fail(err)
 		return "", err
 	}
 	defer resp.Body.Close()
 	b, err := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 400 {
-		glg.Fatalln(string(b))
+		glg.Fail(string(b))
 		return "", err
 	}
 	if err != nil {
-		glg.Fatalln(err)
+		glg.Fail(err)
 		return "", err
 	}
 	return string(b), nil

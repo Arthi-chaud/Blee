@@ -6,84 +6,75 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class Poster extends StatelessWidget {
-  final api.Image? image;
-  const Poster({super.key, required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    const aspectRatio = 3 / 4;
-    return _BleeImage(
-      key: key,
-      image: image,
-      placeholderRatio: aspectRatio,
-      forcedAspectRatio: aspectRatio,
-    );
-  }
+class Poster extends _BleeImage {
+  const Poster(
+      {super.key,
+      required super.image,
+      super.disableBorderRadius = false,
+      super.onTap,
+      super.disableSlashFadein = false})
+      : super(placeholderAspectRatio: 3 / 4, fitToPlaceholder: false);
 }
 
-class Thumbnail extends StatelessWidget {
-  final api.Image? image;
-  final bool disableBorderRadius;
-  final bool disableSlashFadein;
+class Thumbnail extends _BleeImage {
   const Thumbnail(
       {super.key,
-      required this.image,
-      this.disableBorderRadius = false,
-      this.disableSlashFadein = false});
-
-  @override
-  Widget build(BuildContext context) {
-    const aspectRatio = 16 / 9;
-    return _BleeImage(
-      key: key,
-      disableBorderRadius: disableBorderRadius,
-      image: image,
-      disableSlashFadein: disableSlashFadein,
-      placeholderRatio: aspectRatio,
-      forcedAspectRatio: aspectRatio,
-    );
-  }
+      required super.image,
+      super.onTap,
+      super.disableBorderRadius = false,
+      super.disableSlashFadein = false})
+      : super(placeholderAspectRatio: 16 / 9, fitToPlaceholder: true);
 }
 
-class _BleeImage extends ConsumerWidget {
+abstract class _BleeImage extends ConsumerWidget {
   final api.Image? image;
-  final double? placeholderRatio;
-  final double? forcedAspectRatio;
+  final double placeholderAspectRatio;
+  final bool fitToPlaceholder;
   final bool disableBorderRadius;
   final bool disableSlashFadein;
+  final Function? onTap;
   const _BleeImage(
       {super.key,
       required this.image,
       this.disableBorderRadius = false,
       this.disableSlashFadein = false,
-      this.placeholderRatio,
-      this.forcedAspectRatio});
+      this.fitToPlaceholder = true,
+      this.onTap,
+      required this.placeholderAspectRatio});
+
+  Widget roundedContainer(Widget child) {
+    return ClipRRect(
+        borderRadius:
+            disableBorderRadius ? BorderRadius.zero : BorderRadius.circular(8),
+        child: AspectRatio(
+            aspectRatio: fitToPlaceholder
+                ? placeholderAspectRatio
+                : image?.aspectRatio ?? placeholderAspectRatio,
+            child: child));
+  }
 
   @override
   Widget build(BuildContext context, ref) {
     APIClient client = ref.read(apiClientProvider);
     return Center(child: Builder(builder: (context) {
       return Skeletonizer(
-          enabled: image == null,
-          child: Builder(builder: (context) {
-            return AspectRatio(
-                aspectRatio: forcedAspectRatio ??
-                    image?.aspectRatio ??
-                    placeholderRatio ??
-                    1,
-                child: ClipRRect(
-                    borderRadius: disableBorderRadius
-                        ? BorderRadius.zero
-                        : BorderRadius.circular(8),
-                    child: Stack(
-                      children: [
-                        Container(
-                            color: disableSlashFadein
-                                ? null
-                                : Theme.of(context).splashColor),
+          enabled: false,
+          child: AspectRatio(
+              aspectRatio: placeholderAspectRatio,
+              child: Stack(
+                alignment: AlignmentDirectional.center,
+                children: [
+                  roundedContainer(Container(
+                      color: disableSlashFadein
+                          ? null
+                          : Theme.of(context).splashColor)),
+                  AspectRatio(
+                      aspectRatio: fitToPlaceholder
+                          ? placeholderAspectRatio
+                          : image?.aspectRatio ?? placeholderAspectRatio,
+                      child: Stack(children: [
                         image != null
-                            ? BlurHash(
+                            ? roundedContainer(BlurHash(
                                 image: image == null
                                     ? null
                                     : client.buildImageUrl(image!.id),
@@ -92,14 +83,28 @@ class _BleeImage extends ConsumerWidget {
                                     ? Colors.transparent
                                     : const Color(0xffebebf4),
                                 curve: Curves.easeIn,
-                                duration: const Duration(milliseconds: 500),
+                                duration: const Duration(milliseconds: 200),
                                 hash: image?.blurhash ??
                                     "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                              ))
+                            : Container(),
+                        onTap != null
+                            ? Positioned.fill(
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          onTap!.call();
+                                        },
+                                      ),
+                                    )),
                               )
-                            : Container()
-                      ],
-                    )));
-          }));
+                            : Container(),
+                      ]))
+                ],
+              )));
     }));
   }
 }

@@ -12,13 +12,14 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:collection/collection.dart';
 import 'package:mediametadata/mediametadata.dart';
+import 'package:uuid/uuid.dart';
 
 class PlayerPage extends ConsumerStatefulWidget {
+  final clientId = const Uuid().v4();
   final String? extraUuid;
   final String? movieUuid;
   final int? startPosition;
-  const PlayerPage(
-      {super.key, this.movieUuid, this.extraUuid, this.startPosition});
+  PlayerPage({super.key, this.movieUuid, this.extraUuid, this.startPosition});
 
   @override
   PlayerPageState createState() => PlayerPageState();
@@ -47,14 +48,12 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
     _controller?.dispose();
   }
 
-  void _onPlayerInit(PlayerMetadata metadata) {
-    if (widget.startPosition == null) {
-      _controller!.play();
-    } else {
-      _controller!
-          .seekTo(Duration(seconds: widget.startPosition!))
-          .then((_) => _controller!.play());
-    }
+  void _onPlayerInit(PlayerMetadata metadata, int? startPos) {
+    _controller!.play().then((_) {
+      if (widget.startPosition != null) {
+        _controller!.seekTo(Duration(seconds: widget.startPosition!));
+      }
+    });
     _controller!.addListener(() {
       // If we are in a movie
       if (metadata.chapters.isNotEmpty) {
@@ -99,17 +98,32 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
     });
   }
 
-  VideoPlayerController setupPlayer(PlayerMetadata metadata,
-      {StreamMode streamMode = StreamMode.hls}) {
+  void _reinitPlayer(StreamMode streamMode, PlayerMetadata metadata) async {
+    final previousPos =
+        _controller?.value.position.inSeconds ?? widget.startPosition;
+    if (_controller != null) {
+      await _controller!.pause();
+      await _controller!.dispose();
+    }
     final baseUrl = ref.read(apiClientProvider).buildTranscoderUrl(
         "/${base64Encode(utf8.encode(metadata.videoFile.path))}");
-    return VideoPlayerController.networkUrl(
+    setState(() {
+      _controller = VideoPlayerController.networkUrl(
         Uri.parse(streamMode == StreamMode.direct
             ? '$baseUrl/direct'
             : '$baseUrl/master.m3u8'),
-        //TODO
-        httpHeaders: {"X-CLIENT-ID": "A"})
-      ..initialize().then((_) => _onPlayerInit(metadata));
+        httpHeaders: {"X-CLIENT-ID": widget.clientId},
+      )..initialize()
+            .then((_) => _onPlayerInit(metadata, previousPos))
+            .onError((error, stackTrace) {
+          if (streamMode == StreamMode.hls) {
+            // ignore: avoid_print
+            print("COULD NOT PLAY VIDEO");
+          } else {
+            _reinitPlayer(StreamMode.hls, metadata);
+          }
+        });
+    });
   }
 
   void _refreshMediaMetadata(PlayerMetadata m) {
@@ -133,8 +147,8 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
               _refreshMediaMetadata(m);
               setState(() {
                 flowStep = PlayerFlowStep.loadingPlayer;
-                _controller = setupPlayer(m);
               });
+              _reinitPlayer(StreamMode.direct, m);
             }
           },
           error: (_, __) {

@@ -11,7 +11,9 @@ class PosterTile extends Tile {
       required super.subtitle,
       required super.thumbnail,
       required super.onTap})
-      : super(imageWidgetBuilder: (image) => Poster(image: image));
+      : super(
+            imageWidgetBuilder: (image, onTap) =>
+                Poster(image: image, onTap: onTap));
 }
 
 class ThumbnailTile extends Tile {
@@ -22,7 +24,9 @@ class ThumbnailTile extends Tile {
       required super.subtitle,
       required super.thumbnail,
       required super.onTap})
-      : super(imageWidgetBuilder: (image) => Thumbnail(image: image));
+      : super(
+            imageWidgetBuilder: (image, onTap) =>
+                Thumbnail(image: image, onTap: onTap));
 }
 
 abstract class Tile extends StatelessWidget {
@@ -30,7 +34,7 @@ abstract class Tile extends StatelessWidget {
   final String? subtitle;
   final api.Image? thumbnail;
   final Function? onTap;
-  final Widget Function(api.Image?) imageWidgetBuilder;
+  final Widget Function(api.Image?, Function? onTap) imageWidgetBuilder;
   const Tile(
       {super.key,
       required this.title,
@@ -45,25 +49,7 @@ abstract class Tile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Stack(
-          children: [
-            imageWidgetBuilder(thumbnail),
-            Positioned.fill(
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: isLoading
-                        ? Container()
-                        : InkWell(
-                            onTap: () {
-                              onTap?.call();
-                            },
-                          ),
-                  )),
-            ),
-          ],
-        ),
+        imageWidgetBuilder(thumbnail, onTap),
         Padding(
           padding: const EdgeInsets.only(top: 4, left: 4),
           child: Column(

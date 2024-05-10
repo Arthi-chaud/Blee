@@ -71,6 +71,14 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
       )),
       appBar: AppBar(
         centerTitle: false,
+        leadingWidth: ResponsiveBreakpoints.of(context)
+                .largerOrEqualTo(BreakpointEnum.sm.name)
+            ? 56 + 16
+            : null,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
+          child: Image.asset('web/icons/Icon-192.png'),
+        ),
         title: const Text(
           'Blee',
           style: TextStyle(

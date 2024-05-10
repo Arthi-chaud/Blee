@@ -30,7 +30,7 @@ class APIClient {
 
   String buildTranscoderUrl(String transcoderRoute) {
     if (kDebugMode) {
-      return 'http://localhost:7666$transcoderRoute';
+      return 'http://0.0.0.0:7666$transcoderRoute';
     }
     return "$_host/transcoder$transcoderRoute";
   }
