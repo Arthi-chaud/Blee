@@ -38,19 +38,20 @@ func GetMediaInfo(path string) (MediaInfo, error) {
 		Quality:  qualityFromHeight(pkg.ParseUint64(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))),
 		Size:     pkg.ParseUint64(mi.Parameter(mediainfo.StreamGeneral, 0, "FileSize")),
 		Duration: uint64(pkg.ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000),
-		Chapters: pkg.Map(make([]MediaChapter, max(chapters_end-chapters_begin, 1)-1), func(_ MediaChapter, i int) MediaChapter {
-			index := 0
-			time := mi.GetI(mediainfo.StreamMenu, index, int(chapters_begin)+i, mediainfo.InfoName)
+		Chapters: pkg.Filter(pkg.Map(make([]MediaChapter, max(chapters_end-chapters_begin, 1)-1), func(_ MediaChapter, i int) MediaChapter {
+			time := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
 			if len(time) > 0 && !unicode.IsDigit(rune(time[0])) {
-				index = index + 1
+				return MediaChapter{}
 			}
 			return MediaChapter{
-				StartTime: uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, index, int(chapters_begin)+i, mediainfo.InfoName))),
-				EndTime:   uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, index, int(chapters_begin)+i+1, mediainfo.InfoName))),
+				StartTime: uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName))),
+				EndTime:   uint32(pkg.ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName))),
 				Name:      parseChapterName(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText)),
 				//TODO
 				Types: []models.ChapterType{models.COther},
 			}
+		}), func(m MediaChapter, i int) bool {
+			return !(m.EndTime == 0 && m.Name == "" && m.StartTime == 0 && len(m.Types) == 0)
 		}),
 	}
 	return info, nil

@@ -60,6 +60,16 @@ func Map[T, U any](ts []T, f func(T, int) U) []U {
 	return us
 }
 
+// https://stackoverflow.com/questions/37562873/most-idiomatic-way-to-select-elements-from-an-array-in-golang
+func Filter[T any](ss []T, test func(T, int) bool) (ret []T) {
+    for i, s := range ss {
+        if test(s, i) {
+            ret = append(ret, s)
+        }
+    }
+    return
+}
+
 func GetPosterPathInFolder(path string) string {
 	list, err := filepath.Glob(fmt.Sprintf("%s/*.*", path))
 

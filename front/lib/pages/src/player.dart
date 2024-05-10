@@ -12,13 +12,14 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:collection/collection.dart';
 import 'package:mediametadata/mediametadata.dart';
+import 'package:uuid/uuid.dart';
 
 class PlayerPage extends ConsumerStatefulWidget {
+  final clientId = const Uuid().v4();
   final String? extraUuid;
   final String? movieUuid;
   final int? startPosition;
-  const PlayerPage(
-      {super.key, this.movieUuid, this.extraUuid, this.startPosition});
+  PlayerPage({super.key, this.movieUuid, this.extraUuid, this.startPosition});
 
   @override
   PlayerPageState createState() => PlayerPageState();
@@ -48,13 +49,11 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
   }
 
   void _onPlayerInit(PlayerMetadata metadata) {
-    if (widget.startPosition == null) {
-      _controller!.play();
-    } else {
-      _controller!
-          .seekTo(Duration(seconds: widget.startPosition!))
-          .then((_) => _controller!.play());
-    }
+    _controller!.play().then((_) {
+      if (widget.startPosition != null) {
+        _controller!.seekTo(Duration(seconds: widget.startPosition!));
+      }
+    });
     _controller!.addListener(() {
       // If we are in a movie
       if (metadata.chapters.isNotEmpty) {
@@ -107,8 +106,7 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
         Uri.parse(streamMode == StreamMode.direct
             ? '$baseUrl/direct'
             : '$baseUrl/master.m3u8'),
-        //TODO
-        httpHeaders: {"X-CLIENT-ID": "A"})
+        httpHeaders: {"X-CLIENT-ID": widget.clientId})
       ..initialize().then((_) => _onPlayerInit(metadata));
   }
 
