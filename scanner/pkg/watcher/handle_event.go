@@ -1,9 +1,10 @@
 package watcher
 
 import (
+	"os"
+
 	"github.com/Arthi-chaud/Blee/scanner/pkg"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/actions"
-	"os"
 
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	fsnotify "github.com/fsnotify/fsnotify"
