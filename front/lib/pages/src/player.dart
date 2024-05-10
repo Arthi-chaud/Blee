@@ -48,10 +48,12 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
     _controller?.dispose();
   }
 
-  void _onPlayerInit(PlayerMetadata metadata) {
-    _controller!.play().then((_) {
+  void _onPlayerInit(PlayerMetadata metadata, int? startPos) {
+    _controller!.play().onError((error, stackTrace) => print("A")).then((_) {
       if (widget.startPosition != null) {
-        _controller!.seekTo(Duration(seconds: widget.startPosition!));
+        _controller!
+            .seekTo(Duration(seconds: widget.startPosition!))
+            .onError((error, stackTrace) => print("B"));
       }
     });
     _controller!.addListener(() {
@@ -98,16 +100,31 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
     });
   }
 
-  VideoPlayerController setupPlayer(PlayerMetadata metadata,
-      {StreamMode streamMode = StreamMode.hls}) {
+  void _reinitPlayer(StreamMode streamMode, PlayerMetadata metadata) async {
+    final previousPos =
+        _controller?.value.position.inSeconds ?? widget.startPosition;
+    if (_controller != null) {
+      await _controller!.pause();
+      await _controller!.dispose();
+    }
     final baseUrl = ref.read(apiClientProvider).buildTranscoderUrl(
         "/${base64Encode(utf8.encode(metadata.videoFile.path))}");
-    return VideoPlayerController.networkUrl(
+    setState(() {
+      _controller = VideoPlayerController.networkUrl(
         Uri.parse(streamMode == StreamMode.direct
             ? '$baseUrl/direct'
             : '$baseUrl/master.m3u8'),
-        httpHeaders: {"X-CLIENT-ID": widget.clientId})
-      ..initialize().then((_) => _onPlayerInit(metadata));
+        httpHeaders: {"X-CLIENT-ID": widget.clientId},
+      )..initialize()
+            .then((_) => _onPlayerInit(metadata, previousPos))
+            .onError((error, stackTrace) {
+          if (streamMode == StreamMode.hls) {
+            print("COULD NOT PLAY VIDEO");
+          } else {
+            _reinitPlayer(StreamMode.hls, metadata);
+          }
+        });
+    });
   }
 
   void _refreshMediaMetadata(PlayerMetadata m) {
@@ -131,8 +148,8 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
               _refreshMediaMetadata(m);
               setState(() {
                 flowStep = PlayerFlowStep.loadingPlayer;
-                _controller = setupPlayer(m);
               });
+              _reinitPlayer(StreamMode.direct, m);
             }
           },
           error: (_, __) {
