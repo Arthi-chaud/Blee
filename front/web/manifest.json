@@ -3,9 +3,9 @@
     "short_name": "blee",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#f5fafb",
+    "theme_color": "#f5fafb",
+    "description": "Enjoy your Concert movies, Music Videos and DVD Extras, all in one place.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
