@@ -49,11 +49,9 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
   }
 
   void _onPlayerInit(PlayerMetadata metadata, int? startPos) {
-    _controller!.play().onError((error, stackTrace) => print("A")).then((_) {
+    _controller!.play().then((_) {
       if (widget.startPosition != null) {
-        _controller!
-            .seekTo(Duration(seconds: widget.startPosition!))
-            .onError((error, stackTrace) => print("B"));
+        _controller!.seekTo(Duration(seconds: widget.startPosition!));
       }
     });
     _controller!.addListener(() {
@@ -119,6 +117,7 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
             .then((_) => _onPlayerInit(metadata, previousPos))
             .onError((error, stackTrace) {
           if (streamMode == StreamMode.hls) {
+            // ignore: avoid_print
             print("COULD NOT PLAY VIDEO");
           } else {
             _reinitPlayer(StreamMode.hls, metadata);

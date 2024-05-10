@@ -1,0 +1,44 @@
+# Source: https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+changelog:
+  exclude:
+    labels:
+      - dependencies
+  categories:
+    - title: App
+      labels:
+        - front
+        - front/web
+        - front/mobile
+    - title: API
+      labels:
+        - api
+    - title: Scanner
+      labels:
+        - scanner
+    - title: Matcher
+      labels:
+        - matcher
+    - title: Exciting New Features 🎉
+      labels:
+        - feature
+        - Basic
+    - title: Improvement, Optmizations & Enhancements 👍
+      labels:
+        - Enhancement/Optimization
+    - title: Fixes & Patches 🩹
+      labels:
+        - bug
+    - title: Security 🛡
+      labels:
+        - security
+    - title: Documentation 📖
+      labels:
+        - Documentation
+    - title: CI/CD ⚙
+      labels:
+        - dockerization
+        - ci
+    - title: Other Changes 🔀
+      labels:
+        - "*"
