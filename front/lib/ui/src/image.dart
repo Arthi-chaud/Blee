@@ -92,7 +92,7 @@ class _BleeImage extends ConsumerWidget {
                                     ? Colors.transparent
                                     : const Color(0xffebebf4),
                                 curve: Curves.easeIn,
-                                duration: const Duration(milliseconds: 500),
+                                duration: const Duration(milliseconds: 200),
                                 hash: image?.blurhash ??
                                     "L5H2EC=PM+yV0g-mq.wG9c010J}I",
                               )
