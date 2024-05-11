@@ -1,5 +1,6 @@
 import 'package:blee/api/api.dart';
 import 'package:blee/api/src/client.dart' as api;
+import 'package:blee/api/src/models/order.dart';
 import 'package:blee/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
@@ -43,9 +44,15 @@ Future<Movie> getMovie(GetMovieRef ref, String movieUuid) async {
 }
 
 @riverpod
-Future<Page<Movie>> getMovies(GetMoviesRef ref, {String? packageUuid}) async {
+Future<Page<Movie>> getMovies(
+  GetMoviesRef ref, {
+  String? packageUuid,
+  MovieSort sort = MovieSort.name,
+  Ordering order = Ordering.asc,
+}) async {
   APIClient client = ref.watch(apiClientProvider);
-  return await client.getMovies(packageUuid!);
+  return await client.getMovies(
+      packageUuid: packageUuid, sort: sort, order: order);
 }
 
 @riverpod
@@ -56,17 +63,27 @@ Future<Page<Chapter>> getChapters(
 }
 
 @riverpod
-Future<Page<Extra>> getExtras(GetExtrasRef ref,
-    {String? packageUuid, PageQuery page = const PageQuery()}) async {
+Future<Page<Extra>> getExtras(
+  GetExtrasRef ref, {
+  String? packageUuid,
+  PageQuery page = const PageQuery(),
+  ExtraSort sort = ExtraSort.name,
+  Ordering order = Ordering.asc,
+}) async {
   APIClient client = ref.watch(apiClientProvider);
-  return await client.getExtras(packageUuid: packageUuid, page: page);
+  return await client.getExtras(
+      packageUuid: packageUuid, page: page, sort: sort, order: order);
 }
 
 @riverpod
 Future<Page<Artist>> getArtists(GetArtistsRef ref,
-    {String? packageUuid, PageQuery page = const PageQuery()}) async {
+    {String? packageUuid,
+    ArtistSort sort = ArtistSort.name,
+    Ordering order = Ordering.asc,
+    PageQuery page = const PageQuery()}) async {
   APIClient client = ref.watch(apiClientProvider);
-  return await client.getArtists(page: page, package: packageUuid);
+  return await client.getArtists(
+      page: page, package: packageUuid, sort: sort, order: order);
 }
 
 @riverpod

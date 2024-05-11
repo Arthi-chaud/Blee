@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:blee/api/api.dart';
+import 'package:blee/api/src/models/order.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -60,18 +61,25 @@ class APIClient {
     return Movie.fromJson(responseBody);
   }
 
-  Future<Page<Package>> getPackages(
-      {PageQuery page = const PageQuery(), String? artistUuid}) async {
+  Future<Page<Package>> getPackages({
+    PageQuery page = const PageQuery(),
+    String? artistUuid,
+    PackageSort sort = PackageSort.name,
+    Ordering order = Ordering.asc,
+  }) async {
     var responseBody = await _request(RequestType.get,
-        '/packages?artist=${artistUuid ?? ''}&take=${page.take}&skip=${page.skip}');
+        '/packages?artist=${artistUuid ?? ''}&take=${page.take}&skip=${page.skip}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
   }
 
   Future<Page<Artist>> getArtists(
-      {PageQuery page = const PageQuery(), String? package}) async {
+      {PageQuery page = const PageQuery(),
+      ArtistSort sort = ArtistSort.name,
+      Ordering order = Ordering.asc,
+      String? package}) async {
     var responseBody = await _request(RequestType.get,
-        '/artists?package=$package&take=${page.take}&skip=${page.skip}');
+        '/artists?package=${package ?? ''}&take=${page.take}&skip=${page.skip}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Artist.fromJson(x as Map<String, dynamic>));
   }
@@ -92,9 +100,13 @@ class APIClient {
         responseBody, (x) => ExternalId.fromJson(x as Map<String, dynamic>));
   }
 
-  Future<Page<Movie>> getMovies(String packageUuid) async {
-    var responseBody =
-        await _request(RequestType.get, '/movies?package=$packageUuid');
+  Future<Page<Movie>> getMovies({
+    String? packageUuid,
+    MovieSort sort = MovieSort.name,
+    Ordering order = Ordering.asc,
+  }) async {
+    var responseBody = await _request(RequestType.get,
+        '/movies?package=${packageUuid ?? ''}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Movie.fromJson(x as Map<String, dynamic>));
   }
@@ -109,9 +121,11 @@ class APIClient {
   Future<Page<Extra>> getExtras(
       {String? packageUuid,
       String? artistUuid,
+      ExtraSort sort = ExtraSort.name,
+      Ordering order = Ordering.asc,
       PageQuery page = const PageQuery()}) async {
     var responseBody = await _request(RequestType.get,
-        '/extras?package=$packageUuid&artist=$artistUuid&take=${page.take}&skip=${page.skip}');
+        '/extras?package=$packageUuid&artist=$artistUuid&take=${page.take}&skip=${page.skip}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
   }

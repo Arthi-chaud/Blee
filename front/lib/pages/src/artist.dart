@@ -1,4 +1,5 @@
 import 'package:blee/api/api.dart';
+import 'package:blee/api/src/models/order.dart';
 import 'package:blee/providers.dart';
 import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/description_box.dart';
@@ -56,7 +57,10 @@ class ArtistPage extends ConsumerWidget {
                             thumbnail: item?.poster,
                           ),
                       query: (q) => client.getPackages(
-                          page: q, artistUuid: artist.value?.id),
+                          page: q,
+                          artistUuid: artist.value?.id,
+                          sort: PackageSort.releaseDate,
+                          order: Ordering.desc),
                       header: const Text('Movies')),
                   ThumbnailListView<Extra>(
                       itemBuilder: (context, item, index) => ThumbnailTile(
