@@ -5,11 +5,13 @@ import 'package:blee/ui/src/breakpoints.dart';
 import 'package:blee/ui/src/description_box.dart';
 import 'package:blee/ui/src/infinite_scroll/infinite_grid.dart';
 import 'package:blee/ui/src/poster_page_header.dart';
+import 'package:blee/ui/src/star_rating.dart';
 import 'package:blee/ui/src/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intersperse/intersperse.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -43,6 +45,19 @@ class PackagePage extends ConsumerWidget {
     final package = data.value?.$1;
     final movies = data.value?.$2;
     final externalIds = data.value?.$3;
+    final firstExternalId = externalIds?.items.firstOrNull;
+    final packageReleaseYear = package?.releaseDate?.year;
+    final headerThirdLine = <Widget?>[
+      packageReleaseYear == null
+          ? null
+          : Text(
+              packageReleaseYear.toString(),
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+      firstExternalId?.rating == null
+          ? null
+          : StarRating(rating: firstExternalId!.rating!)
+    ].whereNotNull().toList();
 
     return MaxWidthBox(
         maxWidth: Breakpoints.getSized(BreakpointEnum.sm),
@@ -65,10 +80,17 @@ class PackagePage extends ConsumerWidget {
                           package?.artistName ?? 'No Artist Name',
                           style: Theme.of(context).textTheme.titleMedium,
                         )),
-                    thirdTitle: Text(
-                      package?.releaseDate?.year.toString() ?? '',
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
+                    thirdTitle: headerThirdLine.isEmpty
+                        ? null
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: headerThirdLine
+                                .intersperse(Text(
+                                  " • ",
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ))
+                                .toList(),
+                          ),
                     poster: package?.poster),
                 SizedBox.fromSize(size: const Size.fromHeight(8)),
                 DescriptionBox(

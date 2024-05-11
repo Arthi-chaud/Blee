@@ -24,26 +24,37 @@ class PosterPageHeader extends StatelessWidget {
     var title = Skeletonizer(enabled: isLoading, child: this.title);
     var subtitle =
         Skeletonizer(enabled: isLoading, child: this.subtitle ?? Container());
-    var info = thirdTitle ?? Container();
+    var info = thirdTitle;
     paddingForVerticalText(Widget w) => Padding(
           padding: const EdgeInsets.only(left: 14),
           child: w,
         );
     if (ResponsiveBreakpoints.of(context).smallerThan(BreakpointEnum.sm.name)) {
-      return Column(mainAxisSize: MainAxisSize.min, children: [
-        Center(
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Poster(image: poster),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 4),
-          child: title,
-        ),
-        subtitle,
-        info
-      ]);
+      return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Center(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Poster(image: poster),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 16, bottom: 4),
+              child: title,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 8),
+              child: subtitle,
+            ),
+            info != null
+                ? Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: info,
+                  )
+                : Container()
+          ]);
     }
     return IntrinsicHeight(
       child: Row(
@@ -59,7 +70,7 @@ class PosterPageHeader extends StatelessWidget {
                 children: [
                   paddingForVerticalText(title),
                   subtitle,
-                  paddingForVerticalText(info)
+                  paddingForVerticalText(info ?? Container())
                 ],
               ),
             ),
