@@ -57,10 +57,16 @@ Future<Page<Chapter>> getChapters(
 }
 
 @riverpod
-Future<Page<Extra>> getExtras(GetExtrasRef ref,
-    {String? packageUuid, PageQuery page = const PageQuery()}) async {
+Future<Page<Extra>> getExtras(
+  GetExtrasRef ref, {
+  String? packageUuid,
+  PageQuery page = const PageQuery(),
+  ExtraSort sort = ExtraSort.name,
+  Ordering order = Ordering.asc,
+}) async {
   APIClient client = ref.watch(apiClientProvider);
-  return await client.getExtras(packageUuid: packageUuid, page: page);
+  return await client.getExtras(
+      packageUuid: packageUuid, page: page, sort: sort, order: order);
 }
 
 @riverpod

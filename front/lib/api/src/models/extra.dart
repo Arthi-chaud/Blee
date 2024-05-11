@@ -1,4 +1,5 @@
 import 'package:blee/api/src/models/image.dart';
+import 'package:change_case/change_case.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'extra.freezed.dart';
@@ -40,4 +41,17 @@ enum ExtraType {
   performance,
   @JsonValue("trailer")
   trailer,
+}
+
+enum ExtraSort {
+  name,
+  artistName,
+  packageName,
+  addDate,
+  releaseDate;
+
+  @override
+  String toString() {
+    return this.name.toSnakeCase();
+  }
 }

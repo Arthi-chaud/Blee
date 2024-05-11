@@ -113,9 +113,11 @@ class APIClient {
   Future<Page<Extra>> getExtras(
       {String? packageUuid,
       String? artistUuid,
+      ExtraSort sort = ExtraSort.name,
+      Ordering order = Ordering.asc,
       PageQuery page = const PageQuery()}) async {
     var responseBody = await _request(RequestType.get,
-        '/extras?package=$packageUuid&artist=$artistUuid&take=${page.take}&skip=${page.skip}');
+        '/extras?package=$packageUuid&artist=$artistUuid&take=${page.take}&skip=${page.skip}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Extra.fromJson(x as Map<String, dynamic>));
   }

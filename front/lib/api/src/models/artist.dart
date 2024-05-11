@@ -1,4 +1,5 @@
 import 'package:blee/api/src/models/image.dart';
+import 'package:change_case/change_case.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'artist.freezed.dart';
@@ -22,11 +23,6 @@ enum ArtistSort {
 
   @override
   String toString() {
-    switch (this) {
-      case ArtistSort.name:
-        return "name";
-      case ArtistSort.addDate:
-        return "add_date";
-    }
+    return this.name.toSnakeCase();
   }
 }
