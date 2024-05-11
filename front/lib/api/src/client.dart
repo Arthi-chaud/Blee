@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:blee/api/api.dart';
+import 'package:blee/api/src/models/order.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -69,9 +70,12 @@ class APIClient {
   }
 
   Future<Page<Artist>> getArtists(
-      {PageQuery page = const PageQuery(), String? package}) async {
+      {PageQuery page = const PageQuery(),
+      ArtistSort sort = ArtistSort.name,
+      Ordering order = Ordering.asc,
+      String? package}) async {
     var responseBody = await _request(RequestType.get,
-        '/artists?package=$package&take=${page.take}&skip=${page.skip}');
+        '/artists?package=${package ?? ''}&take=${page.take}&skip=${page.skip}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Artist.fromJson(x as Map<String, dynamic>));
   }

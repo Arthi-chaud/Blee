@@ -15,3 +15,18 @@ class Artist with _$Artist {
 
   factory Artist.fromJson(Map<String, dynamic> json) => _$ArtistFromJson(json);
 }
+
+enum ArtistSort {
+  name,
+  addDate;
+
+  @override
+  String toString() {
+    switch (this) {
+      case ArtistSort.name:
+        return "name";
+      case ArtistSort.addDate:
+        return "add_date";
+    }
+  }
+}
