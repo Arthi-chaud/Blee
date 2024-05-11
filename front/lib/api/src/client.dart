@@ -61,10 +61,14 @@ class APIClient {
     return Movie.fromJson(responseBody);
   }
 
-  Future<Page<Package>> getPackages(
-      {PageQuery page = const PageQuery(), String? artistUuid}) async {
+  Future<Page<Package>> getPackages({
+    PageQuery page = const PageQuery(),
+    String? artistUuid,
+    PackageSort sort = PackageSort.name,
+    Ordering order = Ordering.asc,
+  }) async {
     var responseBody = await _request(RequestType.get,
-        '/packages?artist=${artistUuid ?? ''}&take=${page.take}&skip=${page.skip}');
+        '/packages?artist=${artistUuid ?? ''}&take=${page.take}&skip=${page.skip}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Package.fromJson(x as Map<String, dynamic>));
   }
@@ -96,9 +100,13 @@ class APIClient {
         responseBody, (x) => ExternalId.fromJson(x as Map<String, dynamic>));
   }
 
-  Future<Page<Movie>> getMovies(String packageUuid) async {
-    var responseBody =
-        await _request(RequestType.get, '/movies?package=$packageUuid');
+  Future<Page<Movie>> getMovies({
+    String? packageUuid,
+    MovieSort sort = MovieSort.name,
+    Ordering order = Ordering.asc,
+  }) async {
+    var responseBody = await _request(RequestType.get,
+        '/movies?package=${packageUuid ?? ''}&sort=${sort.toString()}&order=${order.toString()}');
     return Page.fromJson(
         responseBody, (x) => Movie.fromJson(x as Map<String, dynamic>));
   }

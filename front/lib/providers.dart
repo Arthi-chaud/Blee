@@ -44,9 +44,15 @@ Future<Movie> getMovie(GetMovieRef ref, String movieUuid) async {
 }
 
 @riverpod
-Future<Page<Movie>> getMovies(GetMoviesRef ref, {String? packageUuid}) async {
+Future<Page<Movie>> getMovies(
+  GetMoviesRef ref, {
+  String? packageUuid,
+  MovieSort sort = MovieSort.name,
+  Ordering order = Ordering.asc,
+}) async {
   APIClient client = ref.watch(apiClientProvider);
-  return await client.getMovies(packageUuid!);
+  return await client.getMovies(
+      packageUuid: packageUuid, sort: sort, order: order);
 }
 
 @riverpod

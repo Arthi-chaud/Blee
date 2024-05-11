@@ -1,4 +1,5 @@
 import 'package:blee/api/src/models/image.dart';
+import 'package:change_case/change_case.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'package.freezed.dart';
@@ -17,4 +18,16 @@ class Package with _$Package {
 
   factory Package.fromJson(Map<String, dynamic> json) =>
       _$PackageFromJson(json);
+}
+
+enum PackageSort {
+  name,
+  addDate,
+  artistName,
+  releaseDate;
+
+  @override
+  String toString() {
+    return this.name.toSnakeCase();
+  }
 }

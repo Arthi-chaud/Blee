@@ -1,4 +1,5 @@
 import 'package:blee/api/src/models/image.dart';
+import 'package:change_case/change_case.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'movie.freezed.dart';
@@ -26,4 +27,17 @@ enum MovieType {
   documentary,
   @JsonValue("concert")
   concert,
+}
+
+enum MovieSort {
+  name,
+  artistName,
+  packageName,
+  addDate,
+  releaseDate;
+
+  @override
+  String toString() {
+    return this.name.toSnakeCase();
+  }
 }
