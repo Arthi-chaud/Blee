@@ -46,6 +46,9 @@ class PackagePage extends ConsumerWidget {
     final movies = data.value?.$2;
     final externalIds = data.value?.$3;
     final firstExternalId = externalIds?.items.firstOrNull;
+    final firstDescription = externalIds?.items
+        .map((id) => id.description)
+        .firstWhereOrNull((desc) => desc != null);
     final packageReleaseYear = package?.releaseDate?.year;
     final headerThirdLine = <Widget?>[
       packageReleaseYear == null
@@ -93,10 +96,12 @@ class PackagePage extends ConsumerWidget {
                           ),
                     poster: package?.poster),
                 SizedBox.fromSize(size: const Size.fromHeight(8)),
-                DescriptionBox(
-                  description: externalIds?.items.firstOrNull?.description,
-                  skeletonize: externalIds == null,
-                )
+                (firstDescription != null && firstDescription.isEmpty)
+                    ? Container()
+                    : DescriptionBox(
+                        description: firstDescription,
+                        skeletonize: externalIds == null,
+                      )
               ],
             ),
             SliverToBoxAdapter(
