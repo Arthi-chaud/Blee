@@ -40,6 +40,12 @@ specs = describe "TMDB" $ do
                             take 10 description `shouldBe` "Madonna (b"
                             reverse (take 10 $ reverse description) `shouldBe` "le artist."
                     )
+        it "Should Get Null Description, not empty string" $ do
+            getArtistDetails tmdbClient 3800537
+                >>= ( \case
+                        Left e -> expectationFailure e
+                        Right (ArtistDetails details) -> details `shouldBe` Nothing
+                    )
     describe "Search Package" $ do
         it "Should Get Package" $ do
             searchMovie tmdbClient "The Corrs - Live at Lansdowne Road"
@@ -52,7 +58,7 @@ specs = describe "TMDB" $ do
                             posterPath res
                                 `shouldBe` Just "https://image.tmdb.org/t/p/original/ApXQQS8peDN9wzXhpU30xzFH5TN.jpg"
                     )
-    describe "Get Artist Details" $ do
+    describe "Get Package Details" $ do
         it "Should Get Package Details" $ do
             getMovieDetails tmdbClient 2188
                 >>= ( \case
@@ -61,4 +67,10 @@ specs = describe "TMDB" $ do
                         Right (MovieDetails (Just description)) -> do
                             take 10 description `shouldBe` "Irish-Celt"
                             reverse (take 10 $ reverse description) `shouldBe` "by fields."
+                    )
+        it "Should Get Null Description, not empty string" $ do
+            getMovieDetails tmdbClient 60516
+                >>= ( \case
+                        Left e -> expectationFailure e
+                        Right (MovieDetails details) -> details `shouldBe` Nothing
                     )

@@ -7,6 +7,8 @@ module Matcher.TMDB.Models (
 ) where
 
 import Data.Aeson
+import Data.Aeson.Types
+import Data.Functor
 
 data ArtistSearchResult = ArtistSearchResult
     { identifier :: Integer,
@@ -30,7 +32,10 @@ data ArtistDetails = ArtistDetails
 instance FromJSON ArtistDetails where
     parseJSON = withObject "TMDB Artist Details" $ \v ->
         ArtistDetails
-            <$> v .: "biography"
+            <$> ( v .: "biography" <&> \case
+                    Just "" -> Nothing
+                    x -> x
+                )
 
 newtype Page a = Page
     { results :: [a]
@@ -61,4 +66,7 @@ instance FromJSON MovieSearchResult where
 instance FromJSON MovieDetails where
     parseJSON = withObject "TMDB Movie Details" $ \v ->
         MovieDetails
-            <$> v .: "overview"
+            <$> ( v .: "overview" <&> \case
+                    Just "" -> Nothing
+                    x -> x
+                )
