@@ -8,7 +8,7 @@ use crate::m20240311_000001_init_enums::{
 pub struct Migration;
 
 #[derive(DeriveIden)]
-enum Image {
+pub enum Image {
 	Table,
 	Id,
 	Blurhash,
@@ -28,7 +28,7 @@ enum Artist {
 }
 
 #[derive(DeriveIden)]
-enum File {
+pub enum File {
 	Table,
 	Id,
 	Size,

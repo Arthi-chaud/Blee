@@ -32,8 +32,6 @@ pub struct FileResponse {
 	#[schemars(example = "example_size")]
 	pub size: i64,
 	pub quality: VideoQuality,
-	#[schemars(example = "example_uuid")]
-	pub scrubber_id: Option<Uuid>,
 	/// The duration of the video, in seconds
 	pub duration: i64,
 }
@@ -46,7 +44,6 @@ impl From<file::Model> for FileResponse {
 			path: value.path,
 			size: value.size,
 			quality: VideoQuality::from(value.quality),
-			scrubber_id: value.scrubber_id,
 		}
 	}
 }

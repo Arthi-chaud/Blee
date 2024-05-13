@@ -14,7 +14,6 @@ pub struct Model {
 	pub size: i64,
 	pub duration: i64,
 	pub quality: VideoQualityEnum,
-	pub scrubber_id: Option<Uuid>,
 	pub registered_at: Date,
 }
 
@@ -22,14 +21,6 @@ pub struct Model {
 pub enum Relation {
 	#[sea_orm(has_many = "super::extra::Entity")]
 	Extra,
-	#[sea_orm(
-		belongs_to = "super::image::Entity",
-		from = "Column::ScrubberId",
-		to = "super::image::Column::Id",
-		on_update = "NoAction",
-		on_delete = "SetNull"
-	)]
-	Image,
 	#[sea_orm(has_many = "super::movie::Entity")]
 	Movie,
 }
@@ -37,12 +28,6 @@ pub enum Relation {
 impl Related<super::extra::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Extra.def()
-	}
-}
-
-impl Related<super::image::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Image.def()
 	}
 }
 
