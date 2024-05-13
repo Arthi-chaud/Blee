@@ -24,8 +24,6 @@ pub enum Relation {
 	Chapter,
 	#[sea_orm(has_many = "super::extra::Entity")]
 	Extra,
-	#[sea_orm(has_many = "super::file::Entity")]
-	File,
 	#[sea_orm(has_many = "super::movie::Entity")]
 	Movie,
 	#[sea_orm(has_many = "super::package::Entity")]
@@ -47,12 +45,6 @@ impl Related<super::chapter::Entity> for Entity {
 impl Related<super::extra::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Extra.def()
-	}
-}
-
-impl Related<super::file::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::File.def()
 	}
 }
 

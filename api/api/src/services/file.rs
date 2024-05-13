@@ -147,9 +147,6 @@ where
 				.await?;
 		}
 	}
-	if let Some(scrubber_id) = file_to_delete.scrubber_id {
-		image::delete(&scrubber_id, connection, config).await?;
-	}
 	file::Entity::delete_by_id(file_to_delete.id)
 		.exec(connection)
 		.await?;
