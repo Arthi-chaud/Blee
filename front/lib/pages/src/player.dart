@@ -196,6 +196,7 @@ class PlayerPageState extends ConsumerState<PlayerPage> {
                 )),
             HideOnInactivity(
                 child: PlayerControls(
+              chapters: metadata.value?.chapters,
               title: metadata.value?.videoTitle,
               poster: metadata.value?.poster,
               subtitle: currentChapter != null
