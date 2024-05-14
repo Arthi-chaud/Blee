@@ -147,8 +147,10 @@ func parseExtraMetadataFromMatches(matches []string, regex *regexp.Regexp) (*Ext
 	if name_index := regex.SubexpIndex("Extra"); name_index != -1 {
 		res.Name = matches[name_index]
 	}
-	if plexExtraType := parseExtraTypeFromPlexRegexGroup(matches[regex.SubexpIndex("PlexExtraType")]); plexExtraType != models.Other {
-		res.Types = []models.ExtraType{plexExtraType}
+	if plex_extra_type_index := regex.SubexpIndex("PlexExtraType"); plex_extra_type_index != -1 {
+		if plexExtraType := parseExtraTypeFromPlexRegexGroup(matches[plex_extra_type_index]); plexExtraType != models.Other {
+			res.Types = append(res.Types, plexExtraType)
+		}
 	}
 	if extraType := parseExtraTypeFromName(res.Name); extraType != models.Other {
 		res.Types = append(res.Types, extraType)
