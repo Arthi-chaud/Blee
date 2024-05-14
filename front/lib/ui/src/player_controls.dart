@@ -1,3 +1,4 @@
+import 'package:blee/api/src/models/chapter.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/api/api.dart' as api;
 import 'package:blee/utils/format_duration.dart';
@@ -5,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
+import 'package:collection/collection.dart';
 
 class PlayerControls extends StatefulWidget {
   final String? title;
   final String? subtitle;
+  final List<Chapter>? chapters;
   final api.Image? poster;
   final int? duration;
   final VideoPlayerController? controller;
@@ -16,6 +19,7 @@ class PlayerControls extends StatefulWidget {
       {super.key,
       required this.title,
       required this.poster,
+      required this.chapters,
       required this.subtitle,
       required this.controller,
       required this.duration});
@@ -27,13 +31,6 @@ class PlayerControls extends StatefulWidget {
 class _PlayerControlsState extends State<PlayerControls> {
   Duration position = Duration.zero;
   bool isPlaying = true;
-
-  String formatProgress(int? progress) {
-    if (progress == null) {
-      return '--:--';
-    }
-    return formatDuration(progress);
-  }
 
   void listener() {
     final controller = widget.controller!;
@@ -48,9 +45,6 @@ class _PlayerControlsState extends State<PlayerControls> {
   @override
   Widget build(BuildContext context) {
     const textColor = Colors.white60;
-    final durationTextStyle = TextStyle(
-        color: textColor,
-        fontSize: Theme.of(context).textTheme.labelMedium?.fontSize);
 
     if (widget.controller != null) {
       widget.controller!.removeListener(listener);
@@ -113,6 +107,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                         AspectRatio(
                             aspectRatio: 3 / 4,
                             child: Poster(
+                              disableSlashFadein: true,
                               image: widget.poster,
                             )),
                         // Slider + titles
@@ -181,53 +176,16 @@ class _PlayerControlsState extends State<PlayerControls> {
                                   ),
                                 ],
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                      formatProgress(widget.controller == null
-                                          ? null
-                                          : position.inSeconds),
-                                      style: durationTextStyle),
-                                  Flexible(
-                                      child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: SliderTheme(
-                                      data: SliderTheme.of(context).copyWith(
-                                        trackHeight: 4.0,
-                                        thumbColor: Colors.transparent,
-                                        overlayShape:
-                                            SliderComponentShape.noThumb,
-                                        thumbShape: const RoundSliderThumbShape(
-                                            enabledThumbRadius: 0.0),
-                                      ),
-                                      child: Slider(
-                                          min: 0,
-                                          max: (widget.duration ?? 1)
-                                              .ceilToDouble(),
-                                          secondaryTrackValue: widget
-                                              .controller
-                                              ?.value
-                                              .buffered
-                                              .lastOrNull
-                                              ?.end
-                                              .inSeconds
-                                              .ceilToDouble(),
-                                          value:
-                                              position.inSeconds.ceilToDouble(),
-                                          onChanged: (scrollPosition) {
-                                            widget.controller?.seekTo(Duration(
-                                                seconds:
-                                                    scrollPosition.ceil()));
-                                          }),
-                                    ),
-                                  )),
-                                  Text(formatProgress(widget.duration),
-                                      style: durationTextStyle)
-                                ],
-                              ),
+                              PlayerSlider(
+                                  totalDuration: widget.duration,
+                                  currentPosition: widget.controller == null
+                                      ? null
+                                      : position.inSeconds,
+                                  onScroll: (newPosition) => widget.controller
+                                      ?.seekTo(Duration(seconds: newPosition)),
+                                  chapters: widget.chapters,
+                                  buffered: widget.controller?.value.buffered
+                                      .lastOrNull?.end.inSeconds),
                             ],
                           ),
                         ))
@@ -237,5 +195,89 @@ class _PlayerControlsState extends State<PlayerControls> {
                 )))
       ],
     );
+  }
+}
+
+class PlayerSlider extends StatelessWidget {
+  final int? totalDuration;
+  final int? buffered;
+  final int? currentPosition;
+  final Function(int) onScroll;
+  final List<Chapter>? chapters;
+  const PlayerSlider(
+      {super.key,
+      required this.totalDuration,
+      required this.currentPosition,
+      required this.onScroll,
+      required this.chapters,
+      required this.buffered});
+  String formatProgress(int? progress) {
+    if (progress == null) {
+      return '--:--';
+    }
+    return formatDuration(progress);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const textColor = Colors.white60;
+    final durationTextStyle = TextStyle(
+        color: textColor,
+        fontSize: Theme.of(context).textTheme.labelMedium?.fontSize);
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Text(formatProgress(currentPosition), style: durationTextStyle),
+      Flexible(
+          child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 4.0,
+                    thumbColor: Colors.transparent,
+                    overlayShape: SliderComponentShape.noOverlay,
+                    thumbShape:
+                        const RoundSliderThumbShape(enabledThumbRadius: 0.0),
+                  ),
+                  child: Stack(
+                    alignment: AlignmentDirectional.center,
+                    children: [
+                      Slider(
+                        min: 0,
+                        max: (totalDuration ?? 1).ceilToDouble(),
+                        value: currentPosition?.ceilToDouble() ?? 0,
+                        secondaryTrackValue: buffered?.ceilToDouble(),
+                        onChanged: (scrollPosition) =>
+                            onScroll(scrollPosition.ceil()),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: chapters?.mapIndexed((chapterIndex, chapter) {
+                              final chapterMarkIsBeforeCursor =
+                                  chapter.startTime <= (currentPosition ?? 0);
+                              return Flexible(
+                                  flex: chapter.endTime - chapter.startTime,
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      height: chapterMarkIsBeforeCursor ? 6 : 4,
+                                      decoration: BoxDecoration(
+                                          border: Border(
+                                              left: chapterIndex == 0
+                                                  ? BorderSide.none
+                                                  : BorderSide(
+                                                      color:
+                                                          chapterMarkIsBeforeCursor
+                                                              ? Colors.white
+                                                              : Theme.of(
+                                                                      context)
+                                                                  .primaryColor,
+                                                      width: 2))),
+                                    ),
+                                  ));
+                            }).toList() ??
+                            [],
+                      )
+                    ],
+                  )))),
+      Text(formatProgress(totalDuration), style: durationTextStyle)
+    ]);
   }
 }
