@@ -139,19 +139,21 @@ class _PlayerControlsState extends State<PlayerControls> {
                                   Padding(
                                     padding:
                                         const EdgeInsets.symmetric(vertical: 4),
-                                    child: Stack(
-                                      alignment:
-                                          AlignmentDirectional.centerStart,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
                                       children: [
-                                        Text(
+                                        Expanded(
+                                            child: Text(
                                           widget.subtitle ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                               color: textColor,
                                               fontSize: Theme.of(context)
                                                   .textTheme
                                                   .labelLarge
                                                   ?.fontSize),
-                                        ),
+                                        )),
                                         Center(
                                           child: IconButton(
                                             onPressed: () {
@@ -173,6 +175,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                                             color: Colors.white,
                                           ),
                                         ),
+                                        Expanded(child: Container())
                                       ],
                                     ),
                                   ),
