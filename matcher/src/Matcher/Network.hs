@@ -1,4 +1,4 @@
-module Matcher.Network (request, post) where
+module Matcher.Network (request, post, put) where
 
 import Data.Bifunctor (Bifunctor (second))
 import Data.ByteString (ByteString, toStrict)
@@ -78,6 +78,45 @@ post url mime headers body = do
             manager
     case responseStatus response of
         Status 201 _ -> return $ Right (toStrict $ responseBody response)
+        status ->
+            return $
+                Left
+                    ( printf
+                        "Expected an OK Status code, got %d: '%s'"
+                        (statusCode status)
+                        (decodeUtf8 $ toStrict $ responseBody response)
+                    )
+
+put ::
+    String
+    -- ^ URL
+    -> [(HeaderName, String)]
+    -- ^ Headers
+    -> ByteString
+    -- ByteString Body
+    -> IO (Either String ByteString)
+put url headers body = do
+    manager <- newManager tlsManagerSettings
+    r <- parseRequest url
+    let h =
+            requestHeaders r
+                <> [   ( "User-Agent",
+                         pack $
+                            printf
+                                "Matcha/%s +https://github.com/Arthi-chaud/Blee/matcher"
+                                (showVersion version)
+                       ),
+                     ("Content-Type", "application/json" <> "; charset=utf-8")
+                   ]
+                <> (second pack <$> headers)
+    response <-
+        httpLbs
+            r {requestBody = RequestBodyBS body, method = "PUT"}
+                { requestHeaders = h
+                }
+            manager
+    case responseStatus response of
+        Status 204 _ -> return $ Right (toStrict $ responseBody response)
         status ->
             return $
                 Left

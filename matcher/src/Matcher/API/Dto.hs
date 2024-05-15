@@ -4,6 +4,7 @@ module Matcher.API.Dto (
     Artist (..),
     Package (..),
     PackageExternalId (..),
+    UpdatePackage (..),
 ) where
 
 import Matcher.API.Dto.Artist

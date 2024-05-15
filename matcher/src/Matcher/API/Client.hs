@@ -7,11 +7,18 @@ module Matcher.API.Client (
     pushPackagePoster,
     getArtist,
     getPackage,
+    updatePackage,
 ) where
 
 import Data.Aeson (eitherDecodeStrict', encode)
 import Data.ByteString
-import Matcher.API.Dto (Artist, ArtistExternalId, Package, PackageExternalId)
+import Matcher.API.Dto (
+    Artist,
+    ArtistExternalId,
+    Package,
+    PackageExternalId,
+    UpdatePackage (..),
+ )
 import Matcher.Network
 
 data APIClient = APIClient
@@ -36,6 +43,15 @@ apiPost ::
     -- ^ Body
     -> IO (Either String ByteString)
 apiPost (APIClient url key) route = post (url <> route) "application/json" [("x-api-key", key)]
+
+apiPut ::
+    APIClient
+    -> String
+    -- ^ Route
+    -> ByteString
+    -- ^ Body
+    -> IO (Either String ByteString)
+apiPut (APIClient url key) route = put (url <> route) [("x-api-key", key)]
 
 apiPostBinary ::
     APIClient
@@ -65,6 +81,9 @@ getPackage client uuid = (eitherDecodeStrict' =<<) <$> apiRequest client ("/pack
 
 pushPackageExternalId :: APIClient -> PackageExternalId -> IO (Either String ())
 pushPackageExternalId client dto = (() <$) <$> apiPost client "/external_ids" (toStrict $ encode dto)
+
+updatePackage :: APIClient -> String -> UpdatePackage -> IO (Either String ())
+updatePackage client uuid dto = (() <$) <$> apiPut client ("/packages/" ++ uuid) (toStrict $ encode dto)
 
 pushPackagePoster :: APIClient -> String -> ByteString -> IO (Either String ())
 pushPackagePoster client uuid posterBytes =

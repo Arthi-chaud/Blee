@@ -7,8 +7,8 @@ module Matcher.TMDB.Models (
 ) where
 
 import Data.Aeson
-import Data.Aeson.Types
 import Data.Functor
+import Data.Time.Calendar
 
 data ArtistSearchResult = ArtistSearchResult
     { identifier :: Integer,
@@ -47,7 +47,8 @@ instance (FromJSON a) => FromJSON (Page a) where
 data MovieSearchResult = MovieSearchResult
     { i :: Integer,
       title :: String,
-      vote_average :: Maybe Double,
+      voteAverage :: Maybe Double,
+      releaseDate :: Maybe Day,
       posterPath :: Maybe String
     }
 
@@ -64,6 +65,7 @@ instance FromJSON MovieSearchResult where
                     Just 0 -> Nothing
                     x -> x
                 )
+            <*> v .: "release_date"
             <*> v .: "poster_path"
 
 instance FromJSON MovieDetails where
