@@ -52,3 +52,11 @@ pub enum PackageSort {
 	#[field(value = "artist_name")]
 	ArtistName,
 }
+
+/// DTO to update a package
+#[derive(Deserialize, JsonSchema, Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct UpdatePackage {
+	#[schemars(example = "example_package_release_date")]
+	pub release_date: Option<chrono::NaiveDate>,
+}

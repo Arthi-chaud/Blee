@@ -1,7 +1,9 @@
 use crate::config::Config;
 use crate::database::Database;
 use crate::dto::image::ImageResponse;
-use crate::dto::package::{PackageFilter, PackageResponseWithRelations, PackageSort};
+use crate::dto::package::{
+	PackageFilter, PackageResponseWithRelations, PackageSort, UpdatePackage,
+};
 use crate::dto::page::{Page, Pagination};
 use crate::dto::sort::{build_sort, SortOrder};
 use crate::error_handling::{ApiError, ApiPageResult, ApiRawResult, ApiResult};
@@ -10,14 +12,14 @@ use entity::package;
 use rocket::fs::TempFile;
 use rocket::response::status;
 use rocket::serde::json::Json;
+use rocket::serde::uuid::Uuid;
 use rocket::State;
 use rocket_okapi::okapi::openapi3::OpenApi;
 use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
-use sqlx::types::Uuid;
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: get_package, get_packages, post_package_poster]
+	openapi_get_routes_spec![settings: get_package, get_packages, post_package_poster, update_package]
 }
 
 /// Get a Single Package
@@ -81,4 +83,18 @@ async fn post_package_poster(
 	.await?;
 
 	Ok(status::Created::new("").body(Json(ImageResponse::from(new_poster))))
+}
+
+/// Update a Package
+#[openapi(tag = "Packages")]
+#[put("/<uuid>", format = "json", data = "<data>")]
+async fn update_package(
+	db: Database<'_>,
+	uuid: Uuid,
+	data: Json<UpdatePackage>,
+) -> Result<status::NoContent, ApiError> {
+	let _ = services::package::update(&uuid, &data.0, db.into_inner())
+		.await
+		.map_err(|e| Err::<status::NoContent, ApiError>(ApiError::from(e)));
+	Ok(status::NoContent)
 }

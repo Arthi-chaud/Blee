@@ -4,7 +4,9 @@ mod common;
 mod test_packages {
 
 	use crate::common::*;
-	use rocket::http::Status;
+	use api::dto::package::UpdatePackage;
+	use chrono::NaiveDate;
+	use rocket::http::{ContentType, Status};
 
 	#[test]
 	// Test /packages?artist=
@@ -160,6 +162,38 @@ mod test_packages {
 				assert_eq!(
 					item.get("id").unwrap().as_str().unwrap(),
 					third_expected_package.to_string()
+				);
+			})
+			.is_ok());
+	}
+
+	#[test]
+	// Test POST /packages/uuid
+	fn test_package_update_release_date() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let target_uuid = &data.as_ref().unwrap().package_c.package.id.to_string();
+				let response = client
+					.put(format!("/packages/{}", target_uuid))
+					.header(ContentType::JSON)
+					.body(
+						serde_json::to_value(UpdatePackage {
+							release_date: Some(NaiveDate::from_ymd_opt(2006, 12, 01).unwrap()),
+						})
+						.unwrap()
+						.to_string(),
+					)
+					.dispatch();
+				assert_eq!(response.status(), Status::NoContent);
+				let response = client.get(format!("/packages/{}", target_uuid)).dispatch();
+				let value = response_json_value(response);
+				let item = value.as_object().unwrap();
+				assert_eq!(
+					item.get("release_year").unwrap().as_str().unwrap(),
+					"2006-12-01"
 				);
 			})
 			.is_ok());
