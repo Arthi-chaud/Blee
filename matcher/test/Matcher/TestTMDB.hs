@@ -1,6 +1,7 @@
 module Matcher.TestTMDB (specs) where
 
 import Data.Maybe (fromJust)
+import Data.Time (fromGregorian)
 import LoadEnv (loadEnv)
 import Matcher.TMDB.Client
 import Matcher.TMDB.Models
@@ -54,7 +55,8 @@ specs = describe "TMDB" $ do
                         Right res -> do
                             i res `shouldBe` 2188
                             title res `shouldBe` "The Corrs: Live at Lansdowne Road"
-                            vote_average res `shouldBe` Just 7.7
+                            voteAverage res `shouldBe` Just 7.7
+                            releaseDate res `shouldBe` Just (fromGregorian 2000 11 10)
                             posterPath res
                                 `shouldBe` Just "https://image.tmdb.org/t/p/original/ApXQQS8peDN9wzXhpU30xzFH5TN.jpg"
                     )
@@ -64,7 +66,7 @@ specs = describe "TMDB" $ do
                         Left e -> expectationFailure e
                         Right res -> do
                             i res `shouldBe` 76110
-                            vote_average res `shouldBe` Nothing
+                            voteAverage res `shouldBe` Nothing
                     )
     describe "Get Package Details" $ do
         it "Should Get Package Details" $ do

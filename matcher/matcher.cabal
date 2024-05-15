@@ -52,6 +52,7 @@ library
     , slugify
     , text
     , text-metrics
+    , time
     , transformers
   default-language: Haskell2010
 
@@ -95,4 +96,5 @@ test-suite matcher-test
     , hspec
     , load-env
     , matcher
+    , time
   default-language: Haskell2010

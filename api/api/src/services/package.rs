@@ -1,13 +1,19 @@
 use crate::dto::{
 	artist::ArtistResponse,
-	package::{PackageFilter, PackageResponse, PackageResponseWithRelations, PackageSort},
+	package::{
+		PackageFilter, PackageResponse, PackageResponseWithRelations, PackageSort, UpdatePackage,
+	},
 	page::Pagination,
 	sort::Sort,
 };
 use ::slug::slugify;
 use chrono::NaiveDate;
-use entity::{artist, image, package};
+use entity::{
+	artist, image,
+	package::{self},
+};
 use rocket::serde::uuid::Uuid;
+use sea_orm::ActiveModelTrait;
 use sea_orm::{
 	sea_query::{self, *},
 	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, FromQueryResult, QueryFilter, QueryOrder,
@@ -165,4 +171,22 @@ where
 			})
 			.collect()
 	})
+}
+
+pub async fn update<'s, 'a, C>(
+	package_uuid: &Uuid,
+	update_dto: &UpdatePackage,
+	connection: &'a C,
+) -> Result<(), DbErr>
+where
+	C: ConnectionTrait,
+{
+	let package: package::Model = package::Entity::find_by_id(*package_uuid)
+		.one(connection)
+		.await?
+		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))?;
+	let mut package: package::ActiveModel = package.into();
+	package.release_year = Set(update_dto.release_date);
+	package.update(connection).await?;
+	Ok(())
 }

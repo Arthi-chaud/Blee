@@ -2,7 +2,9 @@ module Matcher (handleAPIEvent) where
 
 import Control.Monad (when)
 import Control.Monad.Trans.Except
+import Data.Functor (void)
 import Data.Maybe
+import Data.Time
 import Matcher.API.Client
 import Matcher.API.Dto
 import Matcher.API.Event
@@ -51,13 +53,24 @@ handleAPIEvent client tmdb (APIEvent "package" Insert uuid name) = runExceptT $ 
                     { url = "https://www.themoviedb.org/movie/" ++ show (i movie),
                       value = show $ i movie,
                       description = packageDescription,
-                      rating = (\r -> round (10 * r) :: Int) <$> vote_average movie,
+                      rating = (\r -> round (10 * r) :: Int) <$> voteAverage movie,
                       providerName = "TMDB"
                     }
     _ <- ExceptT $ pushPackageExternalId client packageDto
+    _ <- ExceptT $ case Matcher.TMDB.Models.releaseDate movie of
+        Nothing -> return $ Right ()
+        Just date -> do
+            when
+                (shouldUpdatePackageDate date (release_year package))
+                (void $ updatePackage client uuid (UpdatePackage date))
+            return $ Right ()
+
     case posterPath movie of
         Nothing -> return ()
         Just posterUrl -> when (isNothing (poster_id package)) $ do
             posterBytes <- ExceptT $ getPoster tmdb posterUrl
             ExceptT $ pushPackagePoster client uuid posterBytes
+    where
+        shouldUpdatePackageDate _ Nothing = True
+        shouldUpdatePackageDate (YearMonthDay tmdbYear _ _) (Just (YearMonthDay apiYear _ _)) = tmdbYear == apiYear
 handleAPIEvent _ _ _ = return $ Left "No handler for this event"

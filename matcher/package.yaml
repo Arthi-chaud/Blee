@@ -33,6 +33,7 @@ library:
   source-dirs: src
   dependencies:
   - aeson
+  - time
   - text
   - http-client
   - http-types
@@ -67,5 +68,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - matcher
+    - time
     - hspec
     - load-env
