@@ -54,9 +54,17 @@ specs = describe "TMDB" $ do
                         Right res -> do
                             i res `shouldBe` 2188
                             title res `shouldBe` "The Corrs: Live at Lansdowne Road"
-                            vote_average res `shouldBe` (Just 7.7)
+                            vote_average res `shouldBe` Just 7.7
                             posterPath res
                                 `shouldBe` Just "https://image.tmdb.org/t/p/original/ApXQQS8peDN9wzXhpU30xzFH5TN.jpg"
+                    )
+        it "Should Get Package, with null votes (instead of 0)" $ do
+            searchMovie tmdbClient "Moloko - 11,000 Clicks"
+                >>= ( \case
+                        Left e -> expectationFailure e
+                        Right res -> do
+                            i res `shouldBe` 76110
+                            vote_average res `shouldBe` Nothing
                     )
     describe "Get Package Details" $ do
         it "Should Get Package Details" $ do
