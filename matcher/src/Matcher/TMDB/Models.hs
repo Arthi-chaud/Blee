@@ -60,7 +60,10 @@ instance FromJSON MovieSearchResult where
         MovieSearchResult
             <$> v .: "id"
             <*> v .: "title"
-            <*> v .: "vote_average"
+            <*> ( v .: "vote_average" <&> \case
+                    Just 0 -> Nothing
+                    x -> x
+                )
             <*> v .: "poster_path"
 
 instance FromJSON MovieDetails where
