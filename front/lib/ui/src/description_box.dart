@@ -15,14 +15,7 @@ class DescriptionBox extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
           child: skeletonize
-              ? Column(
-                  children: List.generate(3, (index) => index)
-                      .map((i) => Skeletonizer(
-                              child: Text(
-                            List.generate(200, (index) => ' ').toString(),
-                            maxLines: 1,
-                          )))
-                      .toList())
+              ? const Skeletonizer.zone(child: Bone.multiText(lines: 3))
               : Text(
                   description ?? '',
                   maxLines: 3,
