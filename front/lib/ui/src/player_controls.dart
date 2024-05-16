@@ -1,4 +1,5 @@
 import 'package:blee/api/src/models/chapter.dart';
+import 'package:blee/theme.dart';
 import 'package:blee/ui/src/image.dart';
 import 'package:blee/api/api.dart' as api;
 import 'package:blee/utils/format_duration.dart';
@@ -232,6 +233,8 @@ class PlayerSlider extends StatelessWidget {
               child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 4.0,
+                    activeTrackColor: Colors.white,
+                    inactiveTrackColor: Colors.white,
                     thumbColor: Colors.transparent,
                     overlayShape: SliderComponentShape.noOverlay,
                     thumbShape:
@@ -266,9 +269,8 @@ class PlayerSlider extends StatelessWidget {
                                                       color:
                                                           chapterMarkIsBeforeCursor
                                                               ? Colors.white
-                                                              : Theme.of(
-                                                                      context)
-                                                                  .primaryColor,
+                                                              : MaterialTheme
+                                                                  .seed,
                                                       width: 2))),
                                     ),
                                   ));
