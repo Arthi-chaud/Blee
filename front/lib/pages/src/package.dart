@@ -118,7 +118,9 @@ class PackagePage extends ConsumerWidget {
                           )))
                   : Container(),
             ),
-            ...(movies?.items.map((movie) {
+            ...(movies?.items
+                    .where((movie) => movie.type == MovieType.concert)
+                    .map((movie) {
                   var isOnlyMovie = movies.metadata.count == 1;
                   return ThumbnailGridView(
                       key: Key('$movie-chapters'),
