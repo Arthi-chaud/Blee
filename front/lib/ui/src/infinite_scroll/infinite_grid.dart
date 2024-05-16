@@ -73,11 +73,13 @@ class _AbstractGridViewState<T> extends State<AbstractGridView<T>> {
         ),
       ),
       sliver: PagedSliverGrid<int, T>(
+        addAutomaticKeepAlives: false,
         pagingController: _pagingController,
         gridDelegate: widget.delegate(context),
         shrinkWrapFirstPageIndicators: true,
         builderDelegate: PagedChildBuilderDelegate<T>(
           noItemsFoundIndicatorBuilder: (_) => Container(),
+          newPageProgressIndicatorBuilder: (_) => Container(),
           firstPageProgressIndicatorBuilder: (context) => GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
