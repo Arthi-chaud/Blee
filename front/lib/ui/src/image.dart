@@ -58,11 +58,12 @@ abstract class _BleeImage extends ConsumerWidget {
     APIClient client = ref.read(apiClientProvider);
     return Center(child: Builder(builder: (context) {
       return Skeletonizer(
+          containersColor: Theme.of(context).splashColor,
           enabled: false,
           child: AspectRatio(
               aspectRatio: placeholderAspectRatio,
               child: Stack(
-                alignment: AlignmentDirectional.center,
+                alignment: AlignmentDirectional.bottomCenter,
                 children: [
                   roundedContainer(Container(
                       color: disableSlashFadein
@@ -81,26 +82,23 @@ abstract class _BleeImage extends ConsumerWidget {
                                 imageFit: BoxFit.cover,
                                 color: disableSlashFadein
                                     ? Colors.transparent
-                                    : const Color(0xffebebf4),
+                                    : Theme.of(context).splashColor,
                                 curve: Curves.easeIn,
                                 duration: const Duration(milliseconds: 200),
-                                hash: image?.blurhash ??
-                                    "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                                hash: image!.blurhash,
                               ))
                             : Container(),
                         onTap != null
                             ? Positioned.fill(
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: () {
-                                          onTap!.call();
-                                        },
-                                      ),
+                                child: roundedContainer(
+                                Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        onTap!.call();
+                                      },
                                     )),
-                              )
+                              ))
                             : Container(),
                       ]))
                 ],
