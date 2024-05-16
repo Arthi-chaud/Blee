@@ -233,7 +233,7 @@ class PlayerSlider extends StatelessWidget {
               child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 4.0,
-                    activeTrackColor: Colors.white,
+                    activeTrackColor: MaterialTheme.seed,
                     inactiveTrackColor: Colors.white,
                     thumbColor: Colors.transparent,
                     overlayShape: SliderComponentShape.noOverlay,
