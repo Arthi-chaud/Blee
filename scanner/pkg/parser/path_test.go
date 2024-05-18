@@ -39,6 +39,20 @@ func TestMovieParsingWithoutPackageFolderWithYear(t *testing.T) {
 	assert.Equal(t, 1999, res.Movie.Package_.ReleaseYear.Year())
 }
 
+func TestMovieParsingWithoutPackageFolderWithFestival(t *testing.T) {
+	config := getTestConfig()
+	path := "/videos/Lady Gaga - iTunes Festival.mkv"
+	res, err := ParseMetadataFromPath(path, config)
+
+	assert.Nil(t, err)
+	assert.Nil(t, res.Extra)
+	assert.Equal(t, "Lady Gaga", res.Movie.ArtistName)
+	assert.Equal(t, "iTunes Festival", res.Movie.Name)
+	assert.Equal(t, models.MovieType(models.Concert), res.Movie.Type_)
+	assert.Equal(t, "Lady Gaga", res.Movie.Package_.ArtistName)
+	assert.Equal(t, "iTunes Festival", res.Movie.Package_.Name)
+}
+
 func TestMovieParsingWithPackageFolderWithoutYear(t *testing.T) {
 	config := getTestConfig()
 	path := "/videos/The Corrs - Unplugged/The Corrs - Unplugged.mkv"

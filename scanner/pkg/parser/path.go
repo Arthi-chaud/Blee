@@ -119,6 +119,7 @@ func parseMovieTypeFromName(movieName string) models.MovieType {
 		strings.Contains(movieName, "concert") ||
 		strings.Contains(movieName, "tour") ||
 		strings.Contains(movieName, "show") ||
+		strings.Contains(movieName, "festival") ||
 		strings.Contains(movieName, "unplugged") {
 		return models.MovieType(models.Concert)
 	}
