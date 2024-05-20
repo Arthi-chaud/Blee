@@ -14,9 +14,9 @@ import (
 type ScannerTask string
 
 const (
-	Idle  = "idle"
-	Scan  = "scan"
-	Clean = "clean"
+	Idle  ScannerTask = "idle"
+	Scan  ScannerTask = "scan"
+	Clean ScannerTask = "clean"
 )
 
 type ScannerContext struct {
@@ -40,14 +40,22 @@ func failIfNotIdle(s *ScannerContext) error {
 }
 
 type ScannerStatus struct {
-	Message string `json:"message"`
-	Status  string `json:"status"`
+	Message string      `json:"message"`
+	Status  ScannerTask `json:"status"`
 }
 
+// @Summary		Get Status of Scanner
+// @Produce		json
+// @Success		200	{object}	ScannerStatus
+// @Router	    /status [get]
 func (s *ScannerContext) Status(c echo.Context) error {
-	return c.JSON(http.StatusOK, ScannerStatus{Message: "Scanner is alive.", Status: string(s.currentTask)})
+	return c.JSON(http.StatusOK, ScannerStatus{Message: "Scanner is alive.", Status: s.currentTask})
 }
 
+// @Summary		Scan for new files
+// @Success		201
+// @Failure		423
+// @Router	    /scan [post]
 func (s *ScannerContext) Scan(c echo.Context) error {
 	err := failIfNotIdle(s)
 	if err != nil {
@@ -69,6 +77,10 @@ func (s *ScannerContext) Scan(c echo.Context) error {
 	return nil
 }
 
+// @Summary		Clean API
+// @Success		201
+// @Failure		423
+// @Router	    /clean [post]
 func (s *ScannerContext) Clean(c echo.Context) error {
 	err := failIfNotIdle(s)
 	if err != nil {

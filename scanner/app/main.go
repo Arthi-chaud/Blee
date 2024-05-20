@@ -3,10 +3,12 @@ package main
 import (
 	"os"
 
+	_ "github.com/Arthi-chaud/Blee/scanner/app/docs"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/api"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
 	"github.com/kpango/glg"
 	"github.com/labstack/echo/v4"
+	"github.com/swaggo/echo-swagger"
 )
 
 func setupLogger() {
@@ -18,6 +20,9 @@ func setupLogger() {
 		SetLineTraceMode(glg.TraceLineNone)
 }
 
+// @title Blee's Scanner API
+// @version 1.0
+// @description The scanner is responsible for file parsing and registration.
 func main() {
 	setupLogger()
 	c := config.GetConfig()
@@ -33,25 +38,11 @@ func main() {
 		currentTask: Idle,
 	}
 
-	e.GET("/", s.Status)
+	e.GET("/status", s.Status)
 	e.POST("/scan", s.Scan)
 	e.POST("/clean", s.Clean)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	// knownPaths, err := api.GetAllKnownPaths(c)
-	// if err != nil {
-	// 	glg.Fatalf("Could not get registered files from API: %s", err)
-	// 	os.Exit(1)
-	// }
-	// for _, path := range watchedFiles {
-	// 	if !slices.Contains(knownPaths, path) && pkg.FileIsVideo(path) {
-	// 		actions.RegisterFile(path, &c)
-	// 	}
-	// }
-	// for _, path := range knownPaths {
-	// 	if !slices.Contains(watchedFiles, path) && pkg.FileIsVideo(path) {
-	// 		actions.DeleteFile(path, &c)
-	// 	}
-	// }
 	glg.Log("Scanner started! Let's get this show on the road.")
 	e.Logger.Fatal(e.Start(":8133"))
 }

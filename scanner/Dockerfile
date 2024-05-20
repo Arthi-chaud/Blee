@@ -1,10 +1,12 @@
 FROM golang:1.22.1-bullseye as builder
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 RUN apt-get update -y; apt-get install -y libmediainfo-dev ffmpeg
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY ./app ./app
 COPY ./pkg ./pkg
+RUN swag init -d app -o ./app/docs
 RUN GOOS=linux go build -o ./scanner ./app
 
 FROM debian:bullseye-slim as runner
