@@ -3,18 +3,17 @@ module github.com/Arthi-chaud/Blee/scanner
 go 1.22.1
 
 require (
-	github.com/fsnotify/fsnotify v1.7.0
 	github.com/kpango/glg v1.6.15
+	github.com/labstack/echo/v4 v4.12.0
 	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/zoriya/go-mediainfo v0.0.0-20240113011752-07018f07efae
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.52.4 // indirect
+	github.com/aws/aws-sdk-go v1.53.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/labstack/echo/v4 v4.12.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

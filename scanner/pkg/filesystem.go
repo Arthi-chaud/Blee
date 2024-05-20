@@ -7,6 +7,7 @@ import (
 
 	"github.com/kpango/glg"
 )
+
 func GetWatchedFiles(rootDir string) []string {
 	watchedFiles := []string{}
 	entries, err := os.ReadDir(rootDir)

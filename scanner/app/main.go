@@ -28,10 +28,12 @@ func main() {
 	}
 	e := echo.New()
 
-	s := ScannerContext {
-		config: &c,
+	s := ScannerContext{
+		config:      &c,
+		currentTask: Idle,
 	}
 
+	e.GET("/", s.Status)
 	e.POST("/scan", s.Scan)
 	e.POST("/clean", s.Clean)
 
