@@ -31,9 +31,16 @@ class APIClient {
 
   String buildTranscoderUrl(String transcoderRoute) {
     if (kDebugMode) {
-      return 'http://0.0.0.0:7666$transcoderRoute';
+      return '${const String.fromEnvironment("TRANSCODER_URL")}$transcoderRoute';
     }
     return "$_host/transcoder$transcoderRoute";
+  }
+
+  String buildScannerUrl(String scannerRoute) {
+    if (kDebugMode) {
+      return '${const String.fromEnvironment("SCANNER_URL")}$scannerRoute';
+    }
+    return "$_host/scanner$scannerRoute";
   }
 
   Future<Artist> getArtist(String uuid) async {
