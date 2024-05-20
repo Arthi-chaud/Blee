@@ -16,6 +16,9 @@ server {
 	location /transcoder/ {
 	    proxy_pass ${TRANSCODER_URL}/;
 	}
+	location /scanner/ {
+	    proxy_pass ${SCANNER_URL}/;
+	}
 	location / {
 		proxy_pass ${FRONT_URL};
 	}

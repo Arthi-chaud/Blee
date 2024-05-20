@@ -23,6 +23,8 @@ services:
       context: ./scanner
       dockerfile: Dockerfile.dev
     restart: on-failure
+    ports:
+      - "8133:8133"
     depends_on:
       api:
         condition: service_healthy
