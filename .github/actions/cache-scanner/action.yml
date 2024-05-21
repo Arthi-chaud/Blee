@@ -3,7 +3,11 @@ description: 'Cache for APScannerI'
 runs:
   using: "composite"
   steps:
-    - run: sudo apt-get update -y && sudo apt-get install -y libmediainfo-dev
+    - run: |
+        sudo apt-get update -y && sudo apt-get install -y libmediainfo-dev
+        cd scanner
+        go install github.com/swaggo/swag/cmd/swag@latest
+        ~/go/bin/swag init -d app -o ./app/docs
       shell: bash
     - uses: actions/setup-go@v5
       with:

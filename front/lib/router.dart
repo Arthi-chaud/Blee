@@ -4,6 +4,7 @@ import 'package:blee/pages/src/artist.dart';
 import 'package:blee/pages/src/artists.dart';
 import 'package:blee/pages/src/extras.dart';
 import 'package:blee/pages/src/player.dart';
+import 'package:blee/pages/src/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -54,6 +55,11 @@ final router = GoRouter(
             path: '/extras',
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ExtrasPage()),
+          ),
+          GoRoute(
+            path: '/settings',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SettingsPage()),
           ),
         ]),
     GoRoute(

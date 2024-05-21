@@ -46,6 +46,11 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
       label: 'Videos',
       initialLocation: '/extras',
     ),
+    MyNavigationDestination(
+      icon: FaIcon(FontAwesomeIcons.gear),
+      label: 'Settings',
+      initialLocation: '/settings',
+    ),
   ];
 
   @override

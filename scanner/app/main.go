@@ -2,15 +2,13 @@ package main
 
 import (
 	"os"
-	"slices"
 
-	"github.com/Arthi-chaud/Blee/scanner/pkg"
-	"github.com/Arthi-chaud/Blee/scanner/pkg/actions"
+	_ "github.com/Arthi-chaud/Blee/scanner/app/docs"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/api"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/config"
-	wa "github.com/Arthi-chaud/Blee/scanner/pkg/watcher"
-	"github.com/fsnotify/fsnotify"
 	"github.com/kpango/glg"
+	"github.com/labstack/echo/v4"
+	"github.com/swaggo/echo-swagger"
 )
 
 func setupLogger() {
@@ -22,48 +20,29 @@ func setupLogger() {
 		SetLineTraceMode(glg.TraceLineNone)
 }
 
+// @title Blee's Scanner API
+// @version 1.0
+// @description The scanner is responsible for file parsing and registration.
 func main() {
 	setupLogger()
 	c := config.GetConfig()
-	w, err := fsnotify.NewWatcher()
-	if err != nil {
-		glg.Fatalf("Failed setting up API: %s", err)
-		os.Exit(1)
-	}
+
 	if err := api.HealthCheck(c); err != nil {
 		glg.Fatalf("Failed connecting to API: %s", err)
 		os.Exit(1)
 	}
-	go func() {
-		for {
-			select {
-			case event := <-w.Events:
-				wa.HandleWatcherEvent(&event, &c)
-			case err := <-w.Errors:
-				glg.Fatalf("File System Watcher errored: %s", err)
-				os.Exit(1)
-			}
-		}
-	}()
-	glg.Logf("Attempting to watch %s", c.WatchDir)
+	e := echo.New()
 
-	watchedFiles := wa.SetupWatcher(w, c.WatchDir)
-	knownPaths, err := api.GetAllKnownPaths(c)
-	if err != nil {
-		glg.Fatalf("Could not get registered files from API: %s", err)
-		os.Exit(1)
+	s := ScannerContext{
+		config:      &c,
+		currentTask: Idle,
 	}
-	for _, path := range watchedFiles {
-		if !slices.Contains(knownPaths, path) && pkg.FileIsVideo(path) {
-			actions.RegisterFile(path, &c)
-		}
-	}
-	for _, path := range knownPaths {
-		if !slices.Contains(watchedFiles, path) && pkg.FileIsVideo(path) {
-			actions.DeleteFile(path, &c)
-		}
-	}
+
+	e.GET("/status", s.Status)
+	e.POST("/scan", s.Scan)
+	e.POST("/clean", s.Clean)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	glg.Log("Scanner started! Let's get this show on the road.")
-
-	<-make(chan struct{})
+	e.Logger.Fatal(e.Start(":8133"))
 }

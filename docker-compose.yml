@@ -62,6 +62,8 @@ services:
   scanner:
     build:
       context: ./scanner
+    expose:
+      - "8133"
     depends_on:
       api:
         condition: service_healthy
@@ -115,6 +117,7 @@ services:
       - FRONT_URL=http://front:3000
       - SERVER_URL=http://api:8000
       - TRANSCODER_URL=http://transcoder:7666
+      - SCANNER_URL=http://scanner:8133
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/blee.conf.template:ro
   transcoder:

@@ -1,6 +1,7 @@
 import 'package:blee/api/api.dart';
 import 'package:blee/api/src/client.dart' as api;
 import 'package:blee/api/src/models/order.dart';
+import 'package:blee/api/src/models/scanner.dart';
 import 'package:blee/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
@@ -98,6 +99,13 @@ Future<Page<ExternalId>> getArtistExternalIds(
     GetArtistExternalIdsRef ref, String artistUuid) async {
   APIClient client = ref.watch(apiClientProvider);
   return await client.getArtistExternalIds(artistUuid);
+}
+
+//// Scanner
+@riverpod
+Future<ScannerStatusResponse> getScannerStatus(GetScannerStatusRef ref) async {
+  APIClient client = ref.watch(apiClientProvider);
+  return await client.getScannerStatus();
 }
 
 //// Player
