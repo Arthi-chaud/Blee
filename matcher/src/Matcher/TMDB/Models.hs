@@ -4,11 +4,14 @@ module Matcher.TMDB.Models (
     ArtistDetails (..),
     MovieSearchResult (..),
     MovieDetails (..),
+    MovieImages (..),
+    MovieImage (..),
 ) where
 
 import Data.Aeson
 import Data.Functor
 import Data.Time.Calendar
+import GHC.Generics (Generic)
 
 data ArtistSearchResult = ArtistSearchResult
     { identifier :: Integer,
@@ -48,12 +51,27 @@ data MovieSearchResult = MovieSearchResult
     { i :: Integer,
       title :: String,
       voteAverage :: Maybe Double,
-      releaseDate :: Maybe Day,
-      posterPath :: Maybe String
+      releaseDate :: Maybe Day
     }
 
+data MovieImages = MovieImages
+    { backdrops :: [MovieImage],
+      posters :: [MovieImage]
+    }
+    deriving (Generic)
+
+instance FromJSON MovieImages
+
+data MovieImage = MovieImage
+    { file_path :: String
+    }
+    deriving (Generic)
+
+instance FromJSON MovieImage
+
 data MovieDetails = MovieDetails
-    { overview :: Maybe String
+    { overview :: Maybe String,
+      images :: MovieImages
     }
 
 instance FromJSON MovieSearchResult where
@@ -66,7 +84,6 @@ instance FromJSON MovieSearchResult where
                     x -> x
                 )
             <*> v .: "release_date"
-            <*> v .: "poster_path"
 
 instance FromJSON MovieDetails where
     parseJSON = withObject "TMDB Movie Details" $ \v ->
@@ -75,3 +92,4 @@ instance FromJSON MovieDetails where
                     Just "" -> Nothing
                     x -> x
                 )
+            <*> v .: "images"

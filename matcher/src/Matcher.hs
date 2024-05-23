@@ -1,8 +1,9 @@
 module Matcher (handleAPIEvent) where
 
-import Control.Monad (when)
+import Control.Monad (forM_, when)
 import Control.Monad.Trans.Except
 import Data.Functor (void)
+import Data.List.Extra ((!?))
 import Data.Maybe
 import Data.Time
 import Matcher.API.Client
@@ -13,6 +14,8 @@ import Matcher.TMDB.Models (
     ArtistDetails (..),
     ArtistSearchResult (..),
     MovieDetails (..),
+    MovieImage (file_path),
+    MovieImages (backdrops, posters),
     MovieSearchResult (..),
  )
 import Prelude hiding (id)
@@ -36,7 +39,7 @@ handleAPIEvent client tmdb (APIEvent "artist" Insert uuid name) = runExceptT $ d
     case profilePath artist of
         Nothing -> return ()
         Just posterUrl -> do
-            posterBytes <- ExceptT $ getPoster tmdb posterUrl
+            posterBytes <- ExceptT $ downloadImage tmdb posterUrl
             ExceptT $ pushArtistPoster client uuid posterBytes
 handleAPIEvent client tmdb (APIEvent "package" Insert uuid name) = runExceptT $ do
     package <- ExceptT $ getPackage client uuid
@@ -44,7 +47,7 @@ handleAPIEvent client tmdb (APIEvent "package" Insert uuid name) = runExceptT $ 
             Nothing -> name
             Just artistName -> artistName ++ " " ++ name
     movie <- ExceptT $ searchMovie tmdb packageSearchToken
-    MovieDetails packageDescription <-
+    movieDetails <-
         ExceptT $ getMovieDetails tmdb (i movie)
     let packageDto =
             PackageExternalId
@@ -52,7 +55,7 @@ handleAPIEvent client tmdb (APIEvent "package" Insert uuid name) = runExceptT $ 
                 BaseExternalId
                     { url = "https://www.themoviedb.org/movie/" ++ show (i movie),
                       value = show $ i movie,
-                      description = packageDescription,
+                      description = overview movieDetails,
                       rating = (\r -> round (10 * r) :: Int) <$> voteAverage movie,
                       providerName = "TMDB"
                     }
@@ -64,12 +67,15 @@ handleAPIEvent client tmdb (APIEvent "package" Insert uuid name) = runExceptT $ 
                 (shouldUpdatePackageDate date (release_year package))
                 (void $ updatePackage client uuid (UpdatePackage date))
             return $ Right ()
-
-    case posterPath movie of
-        Nothing -> return ()
-        Just posterUrl -> when (isNothing (poster_id package)) $ do
-            posterBytes <- ExceptT $ getPoster tmdb posterUrl
-            ExceptT $ pushPackagePoster client uuid posterBytes
+    forM_
+        [ (posters, poster_id, pushPackagePoster),
+          (backdrops, banner_id, pushPackageBanner)
+        ]
+        $ \(imageType, column, apiCall) -> case imageType (images movieDetails) !? 0 of
+            Nothing -> return ()
+            Just image -> when (isNothing (column package)) $ do
+                imageBytes <- ExceptT $ downloadImage tmdb (file_path image)
+                ExceptT $ apiCall client uuid imageBytes
     where
         shouldUpdatePackageDate _ Nothing = True
         shouldUpdatePackageDate (YearMonthDay tmdbYear _ _) (Just (YearMonthDay apiYear _ _)) = tmdbYear == apiYear

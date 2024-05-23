@@ -57,8 +57,6 @@ specs = describe "TMDB" $ do
                             title res `shouldBe` "The Corrs: Live at Lansdowne Road"
                             voteAverage res `shouldBe` Just 7.7
                             releaseDate res `shouldBe` Just (fromGregorian 2000 11 10)
-                            posterPath res
-                                `shouldBe` Just "https://image.tmdb.org/t/p/original/ApXQQS8peDN9wzXhpU30xzFH5TN.jpg"
                     )
         it "Should Get Package, with null votes (instead of 0)" $ do
             searchMovie tmdbClient "Moloko - 11,000 Clicks"
@@ -73,14 +71,18 @@ specs = describe "TMDB" $ do
             getMovieDetails tmdbClient 2188
                 >>= ( \case
                         Left e -> expectationFailure e
-                        Right (MovieDetails Nothing) -> expectationFailure "No description found"
-                        Right (MovieDetails (Just description)) -> do
+                        Right (MovieDetails Nothing _) -> expectationFailure "No description found"
+                        Right (MovieDetails (Just description) (MovieImages backdrops posters)) -> do
                             take 10 description `shouldBe` "Irish-Celt"
                             reverse (take 10 $ reverse description) `shouldBe` "by fields."
+                            file_path (head posters)
+                                `shouldBe` "https://image.tmdb.org/t/p/original/ApXQQS8peDN9wzXhpU30xzFH5TN.jpg"
+                            file_path (head backdrops)
+                                `shouldBe` "https://image.tmdb.org/t/p/original/vloSviBTcbNM9a7rjmL9saaYMix.jpg"
                     )
         it "Should Get Null Description, not empty string" $ do
             getMovieDetails tmdbClient 60516
                 >>= ( \case
                         Left e -> expectationFailure e
-                        Right (MovieDetails details) -> details `shouldBe` Nothing
+                        Right (MovieDetails details _) -> details `shouldBe` Nothing
                     )

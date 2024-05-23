@@ -8,6 +8,7 @@ module Matcher.API.Client (
     getArtist,
     getPackage,
     updatePackage,
+    pushPackageBanner,
 ) where
 
 import Data.Aeson (eitherDecodeStrict', encode)
@@ -88,3 +89,7 @@ updatePackage client uuid dto = (() <$) <$> apiPut client ("/packages/" ++ uuid)
 pushPackagePoster :: APIClient -> String -> ByteString -> IO (Either String ())
 pushPackagePoster client uuid posterBytes =
     (() <$) <$> apiPostBinary client ("/packages/" ++ uuid ++ "/poster") posterBytes
+
+pushPackageBanner :: APIClient -> String -> ByteString -> IO (Either String ())
+pushPackageBanner client uuid bannerBytes =
+    (() <$) <$> apiPostBinary client ("/packages/" ++ uuid ++ "/banner") bannerBytes
