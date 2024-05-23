@@ -102,7 +102,7 @@ async fn post_package_banner(
 	let new_poster = services::image::save_image(
 		&bytes,
 		crate::dto::image::ImageType::Banner,
-		package.poster.map(|p| p.id),
+		package.banner.map(|p| p.id),
 		&package.package.id,
 		package::Entity,
 		package::Column::Id,
