@@ -24,7 +24,11 @@ where
 		.all(connection)
 		.await?;
 	image::Entity::delete_many()
-		.filter(image::Column::Id.is_in(empty_packages.iter().map(|p| p.poster_id)))
+		.filter(
+			image::Column::Id
+				.is_in(empty_packages.iter().map(|p| p.poster_id))
+				.or(image::Column::Id.is_in(empty_packages.iter().map(|p| p.banner_id))),
+		)
 		.exec(connection)
 		.await?;
 	package::Entity::delete_many()

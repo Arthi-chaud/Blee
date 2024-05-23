@@ -38,6 +38,42 @@ mod test_images {
 		}
 	}
 
+	#[test]
+	/// Test Image Upload through `/package/:slug_or_id/banner`
+	fn test_image_upload_banner() {
+		let client = test_client().lock().unwrap();
+
+		assert!(GLOBAL_DATA
+			.lock()
+			.inspect(|data| {
+				let package_id = &data.as_ref().unwrap().package_b.package.id.to_string();
+				let response = client
+					.post(format!("/packages/{}/banner", package_id))
+					.body(fs::read("./tests/assets/poster.png").unwrap())
+					.dispatch();
+				assert_eq!(response.status(), Status::Created);
+
+				let response = client.get(format!("/packages/{}", package_id)).dispatch();
+				assert_eq!(response.status(), Status::Ok);
+				let package = response_json_value(response);
+				let _ = package.get("poster").unwrap().as_null().unwrap();
+				let poster = package.get("banner").unwrap().as_object().unwrap();
+				let poster_colors = poster.get("colors").unwrap().as_array().unwrap();
+				let poster_blurhash = poster.get("blurhash").unwrap().as_str().unwrap();
+				let poster_ratio = poster.get("aspect_ratio").unwrap().as_f64().unwrap();
+
+				assert_eq!(poster_blurhash, "T02Yt$WBx]x]ofITRiay4mt8axWA");
+				assert_ne!(poster_colors.len(), 0);
+				assert_eq!(poster_ratio, 1 as f64);
+				for color in poster_colors {
+					assert!(Regex::new(r"#(\d|[a-z]){6}")
+						.unwrap()
+						.is_match(color.as_str().unwrap()))
+				}
+			})
+			.is_ok());
+	}
+
 	/// Test image overwrite
 	#[test]
 	fn test_image_upload_2() {

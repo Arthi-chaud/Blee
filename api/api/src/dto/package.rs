@@ -13,6 +13,8 @@ pub struct PackageResponseWithRelations {
 	pub package: PackageResponse,
 	#[schemars(skip)]
 	pub poster: Option<ImageResponse>,
+	#[schemars(skip)]
+	pub banner: Option<ImageResponse>,
 }
 
 /// A Package Data type
@@ -31,6 +33,8 @@ pub struct PackageResponse {
 	pub artist_name: Option<String>,
 	#[schemars(example = "example_uuid")]
 	pub poster_id: Option<Uuid>,
+	#[schemars(example = "example_uuid")]
+	pub banner_id: Option<Uuid>,
 }
 
 /// Filters for packages

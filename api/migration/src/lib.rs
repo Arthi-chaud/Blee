@@ -4,6 +4,7 @@ mod m20240311_000001_init_enums;
 mod m20240311_073406_init_tables;
 mod m20240406_163549_insert_events;
 mod m20240513_185419_remove_scrubbers;
+mod m20240521_162622_package_banner;
 
 pub struct Migrator;
 
@@ -15,6 +16,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20240311_073406_init_tables::Migration),
 			Box::new(m20240406_163549_insert_events::Migration),
 			Box::new(m20240513_185419_remove_scrubbers::Migration),
+			Box::new(m20240521_162622_package_banner::Migration),
 		]
 	}
 }
