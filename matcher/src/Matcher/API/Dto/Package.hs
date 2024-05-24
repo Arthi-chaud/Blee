@@ -8,7 +8,8 @@ import Matcher.API.Dto.BaseExternalId
 data Package = Package
     { artist_name :: Maybe String,
       release_year :: Maybe Day,
-      poster_id :: Maybe String
+      poster_id :: Maybe String,
+      banner_id :: Maybe String
     }
     deriving (Generic, Show)
 
@@ -18,6 +19,7 @@ instance FromJSON Package where
             <$> v .: "artist_name"
             <*> v .: "release_year"
             <*> v .: "poster_id"
+            <*> v .: "banner_id"
 
 data PackageExternalId = PackageExternalId
     { packageId :: String,

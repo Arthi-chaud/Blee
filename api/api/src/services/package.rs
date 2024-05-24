@@ -1,5 +1,6 @@
 use crate::dto::{
 	artist::ArtistResponse,
+	image::{ImageResponse, ImageType},
 	package::{
 		PackageFilter, PackageResponse, PackageResponseWithRelations, PackageSort, UpdatePackage,
 	},
@@ -8,17 +9,14 @@ use crate::dto::{
 };
 use ::slug::slugify;
 use chrono::NaiveDate;
-use entity::{
-	artist, image,
-	package::{self},
-};
+use entity::{artist, image, package, sea_orm_active_enums::ImageTypeEnum};
 use rocket::serde::uuid::Uuid;
-use sea_orm::ActiveModelTrait;
 use sea_orm::{
 	sea_query::{self, *},
-	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, FromQueryResult, QueryFilter, QueryOrder,
-	QuerySelect, QueryTrait, RelationTrait, Set,
+	ColumnTrait, ConnectionTrait, DbErr, EntityTrait, FromQueryResult, Iterable, QueryFilter,
+	QueryOrder, QuerySelect, QueryTrait, RelationTrait, Set,
 };
+use sea_orm::{ActiveModelTrait, Select};
 
 #[derive(FromQueryResult)]
 struct PackageModel {
@@ -28,21 +26,55 @@ struct PackageModel {
 	pub release_year: Option<NaiveDate>,
 	pub registered_at: NaiveDate,
 	pub artist_id: Option<Uuid>,
-	pub poster_id: Option<Uuid>,
 	pub artist_name: Option<String>,
+	pub banner_id: Option<Uuid>,
+	pub banner_blurhash: Option<String>,
+	pub banner_aspect_ratio: Option<f32>,
+	pub banner_colors: Option<Vec<String>>,
+	pub poster_id: Option<Uuid>,
+	pub poster_blurhash: Option<String>,
+	pub poster_aspect_ratio: Option<f32>,
+	pub poster_colors: Option<Vec<String>>,
 }
 
-impl From<PackageModel> for PackageResponse {
+impl From<PackageModel> for PackageResponseWithRelations {
 	fn from(value: PackageModel) -> Self {
-		PackageResponse {
-			id: value.id,
-			name: value.name,
-			artist_name: value.artist_name,
-			slug: value.unique_slug,
-			release_year: value.release_year,
-			registered_at: value.registered_at.into(),
-			artist_id: value.artist_id,
-			poster_id: value.poster_id,
+		PackageResponseWithRelations {
+			package: PackageResponse {
+				id: value.id,
+				name: value.name,
+				artist_name: value.artist_name,
+				slug: value.unique_slug,
+				release_year: value.release_year,
+				registered_at: value.registered_at.into(),
+				artist_id: value.artist_id,
+				poster_id: value.poster_id,
+				banner_id: value.banner_id,
+			},
+			poster: if let Some(p_id) = value.poster_id {
+				Some(ImageResponse {
+					id: p_id,
+					blurhash: value.poster_blurhash.unwrap(),
+					aspect_ratio: value.poster_aspect_ratio.unwrap(),
+					r#type: ImageType::Poster,
+					colors: value.poster_colors.unwrap(),
+				})
+			} else {
+				None
+			},
+			banner: if let Some(b_id) = value.banner_id {
+				Some(ImageResponse {
+					id: b_id,
+					blurhash: value.banner_blurhash.unwrap(),
+					aspect_ratio: value.banner_aspect_ratio.unwrap(),
+					// Note: Deserializing Enum does not work (?)
+					// So we do not select it, and determine it by hand
+					r#type: ImageType::Banner,
+					colors: value.banner_colors.unwrap(),
+				})
+			} else {
+				None
+			},
 		}
 	}
 }
@@ -103,17 +135,13 @@ where
 		query = query.filter(package::Column::UniqueSlug.eq(slug_or_uuid));
 	}
 
-	let (package, poster) = query
-		.find_also_related(image::Entity)
-		.into_model::<PackageModel, image::Model>()
+	let model = join_and_select_related_image(&query)
+		.into_model::<PackageModel>()
 		.one(connection)
 		.await?
 		.map_or(Err(DbErr::RecordNotFound("Package".to_string())), |r| Ok(r))?;
 
-	Ok(PackageResponseWithRelations {
-		package: package.into(),
-		poster: poster.map(|x| x.into()),
-	})
+	Ok(model.into())
 }
 
 pub async fn find_many<'a, C>(
@@ -158,19 +186,12 @@ where
 		}
 	}
 
-	let joint_query = query
-		.find_also_related(image::Entity)
-		.into_model::<PackageModel, image::Model>();
+	let joint_query = join_and_select_related_image(&query).into_model::<PackageModel>();
 
-	joint_query.all(connection).await.map(|items| {
-		items
-			.into_iter()
-			.map(|(package, poster)| PackageResponseWithRelations {
-				package: package.into(),
-				poster: poster.map(|x| x.into()),
-			})
-			.collect()
-	})
+	joint_query
+		.all(connection)
+		.await
+		.map(|items| items.into_iter().map(|model| model.into()).collect())
 }
 
 pub async fn update<'s, 'a, C>(
@@ -189,4 +210,22 @@ where
 	package.release_year = Set(update_dto.release_date);
 	package.update(connection).await?;
 	Ok(())
+}
+
+fn join_and_select_related_image(query: &Select<package::Entity>) -> Select<package::Entity> {
+	let poster_alias = (Alias::new("poster"), package::Relation::Image1);
+	let banner_alias = (Alias::new("banner"), package::Relation::Image2);
+	let mut new_query = query.clone();
+	for (alias, col) in vec![poster_alias, banner_alias] {
+		new_query = new_query.join_as(JoinType::LeftJoin, col.def(), alias.clone());
+		for column in
+			image::Column::iter().filter(|x| x.to_string().ne("id") && x.to_string().ne("type"))
+		{
+			new_query = new_query.column_as(
+				Expr::col((alias.clone(), column)),
+				format!("{}_{}", alias.to_string(), column.to_string()),
+			);
+		}
+	}
+	new_query
 }

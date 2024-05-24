@@ -2,7 +2,7 @@ module Matcher.TMDB.Client (
     TMDBClient (..),
     searchArtist,
     getArtistDetails,
-    getPoster,
+    downloadImage,
     searchMovie,
     getMovieDetails,
 ) where
@@ -76,11 +76,7 @@ searchMovie client token = do
                     page <- eitherDecodeStrict' s :: Either String (Page MovieSearchResult)
                     case results page of
                         [] -> Left "Empty Page"
-                        (a : _) ->
-                            return $
-                                a
-                                    { posterPath = ("https://image.tmdb.org/t/p/original" ++) <$> posterPath a
-                                    }
+                        (a : _) -> Right a
                 )
 
 getArtistDetails :: TMDBClient -> Integer -> IO (Either String ArtistDetails)
@@ -100,14 +96,31 @@ getMovieDetails client movieId = do
         tmdbRequest
             client
             ("/movie/" <> show movieId)
-            []
+            [("append_to_response", "images")]
     return $
         rawRes
-            >>= eitherDecodeStrict'
+            >>= \s -> do
+                details <- eitherDecodeStrict' s
+                return
+                    details
+                        { images = buildFullImagesPath $ images details
+                        }
+    where
+        buildFullImagesPath images =
+            images
+                { backdrops =
+                    buildImagePath
+                        <$> backdrops images,
+                  posters =
+                    buildImagePath
+                        <$> posters images
+                }
+        buildImagePath image =
+            image {file_path = "https://image.tmdb.org/t/p/original" ++ file_path image}
 
-getPoster :: TMDBClient -> String -> IO (Either String ByteString)
-getPoster client posterurl =
+downloadImage :: TMDBClient -> String -> IO (Either String ByteString)
+downloadImage client imageUrl =
     request
-        posterurl
+        imageUrl
         []
         [("api_key", apiKey client)]

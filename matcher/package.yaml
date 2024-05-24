@@ -41,6 +41,7 @@ library:
   - bytestring
   - text-metrics
   - slugify
+  - extra
   - transformers
 
 executables:

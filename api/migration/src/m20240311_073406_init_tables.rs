@@ -40,7 +40,7 @@ pub enum File {
 }
 
 #[derive(DeriveIden)]
-enum Package {
+pub enum Package {
 	Table,
 	Id,
 	Name,
@@ -50,6 +50,7 @@ enum Package {
 	RegisteredAt,
 	ArtistId,
 	PosterId,
+	BannerId,
 }
 
 #[derive(DeriveIden)]

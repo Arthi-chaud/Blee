@@ -19,7 +19,7 @@ use rocket_okapi::settings::OpenApiSettings;
 use rocket_okapi::{openapi, openapi_get_routes_spec};
 
 pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, OpenApi) {
-	openapi_get_routes_spec![settings: get_package, get_packages, post_package_poster, update_package]
+	openapi_get_routes_spec![settings: get_package, get_packages, post_package_poster, update_package, post_package_banner]
 }
 
 /// Get a Single Package
@@ -77,6 +77,36 @@ async fn post_package_poster(
 		package::Entity,
 		package::Column::Id,
 		package::Column::PosterId,
+		conn,
+		config,
+	)
+	.await?;
+
+	Ok(status::Created::new("").body(Json(ImageResponse::from(new_poster))))
+}
+
+/// Upload a Package's Banner
+#[openapi(tag = "Packages")]
+#[post("/<slug_or_uuid>/banner", data = "<data>")]
+async fn post_package_banner(
+	db: Database<'_>,
+	slug_or_uuid: String,
+	data: TempFile<'_>,
+	config: &State<Config>,
+) -> ApiRawResult<status::Created<Json<ImageResponse>>> {
+	let bytes = utils::temp_file_to_bytes_vec(data).await?;
+	let conn = db.into_inner();
+	let package = services::package::find(&slug_or_uuid, conn)
+		.await
+		.map_err(|e| ApiError::from(e))?;
+	let new_poster = services::image::save_image(
+		&bytes,
+		crate::dto::image::ImageType::Banner,
+		package.banner.map(|p| p.id),
+		&package.package.id,
+		package::Entity,
+		package::Column::Id,
+		package::Column::BannerId,
 		conn,
 		config,
 	)

@@ -16,6 +16,7 @@ pub struct Model {
 	pub registered_at: Date,
 	pub artist_id: Option<Uuid>,
 	pub poster_id: Option<Uuid>,
+	pub banner_id: Option<Uuid>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -34,12 +35,20 @@ pub enum Relation {
 	Extra,
 	#[sea_orm(
 		belongs_to = "super::image::Entity",
+		from = "Column::BannerId",
+		to = "super::image::Column::Id",
+		on_update = "NoAction",
+		on_delete = "SetNull"
+	)]
+	Image2,
+	#[sea_orm(
+		belongs_to = "super::image::Entity",
 		from = "Column::PosterId",
 		to = "super::image::Column::Id",
 		on_update = "NoAction",
 		on_delete = "SetNull"
 	)]
-	Image,
+	Image1,
 	#[sea_orm(has_many = "super::movie::Entity")]
 	Movie,
 }
@@ -59,12 +68,6 @@ impl Related<super::external_id::Entity> for Entity {
 impl Related<super::extra::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Extra.def()
-	}
-}
-
-impl Related<super::image::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::Image.def()
 	}
 }
 
