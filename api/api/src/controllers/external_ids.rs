@@ -45,7 +45,7 @@ async fn new_external_id(
 }
 
 /// Get many External IDs
-#[openapi(tag = "Extras")]
+#[openapi(tag = "External Id")]
 #[get("/?<artist>&<package>&<pagination..>")]
 async fn get_external_ids(
 	db: Database<'_>,
