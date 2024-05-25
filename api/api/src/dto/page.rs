@@ -92,7 +92,7 @@ impl<'r, T: Serialize> Responder<'r, 'r> for Page<T> {
 		};
 		let serialized = serde_json::to_string(&json_object).unwrap();
 		Response::build()
-			.header(ContentType::JSON)
+			.header(ContentType::parse_flexible("application/json; charset=utf-8").unwrap())
 			.sized_body(serialized.len(), Cursor::new(serialized))
 			.ok()
 	}
@@ -115,5 +115,5 @@ struct PageMetadata {
 }
 
 fn example_next() -> &'static str {
-	"/route?param1=a&param2=b&after_id=[FINAL ITEM'S UUID]"
+	"/route?param1=a&param2=b&take=&skip="
 }

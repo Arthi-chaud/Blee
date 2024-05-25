@@ -9,7 +9,7 @@ use crate::dto::{
 };
 use ::slug::slugify;
 use chrono::NaiveDate;
-use entity::{artist, image, package, sea_orm_active_enums::ImageTypeEnum};
+use entity::{artist, image, package};
 use rocket::serde::uuid::Uuid;
 use sea_orm::{
 	sea_query::{self, *},
