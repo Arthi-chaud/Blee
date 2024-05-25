@@ -41,6 +41,7 @@ class DescriptionBox extends StatelessWidget {
         context: context,
         builder: (context) {
           return AlertDialog(
+            scrollable: true,
             title: const Text('Description'),
             content: Text(description!),
             actions: [
