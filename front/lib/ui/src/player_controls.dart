@@ -233,7 +233,7 @@ class PlayerSlider extends StatelessWidget {
               child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 4.0,
-                    activeTrackColor: MaterialTheme.seed,
+                    activeTrackColor: AppTheme.seed,
                     inactiveTrackColor: Colors.white,
                     thumbColor: Colors.transparent,
                     overlayShape: SliderComponentShape.noOverlay,
@@ -269,8 +269,7 @@ class PlayerSlider extends StatelessWidget {
                                                       color:
                                                           chapterMarkIsBeforeCursor
                                                               ? Colors.white
-                                                              : MaterialTheme
-                                                                  .seed,
+                                                              : AppTheme.seed,
                                                       width: 2))),
                                     ),
                                   ));
