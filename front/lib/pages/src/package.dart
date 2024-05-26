@@ -72,10 +72,7 @@ class PackagePage extends ConsumerWidget {
                 PosterPageHeader(
                     key: Key('$packageUuid-header'),
                     isLoading: package == null,
-                    title: Text(
-                      package?.name ?? 'No Package Name',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
+                    title: package?.name ?? 'No Package Name',
                     subtitle: TextButton(
                         onPressed: () =>
                             context.push('/artists/${package?.artistId}'),

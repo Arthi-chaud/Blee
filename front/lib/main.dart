@@ -22,13 +22,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = View.of(context).platformDispatcher.platformBrightness;
-    MaterialTheme theme = MaterialTheme();
+    final brightness = MediaQuery.of(context).platformBrightness;
     FlutterNativeSplash.remove();
     return MaterialApp.router(
       title: 'Blee',
       debugShowCheckedModeBanner: false,
-      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      theme: ThemeData.from(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: AppTheme.seed, brightness: brightness)),
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
         breakpoints: Breakpoints.getList(),

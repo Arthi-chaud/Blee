@@ -28,10 +28,7 @@ class ArtistPage extends ConsumerWidget {
           SizedBox.fromSize(size: const Size.fromHeight(16)),
           PosterPageHeader(
             isLoading: artist.value == null,
-            title: Text(
-              artist.value?.name ?? 'No Artist Name',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            title: artist.value?.name ?? 'No Artist Name',
             subtitle: null,
             thirdTitle: null,
             poster: artist.value?.poster,
