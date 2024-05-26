@@ -6,7 +6,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:blee/api/src/models/image.dart' as blee_image;
 
 class PosterPageHeader extends StatelessWidget {
-  final Widget title;
+  final String title;
   final Widget? subtitle;
   final Widget? thirdTitle;
   final blee_image.Image? poster;
@@ -21,7 +21,15 @@ class PosterPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var title = Skeletonizer(enabled: isLoading, child: this.title);
+    final isColumnView =
+        ResponsiveBreakpoints.of(context).smallerThan(BreakpointEnum.sm.name);
+    var title = Skeletonizer(
+        enabled: isLoading,
+        child: Text(
+          this.title,
+          style: Theme.of(context).textTheme.titleLarge,
+          textAlign: isColumnView ? TextAlign.center : TextAlign.left,
+        ));
     var subtitle =
         Skeletonizer(enabled: isLoading, child: this.subtitle ?? Container());
     var info = thirdTitle;
@@ -29,7 +37,7 @@ class PosterPageHeader extends StatelessWidget {
           padding: const EdgeInsets.only(left: 14),
           child: w,
         );
-    if (ResponsiveBreakpoints.of(context).smallerThan(BreakpointEnum.sm.name)) {
+    if (isColumnView) {
       return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -41,9 +49,8 @@ class PosterPageHeader extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 16, bottom: 4),
-              child: title,
-            ),
+                padding: const EdgeInsets.only(top: 16, bottom: 4),
+                child: title),
             Padding(
               padding: const EdgeInsets.only(top: 4, bottom: 8),
               child: subtitle,
