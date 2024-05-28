@@ -5,14 +5,15 @@ go 1.22.1
 require (
 	github.com/kpango/glg v1.6.15
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/swaggo/swag v1.16.3
 	github.com/u2takey/ffmpeg-go v0.5.0
-	github.com/zoriya/go-mediainfo v0.0.0-20240113011752-07018f07efae
+	gopkg.in/vansante/go-ffprobe.v2 v2.1.1
 )
+
+replace gopkg.in/vansante/go-ffprobe.v2 => github.com/Arthi-chaud/go-ffprobe v0.0.0-20240527163440-44ff105bd072
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/PuerkitoBio/purell v1.2.1 // indirect
-	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/aws/aws-sdk-go v1.53.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
@@ -29,7 +30,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
-	github.com/swaggo/swag v1.16.3 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect

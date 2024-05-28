@@ -1,12 +1,13 @@
 package parser
 
 import (
-	"strings"
-	"unicode"
+	"context"
+	"errors"
 
 	"github.com/Arthi-chaud/Blee/scanner/pkg"
 	"github.com/Arthi-chaud/Blee/scanner/pkg/models"
-	"github.com/zoriya/go-mediainfo"
+	"github.com/kpango/glg"
+	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
 type MediaInfo struct {
@@ -24,32 +25,26 @@ type MediaChapter struct {
 }
 
 func GetMediaInfo(path string) (MediaInfo, error) {
-	mi, err := mediainfo.Open(path)
+	ctx, cancelFn := context.WithCancel(context.Background())
+	defer cancelFn()
+
+	probe, err := ffprobe.ProbeURL(ctx, path)
 	if err != nil {
 		return MediaInfo{}, err
 	}
-	defer mi.Close()
+	glg.Print(probe, probe.Format, probe.Streams, probe.Chapters)
 
-	chapters_begin := pkg.ParseUint64(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_Begin"))
-	chapters_end := pkg.ParseUint64(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_End"))
-	duration := uint64(pkg.ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000)
-
-	// SRC: https://github.com/zoriya/Kyoo/blob/master/transcoder/src/info.go
+	videoStream := probe.FirstVideoStream()
+	if videoStream == nil {
+		return MediaInfo{}, errors.New("no video stream found")
+	}
 	info := MediaInfo{
-		Quality:  qualityFromHeight(pkg.ParseUint64(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))),
-		Size:     pkg.ParseUint64(mi.Parameter(mediainfo.StreamGeneral, 0, "FileSize")),
-		Duration: duration,
-		Chapters: getChapters(uint32(chapters_begin), uint32(chapters_end), mi, duration),
+		Quality:  qualityFromHeight(uint64(videoStream.Height)),
+		Size:     pkg.ParseUint64(probe.Format.Size),
+		Duration: uint64(probe.Format.DurationSeconds),
+		Chapters: formatChapters(probe),
 	}
 	return info, nil
-}
-
-func parseChapterName(name string) string {
-	index := strings.Index(name, ":")
-	if index == -1 {
-		return name
-	}
-	return name[index+1:]
 }
 
 func qualityFromHeight(height uint64) models.Quality {
@@ -62,41 +57,22 @@ func qualityFromHeight(height uint64) models.Quality {
 	return models.Other_
 }
 
-func chapterTimeIsValid(chapterTime string) bool {
-	return len(chapterTime) > 0 && unicode.IsDigit(rune(chapterTime[0]))
-}
+func formatChapters(probe *ffprobe.ProbeData) []MediaChapter {
+	if probe == nil {
+		return []MediaChapter{}
+	}
+	chapterCount := len(probe.Chapters)
+	chapters := make([]MediaChapter, len(probe.Chapters))
 
-func getChapters(chapters_begin uint32, chapters_end uint32, mi *mediainfo.File, duration uint64) []MediaChapter {
-	chapterCount := max(chapters_end-chapters_begin, 0)
-	chapterIterationCount := chapterCount
-	chapters := make([]MediaChapter, chapterCount)
-	chapterIndex := 0
-
-	for i := 0; i < int(chapterIterationCount); i++ {
-		rawStartTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
-		rawEndTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)
-		// If true, this "chapter" is invalid. We skip it
-		if !chapterTimeIsValid(rawStartTime) {
-			chapterIterationCount = chapterIterationCount + 1
-			continue
-		}
-		var endTime uint32
-		// If this fails, we probably are at the end of the video
-		// Since there would be no following chapter,
-		// we defacto set the end time to the end of the video (i.e. its duration)
-		if chapterTimeIsValid(rawEndTime) {
-			endTime = uint32(pkg.ParseTime(rawEndTime))
-		} else {
-			endTime = uint32(duration)
-		}
-		chapters[chapterIndex] = MediaChapter{
-			StartTime: uint32(pkg.ParseTime(rawStartTime)),
-			EndTime:   endTime,
-			Name:      parseChapterName(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText)),
+	for i := 0; i < chapterCount; i++ {
+		currentChapter := probe.Chapters[i]
+		chapters[i] = MediaChapter{
+			Name:      currentChapter.Tags.Title,
+			StartTime: uint32(currentChapter.StartTimeSeconds),
+			EndTime:   uint32(currentChapter.EndTimeSeconds),
 			// TODO
 			Types: []models.ChapterType{models.COther},
 		}
-		chapterIndex++
 	}
 	return chapters
 }
