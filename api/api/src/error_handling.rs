@@ -9,7 +9,9 @@ use rocket_okapi::gen::OpenApiGenerator;
 use rocket_okapi::okapi::openapi3::Responses;
 use rocket_okapi::okapi::Map;
 use rocket_okapi::response::OpenApiResponderInner;
+use rocket_okapi::util::add_schema_response;
 use rocket_okapi::OpenApiError;
+use schemars::JsonSchema;
 use sea_orm::error::DbErr;
 use sea_orm::RuntimeErr;
 use sea_orm::SqlErr;
@@ -33,7 +35,29 @@ pub struct ErrorResponse {
 	pub message: String,
 }
 
-pub type ApiResult<T> = Result<Json<T>, ApiError>;
+pub struct ApiResult<T>(pub Result<Json<T>, ApiError>);
+
+impl<'r, T: Serialize> Responder<'r, 'static> for ApiResult<T> {
+	fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+		if let Ok(r) = self.0 {
+			let serialized = serde_json::to_string(&r.0).unwrap();
+			return Response::build()
+				.header(ContentType::parse_flexible("application/json; charset=utf-8").unwrap())
+				.sized_body(serialized.len(), Cursor::new(serialized))
+				.ok();
+		}
+		self.0.err().unwrap().respond_to(req)
+	}
+}
+
+impl<T: JsonSchema> OpenApiResponderInner for ApiResult<T> {
+	fn responses(gen: &mut OpenApiGenerator) -> rocket_okapi::Result<Responses> {
+		let mut responses = Responses::default();
+		let schema = gen.json_schema::<T>();
+		add_schema_response(&mut responses, 200, "application/json", schema)?;
+		Ok(responses)
+	}
+}
 
 pub type ApiPageResult<T> = Result<Page<T>, ApiError>;
 

@@ -105,9 +105,11 @@ async fn get_movie(
 	db: Database<'_>,
 	slug_or_uuid: String,
 ) -> ApiResult<MovieResponseWithRelations> {
-	services::movie::find(&slug_or_uuid, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	ApiResult(
+		services::movie::find(&slug_or_uuid, db.into_inner())
+			.await
+			.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v))),
+	)
 }
 
 /// Get many movies

@@ -45,9 +45,11 @@ async fn get_artists(
 #[openapi(tag = "Artists")]
 #[get("/<slug_or_uuid>")]
 async fn get_artist(db: Database<'_>, slug_or_uuid: String) -> ApiResult<ArtistWithPosterResponse> {
-	services::artist::find(&slug_or_uuid, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	ApiResult(
+		services::artist::find(&slug_or_uuid, db.into_inner())
+			.await
+			.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v))),
+	)
 }
 
 /// Upload an Artist's image

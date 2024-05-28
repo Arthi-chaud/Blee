@@ -126,9 +126,11 @@ async fn new_extra(
 #[openapi(tag = "Extras")]
 #[get("/<uuid>")]
 async fn get_extra(db: Database<'_>, uuid: Uuid) -> ApiResult<ExtraResponseWithRelations> {
-	services::extra::find(&uuid, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	ApiResult(
+		services::extra::find(&uuid, db.into_inner())
+			.await
+			.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v))),
+	)
 }
 
 /// Upload an Extra's Thumbnail
