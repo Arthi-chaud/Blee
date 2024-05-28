@@ -43,7 +43,8 @@ library
       LambdaCase
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      aeson
+      HTTP
+    , aeson
     , base >=4.7 && <5
     , bytestring
     , extra

@@ -36,6 +36,7 @@ library:
   - time
   - text
   - http-client
+  - HTTP
   - http-types
   - http-client-tls
   - bytestring

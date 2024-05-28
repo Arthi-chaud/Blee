@@ -23,7 +23,14 @@ specs = describe "TMDB" $ do
                             name res `shouldBe` "Madonna"
                             originalName res `shouldBe` "Madonna"
                             profilePath res
-                                `shouldBe` Just "https://image.tmdb.org/t/p/original/8XtGxpB4z428QDgwKlFYPktYHFC.jpg"
+                                `shouldBe` Just "https://image.tmdb.org/t/p/original/8eDYXgEjiz5k3HYQX89wSjSCjzb.jpg"
+                    )
+        it "Should Search and find Artist (w/ Special character)" $ do
+            searchArtist tmdbClient "Róisín Murphy"
+                >>= ( \case
+                        Left e -> expectationFailure e
+                        Right res -> do
+                            identifier res `shouldBe` 1227390
                     )
         it "Should Fail to find band" $ do
             searchArtist tmdbClient "Garbage"
@@ -57,6 +64,13 @@ specs = describe "TMDB" $ do
                             title res `shouldBe` "The Corrs: Live at Lansdowne Road"
                             voteAverage res `shouldBe` Just 7.7
                             releaseDate res `shouldBe` Just (fromGregorian 2000 11 10)
+                    )
+        it "Should Get Package (w/ special char)" $ do
+            searchMovie tmdbClient "Björk - Cambridge"
+                >>= ( \case
+                        Left e -> expectationFailure e
+                        Right res -> do
+                            i res `shouldBe` 61084
                     )
         it "Should Get Package, with null votes (instead of 0)" $ do
             searchMovie tmdbClient "Moloko - 11,000 Clicks"

@@ -5,6 +5,8 @@ import Data.ByteString (ByteString, toStrict)
 import Data.ByteString.Char8 (pack)
 import Data.Text.Encoding (decodeUtf8)
 import Data.Version (showVersion)
+import Debug.Trace (trace)
+import Network.HTTP.Base
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Network.HTTP.Types (HeaderName, Status (Status, statusCode))
@@ -21,9 +23,7 @@ request ::
     -> IO (Either String ByteString)
 request url headers query = do
     manager <- newManager tlsManagerSettings
-    r <-
-        setQueryString ((\(a, b) -> (pack a, Just $ pack b)) <$> query)
-            <$> parseRequest url
+    r <- parseRequest $ url ++ "?" ++ urlEncodeVars query
     let h =
             requestHeaders r
                 <> [   ( "User-Agent",
