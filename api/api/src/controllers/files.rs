@@ -26,18 +26,22 @@ pub fn get_routes_and_docs(settings: &OpenApiSettings) -> (Vec<rocket::Route>, O
 #[openapi(tag = "Files")]
 #[get("/<uuid>", rank = 2)]
 async fn get_file(db: Database<'_>, uuid: Uuid) -> ApiResult<FileResponse> {
-	services::file::find(&uuid, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	ApiResult(
+		services::file::find(&uuid, db.into_inner())
+			.await
+			.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v))),
+	)
 }
 
 /// Get a Single File By Path
 #[openapi(tag = "Files")]
 #[get("/<path>", rank = 3)]
 async fn get_file_by_path(db: Database<'_>, path: String) -> ApiResult<FileResponse> {
-	services::file::find_by_path(&path, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	ApiResult(
+		services::file::find_by_path(&path, db.into_inner())
+			.await
+			.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v))),
+	)
 }
 
 /// Update a Single File
@@ -49,9 +53,11 @@ async fn update_file(
 	update_dto: Json<UpdateFile>,
 	_scanner: ScannerAuthGuard,
 ) -> ApiResult<FileResponse> {
-	services::file::update(&uuid, &update_dto, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v.into())))
+	ApiResult(
+		services::file::update(&uuid, &update_dto, db.into_inner())
+			.await
+			.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v.into()))),
+	)
 }
 
 /// Get delete a File, along with the related resources if needed (images,

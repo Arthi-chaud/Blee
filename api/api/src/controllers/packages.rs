@@ -29,9 +29,11 @@ async fn get_package(
 	db: Database<'_>,
 	slug_or_uuid: String,
 ) -> ApiResult<PackageResponseWithRelations> {
-	services::package::find(&slug_or_uuid, db.into_inner())
-		.await
-		.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v)))
+	ApiResult(
+		services::package::find(&slug_or_uuid, db.into_inner())
+			.await
+			.map_or_else(|e| Err(ApiError::from(e)), |v| Ok(Json(v))),
+	)
 }
 
 /// Get many packages
