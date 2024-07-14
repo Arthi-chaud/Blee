@@ -12,10 +12,12 @@
   "dependencies": {
     "nuxt": "^3.12.3",
     "nuxt-primevue": "^3.0.0",
-    "vue": "latest"
+    "vue": "latest",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@nuxt/eslint": "^0.3.13",
+    "prettier": "^3.3.3",
     "typescript": "^5.5.3",
     "vue-tsc": "^1"
   },
