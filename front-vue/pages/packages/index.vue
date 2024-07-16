@@ -9,8 +9,10 @@ const { data, suspense } = useQuery(
 onServerPrefetch(async () => {
     await suspense();
 });
-
 </script>
 <template>
     <span>Item count: {{ data?.items.length }}</span>
+    <div class="p-4">
+        <button class="btn">Hello daisyUI</button>
+    </div>
 </template>

@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.1",
     "@tanstack/vue-query": "^5.51.1",
     "nuxt": "^3.12.3",
     "type-fest": "^4.21.0",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^0.3.13",
+    "daisyui": "^4.12.10",
     "prettier": "^3.3.3",
     "typescript": "^5.5.3",
     "vue-tsc": "^1"
