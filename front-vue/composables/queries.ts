@@ -11,7 +11,7 @@ import type {
 
 const useInfiniteQuery = <ReturnType>(
     query: PaginatedQuery<ReturnType>,
-    options: PaginatedQueryOptions<ReturnType>,
+    options?: PaginatedQueryOptions<ReturnType>,
 ) => {
     return tanstack.useInfiniteQuery<
         PaginatedResponse<ReturnType>,
@@ -41,7 +41,7 @@ const useInfiniteQuery = <ReturnType>(
 
 const useQuery = <ReturnType>(
     query: Query<ReturnType>,
-    options: QueryOptions<ReturnType>,
+    options?: QueryOptions<ReturnType>,
 ) => {
     return tanstack.useQuery<ReturnType, Error, ReturnType, tanstack.QueryKey>({
         ...options,

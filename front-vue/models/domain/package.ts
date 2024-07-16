@@ -6,7 +6,7 @@ const Package = Resource.concat(
     yup.object({
         name: yup.string().required(),
         slug: yup.string().required(),
-        release_date: yup.date().required().nullable(),
+        release_year: yup.date().required().nullable(),
         artist_id: yup.string().required().nullable(),
         artist_name: yup.string().required().nullable(),
         poster: Image.required().nullable(),

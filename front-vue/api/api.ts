@@ -11,7 +11,7 @@ type Sort<T extends string> = {
 };
 class API {
     public static readonly defaultPageSize = 20;
-    
+
     static getPackages(
         filter: { artistUuid?: string },
         sort: Sort<PackageSortingKeys>,
@@ -58,7 +58,11 @@ class API {
         const headers = {
             "Content-Type": "application/json",
         };
-        const url = new URL(route);
+        const host =
+            typeof window == "undefined" // Is SSR
+                ? process.env.SSR_SERVER_URL
+                : `/api`;
+        const url = new URL(`${host}${route}`);
         Object.entries(options.query ?? {}).forEach(([key, value]) =>
             url.searchParams.append(key, value.toString()),
         );
