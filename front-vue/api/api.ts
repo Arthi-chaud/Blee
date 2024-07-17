@@ -58,10 +58,7 @@ class API {
         const headers = {
             "Content-Type": "application/json",
         };
-        const host =
-            typeof window == "undefined" // Is SSR
-                ? process.env.SSR_SERVER_URL
-                : `/api`;
+        const host = isSSR() ? process.env.SSR_SERVER_URL : `/api`;
         const url = new URL(`${host}${route}`);
         Object.entries(options.query ?? {}).forEach(([key, value]) =>
             url.searchParams.append(key, value.toString()),

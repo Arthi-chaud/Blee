@@ -11,8 +11,8 @@ onServerPrefetch(async () => {
 });
 </script>
 <template>
-    <span>Item count: {{ data?.items.length }}</span>
-    <div class="p-4">
-        <button class="btn">Hello daisyUI</button>
+    <div class="w-96 h-96 bg-red-50">
+        <PackageItem :package="data?.items.at(0)"/>
     </div>
+    <span>Item count: {{ data?.items.length }}</span>
 </template>
