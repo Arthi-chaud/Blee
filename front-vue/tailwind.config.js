@@ -2,7 +2,11 @@
 export default {
     content: [],
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                rubik: ["Rubik", "sans-serif"],
+            },
+        },
     },
     plugins: [require("daisyui")],
 };

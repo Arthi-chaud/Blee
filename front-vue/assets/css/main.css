@@ -1,0 +1,8 @@
+:root {
+	font-family: "Rubik";
+}
+
+@font-face {
+    font-family: 'Rubik';
+    src: url('/public/fonts/rubik.ttf')  format('truetype')
+}
