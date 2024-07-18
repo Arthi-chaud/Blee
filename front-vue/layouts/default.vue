@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { faCog, faUser, faFilm, faTv } from "@fortawesome/free-solid-svg-icons";
-
 const routes = ref([
-    { path: "/artists", label: "Artists", icon: faUser },
-    { path: "/packages", label: "Movies", icon: faFilm },
-    { path: "/extras", label: "Videos", icon: faTv },
-    { path: "/settings", label: "Settings", icon: faCog },
+    { path: "/artists", label: "Artists", icon: "user" },
+    { path: "/packages", label: "Movies", icon: "film" },
+    { path: "/extras", label: "Videos", icon: "tv" },
+    { path: "/settings", label: "Settings", icon: "cog" },
 ]);
 const router = useRouter();
 const path = computed(() => router.currentRoute.value.path);
