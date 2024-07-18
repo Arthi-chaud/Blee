@@ -2,10 +2,8 @@
 export default defineNuxtConfig({
     compatibilityDate: "2024-04-03",
     devtools: { enabled: true },
-    modules: ["@nuxt/eslint", "@nuxtjs/tailwindcss"],
-    css: [
-        '@/assets/css/main.css',
-    ],
+    modules: ["@nuxt/eslint", "@nuxtjs/tailwindcss", "@vesp/nuxt-fontawesome"],
+    css: ["@/assets/css/main.css"],
     components: [
         {
             path: "~/components",
@@ -18,4 +16,10 @@ export default defineNuxtConfig({
                   "/api/**": { proxy: `${process.env.SSR_SERVER_URL!}/**` },
               }
             : {},
+    fontawesome: {
+        component: "fa",
+        icons: {
+            solid: ["cog", "user", "film", "tv"],
+        },
+    },
 });
