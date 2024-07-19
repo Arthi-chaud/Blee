@@ -11,8 +11,5 @@ onServerPrefetch(async () => {
 });
 </script>
 <template>
-    <div class="w-96 h-96 bg-red-50">
-        <PackageItem :package="data?.items.at(0)"/>
-    </div>
-    <span>Item count: {{ data?.items.length }}</span>
+    <div>Package  count: {{ data?.items.length }}</div>
 </template>

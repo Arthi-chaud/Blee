@@ -4,6 +4,11 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     modules: ["@nuxt/eslint", "@nuxtjs/tailwindcss", "@vesp/nuxt-fontawesome"],
     css: ["@/assets/css/main.css"],
+    app: {
+        head: {
+            title: "Blee",
+        },
+    },
     components: [
         {
             path: "~/components",
