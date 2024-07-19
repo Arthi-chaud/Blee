@@ -17,19 +17,19 @@ const path = computed(() => router.currentRoute.value.path);
         </a>
     </div>
     <div class="w-full h-full flex flex-row">
-        <div class="sidenav px-2">
+        <nav class="sidenav px-2">
             <a
-                class="btn btn-ghost p-2 !h-auto flex flex-col"
+                class="btn btn-ghost no-animation p-2 !h-auto flex flex-col mb-2"
                 :class="{ 'font-normal': item.path != path }"
                 v-for="item in routes"
                 :href="item.path"
             >
                 <fa :icon="item.icon" />
-                <span class="pt-1">
+                <span class="pt-0.5">
                     {{ item.label }}
                 </span>
             </a>
-        </div>
+        </nav>
         <div class="w-full h-full">
             <slot />
         </div>
