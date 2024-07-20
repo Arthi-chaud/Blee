@@ -3,7 +3,6 @@ import type { Image } from "~/models/domain/image";
 import { ref } from "vue";
 const { image } = defineProps<{
     expectedAspectRatio: number;
-    href: string | null;
     image: Image | undefined | null;
     disableBorderRadius?: boolean;
     fitToExpectedAspectRatio?: true;
