@@ -14,11 +14,14 @@
     .poster-grid {
         @apply grid;
         @apply gap-3;
+        @apply pb-10;
         @apply grid-cols-3;
         @apply sm:grid-cols-4;
         @apply md:grid-cols-6;
         @apply lg:grid-cols-7;
         @apply xl:grid-cols-8;
+        /* hotfix, last row can overflow */
+        padding-bottom: 6rem;
     }
     .poster-rounded {
         @apply rounded-lg;

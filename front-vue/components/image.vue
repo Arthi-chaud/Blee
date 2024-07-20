@@ -8,20 +8,19 @@ const { image } = defineProps<{
     fitToExpectedAspectRatio?: true;
 }>();
 
+//todo blurhash
+// const blurashURL = computed(() =>
+//     isSSR() ? null : blurHashToDataURL(image?.blurhash),
+// );
+
 // If SSR, we wont receive event 'on loaded'.
 // In that case, we'll consider the image to be loaded already
 const imageIsLoaded = ref(isSSR() ? true : false);
-const blurashURL = computed(() =>
-    isSSR() ? null : blurHashToDataURL(image?.blurhash),
-);
 </script>
 <template>
-    <div
-        :class="{ [`aspect-${expectedAspectRatio}`]: true }"
-        class="w-full h-full flex align-center justify-center"
-    >
+    <div :class="{ [`aspect-[${expectedAspectRatio}]`]: true }">
         <div
-            class="poster-rounded"
+            class="poster-rounded flex align-end justify-center"
             :style="{
                 aspectRatio: image?.aspect_ratio,
             }"
@@ -35,11 +34,11 @@ const blurashURL = computed(() =>
                     }"
                     @load="() => (imageIsLoaded = true)"
                 />
-                <img
+                <!-- <img
                     v-if="blurashURL && !imageIsLoaded"
                     :src="blurashURL"
                     class="h-full w-full"
-                />
+                /> -->
                 <div
                     class="h-full w-full"
                     :style="{ backgroundColor: image?.colors?.at(0) }"

@@ -11,7 +11,7 @@ const path = computed(() => router.currentRoute.value.path);
 </script>
 <template>
     <div class="h-screen w-screen overflow-clip">
-        <div class="pl-4 navbar bg-base-100">
+        <div class="pl-4 navbar">
             <NuxtLink :to="homeRoute" class="navbar-start">
                 <img src="/icon.png" class="h-10" />
                 <span class="ml-4 text-xl">Blee</span>
@@ -33,7 +33,7 @@ const path = computed(() => router.currentRoute.value.path);
                     </NuxtLink>
                 </nav>
             </div>
-            <div class="w-full h-full overflow-scroll">
+            <div class="w-full h-auto overflow-scroll">
                 <slot />
             </div>
             <div class="btm-nav sm:hidden">
