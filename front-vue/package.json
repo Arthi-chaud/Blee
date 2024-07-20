@@ -13,6 +13,7 @@
     "@nuxtjs/tailwindcss": "^6.12.1",
     "@tanstack/vue-query": "^5.51.1",
     "@vesp/nuxt-fontawesome": "^1.0.4",
+    "blurhash": "^2.0.5",
     "nuxt": "^3.12.3",
     "type-fest": "^4.21.0",
     "vue": "latest",

@@ -11,5 +11,9 @@ onServerPrefetch(async () => {
 });
 </script>
 <template>
-    <div>Package  count: {{ data?.items.length }}</div>
+    <div class="poster-grid w-full">
+        <div v-for="item in data?.items" :key="item.id">
+            <PackageItem :package="item" />
+        </div>
+    </div>
 </template>

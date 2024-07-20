@@ -3045,6 +3045,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"blurhash@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "blurhash@npm:2.0.5"
+  checksum: 10c0/75d5f042b5bb8ead977524a985048378a033af866534abbaee73c80030cc9fc34e6c5b7d483c68bbdb600e0ae438f2ea6140b1f46d75fcfa57a902208ae8b85e
+  languageName: node
+  linkType: hard
+
 "boolbase@npm:^1.0.0":
   version: 1.0.0
   resolution: "boolbase@npm:1.0.0"
@@ -6886,6 +6893,7 @@ __metadata:
     "@nuxtjs/tailwindcss": "npm:^6.12.1"
     "@tanstack/vue-query": "npm:^5.51.1"
     "@vesp/nuxt-fontawesome": "npm:^1.0.4"
+    blurhash: "npm:^2.0.5"
     daisyui: "npm:^4.12.10"
     nuxt: "npm:^3.12.3"
     prettier: "npm:^3.3.3"

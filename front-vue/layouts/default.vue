@@ -17,7 +17,7 @@ const path = computed(() => router.currentRoute.value.path);
         </a>
     </div>
     <div class="w-full h-full flex flex-row">
-        <div class="hidden md:flex">
+        <div class="hidden sm:flex">
             <nav class="sidenav px-2">
                 <a
                     class="btn btn-ghost no-animation p-2 !h-auto flex flex-col mb-2"
@@ -34,7 +34,7 @@ const path = computed(() => router.currentRoute.value.path);
         </div>
         <div class="w-full h-full">
             <slot />
-            <div class="btm-nav md:hidden">
+            <div class="btm-nav sm:hidden">
                 <a
                     :class="{ active: item.path == path }"
                     v-for="item in routes"

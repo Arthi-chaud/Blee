@@ -1,8 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 :root {
-	font-family: "Rubik";
+    font-family: "Rubik";
 }
 
 @font-face {
-    font-family: 'Rubik';
-    src: url('/public/fonts/rubik.ttf')  format('truetype')
+    font-family: "Rubik";
+    src: url("/public/fonts/rubik.ttf") format("truetype");
+}
+
+@layer utilities {
+    .poster-grid {
+        @apply grid;
+        @apply gap-3;
+        @apply grid-cols-3;
+        @apply sm:grid-cols-4;
+        @apply md:grid-cols-6;
+        @apply lg:grid-cols-8;
+        @apply xl:grid-cols-9;
+    }
+    .poster-rounded {
+        @apply rounded-lg;
+        overflow: hidden;
+    }
+    .poster-skeleton {
+        @apply skeleton;
+        @apply poster-rounded;
+    }
 }
