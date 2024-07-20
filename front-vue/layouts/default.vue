@@ -17,21 +17,35 @@ const path = computed(() => router.currentRoute.value.path);
         </a>
     </div>
     <div class="w-full h-full flex flex-row">
-        <nav class="sidenav px-2">
-            <a
-                class="btn btn-ghost no-animation p-2 !h-auto flex flex-col mb-2"
-                :class="{ 'font-normal': item.path != path }"
-                v-for="item in routes"
-                :href="item.path"
-            >
-                <fa :icon="item.icon" />
-                <span class="pt-0.5">
-                    {{ item.label }}
-                </span>
-            </a>
-        </nav>
+        <div class="hidden md:flex">
+            <nav class="sidenav px-2">
+                <a
+                    class="btn btn-ghost no-animation p-2 !h-auto flex flex-col mb-2"
+                    :class="{ 'font-normal': item.path != path }"
+                    v-for="item in routes"
+                    :href="item.path"
+                >
+                    <fa :icon="item.icon" />
+                    <span class="pt-0.5">
+                        {{ item.label }}
+                    </span>
+                </a>
+            </nav>
+        </div>
         <div class="w-full h-full">
             <slot />
+            <div class="btm-nav md:hidden">
+                <a
+                    :class="{ active: item.path == path }"
+                    v-for="item in routes"
+                    :href="item.path"
+                >
+                    <fa :icon="item.icon" />
+                    <span class="pt-0.5">
+                        {{ item.label }}
+                    </span>
+                </a>
+            </div>
         </div>
     </div>
 </template>
