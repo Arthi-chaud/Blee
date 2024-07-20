@@ -17,8 +17,8 @@
         @apply grid-cols-3;
         @apply sm:grid-cols-4;
         @apply md:grid-cols-6;
-        @apply lg:grid-cols-8;
-        @apply xl:grid-cols-9;
+        @apply lg:grid-cols-7;
+        @apply xl:grid-cols-8;
     }
     .poster-rounded {
         @apply rounded-lg;
