@@ -10,7 +10,7 @@ type Sort<T extends string> = {
     order: "asc" | "desc";
 };
 class API {
-    public static readonly defaultPageSize = 20;
+    public static readonly defaultPageSize = 25;
 
     static getPackages(
         filter: { artistUuid?: string },
@@ -63,6 +63,10 @@ class API {
         Object.entries(options.query ?? {}).forEach(([key, value]) =>
             url.searchParams.append(key, value.toString()),
         );
+        // HotFix, as pageParams if null for first page
+        if (!url.searchParams.get("take")) {
+            url.searchParams.set("take", API.defaultPageSize.toString());
+        }
         const response = await fetch(url, {
             method: options.method ?? "GET",
             body: options.body ? JSON.stringify(options.body) : undefined,
