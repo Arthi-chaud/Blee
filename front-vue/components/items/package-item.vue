@@ -28,7 +28,7 @@ const secondaryTitle = computed(() =>
         <div
             class="aspect-[2/3] flex items-end hover:scale-105 transition-transform duration-200"
         >
-            <NuxtLink :to="packageLink">
+            <NuxtLink :to="packageLink" class="h-full w-full">
                 <Image :image="package?.poster" :expectedAspectRatio="2 / 3" />
             </NuxtLink>
         </div>

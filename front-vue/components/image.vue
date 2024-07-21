@@ -18,9 +18,9 @@ const { image } = defineProps<{
 const imageIsLoaded = ref(isSSR() ? true : false);
 </script>
 <template>
-    <div :class="{ [`aspect-[${expectedAspectRatio}]`]: true }">
+    <div :class="{ [`aspect-[${expectedAspectRatio}]`]: true }" class="h-full w-full">
         <div
-            class="poster-rounded flex align-end justify-center"
+            class="poster-rounded flex align-end justify-center h-full w-full"
             :style="{
                 aspectRatio: image?.aspect_ratio,
             }"
@@ -44,7 +44,8 @@ const imageIsLoaded = ref(isSSR() ? true : false);
                     :style="{ backgroundColor: image?.colors?.at(0) }"
                 />
             </template>
-            <div v-else class="poster-skeleton w-full h-full"></div>
+            <div v-else-if="image === undefined" class="poster-skeleton w-full h-full"></div>
+            <div v-else-if="image === null" class="w-full h-full bg-base-300"></div>
         </div>
     </div>
 </template>
