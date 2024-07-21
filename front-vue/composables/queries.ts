@@ -13,7 +13,7 @@ const useInfiniteQuery = <ReturnType>(
     query: PaginatedQuery<ReturnType>,
     options?: PaginatedQueryOptions<ReturnType>,
 ) => {
-    return tanstack.useInfiniteQuery<
+    const res = tanstack.useInfiniteQuery<
         PaginatedResponse<ReturnType>,
         Error,
         tanstack.InfiniteData<PaginatedResponse<ReturnType>, PageParameter>,
@@ -22,7 +22,7 @@ const useInfiniteQuery = <ReturnType>(
     >({
         ...options,
         queryKey: query.queryKey,
-        queryFn: query.queryFn,
+        queryFn: ({ pageParam }) => query.queryFn(pageParam),
         getNextPageParam: (lastPage, _, lastPageParam) => {
             if (lastPage.metadata.next == null) {
                 return undefined;
@@ -37,17 +37,27 @@ const useInfiniteQuery = <ReturnType>(
             take: API.defaultPageSize,
         },
     });
+
+    onServerPrefetch(res.suspense);
+    return res;
 };
 
 const useQuery = <ReturnType>(
     query: Query<ReturnType>,
     options?: QueryOptions<ReturnType>,
 ) => {
-    return tanstack.useQuery<ReturnType, Error, ReturnType, tanstack.QueryKey>({
+    const res = tanstack.useQuery<
+        ReturnType,
+        Error,
+        ReturnType,
+        tanstack.QueryKey
+    >({
         ...options,
         queryKey: query.queryKey,
         queryFn: query.queryFn,
     });
+    onServerPrefetch(res.suspense);
+    return res;
 };
 
 export { useInfiniteQuery, useQuery };

@@ -15,11 +15,7 @@ type QueryOptions<ReturnType> = Omit<
 
 type PaginatedQuery<ReturnType> = {
     queryKey: tanstack.QueryKey;
-    queryFn: tanstack.QueryFunction<
-        PaginatedResponse<ReturnType>,
-        tanstack.QueryKey,
-        PageParameter
-    >;
+    queryFn: (page: PageParameter) => Promise<PaginatedResponse<ReturnType>>;
 };
 
 type PaginatedQueryOptions<ReturnType> = Omit<

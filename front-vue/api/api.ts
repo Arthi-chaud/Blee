@@ -31,7 +31,7 @@ class API {
         const params = { ...sort, ...filter };
         return {
             queryKey: this.buildQueryKey(route, params),
-            queryFn: ({ pageParam }) =>
+            queryFn: (pageParam) =>
                 this._fetch(route, {
                     query: { ...params, ...pageParam },
                     validator: PaginatedResponse(Package),
@@ -46,10 +46,10 @@ class API {
     ) {
         return [
             ...route.split("/"),
-            Object.entries(queryParams ?? {}).map(
+            ...Object.entries(queryParams ?? {}).map(
                 ([key, value]) => `${key}=${value}`,
             ),
-        ];
+        ].filter((v) => v.length > 0);
     }
 
     private static async _fetch<ReturnType>(
@@ -63,60 +63,63 @@ class API {
         } & RequireExactlyOne<{
             emptyResponse: true;
             validator: Schema<ReturnType>;
-            customValidator: (value: unknown) => Promise<ReturnType>;
         }>,
     ) {
         const headers = {
             "Content-Type": "application/json",
         };
-        const host = isSSR() ? process.env.SSR_SERVER_URL : `/api`;
-        const url = new URL(`${host}${route}`);
+        const host = `/api`;
+        let url = `${host}${route}?`;
+        if (options.query) {
+            url = url.concat('?')
+        }
         Object.entries(options.query ?? {}).forEach(([key, value]) =>
-            url.searchParams.append(key, value.toString()),
+            url = url.concat(`${key}=${value}&`),
         );
         // HotFix, as pageParams if null for first page
-        if (!url.searchParams.get("take")) {
-            url.searchParams.set("take", API.defaultPageSize.toString());
+        if (!options.query?.take) {
+            url = url.concat(`take=${API.defaultPageSize.toString()}`);
         }
-        const response = await $fetch.raw(url.toString(), {
+        return $fetch(url, {
             method: options.method ?? "GET",
             parseResponse: (txt) =>
-                options.emptyResponse ? undefined : JSON.parse(txt),
+                options.emptyResponse ? txt : JSON.parse(txt),
+            onResponseError: (e) => {
+                const jsonResponse = e.response as Record<string, any>;
+                switch (e.response.status) {
+                    case 404:
+                        throw new Error(
+                            options.errorMessage ??
+                                jsonResponse.message ??
+                                e.response.statusText,
+                        );
+                    default:
+                        if (!jsonResponse.ok) {
+                            throw new Error(
+                                options.errorMessage ??
+                                    jsonResponse.message ??
+                                    e.response.statusText,
+                            );
+                        }
+                }
+            },
             body: options.body ? JSON.stringify(options.body) : undefined,
             headers,
-        });
-        const jsonResponse = response._data as Record<string, string>;
-        switch (response.status) {
-            case 404:
-                throw new Error(
-                    options.errorMessage ??
-                        jsonResponse.message ??
-                        response.statusText,
-                );
-            default:
-                if (!response.ok) {
-                    throw new Error(
-                        options.errorMessage ??
-                            jsonResponse.message ??
-                            response.statusText,
-                    );
-                }
-        }
-        if (options.emptyResponse) {
-            return {} as ReturnType;
-        }
-        try {
-            if (options.customValidator) {
-                return await options.customValidator(jsonResponse);
-            }
-            const validated = await options.validator.validate(jsonResponse);
+        }).then((response) => {
+            const jsonResponse = response as Record<string, any>;
 
-            return options.validator.cast(validated);
-        } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error(jsonResponse, err);
-            throw new Error("Error: Invalid Response Type");
-        }
+            if (options.emptyResponse) {
+                return {} as ReturnType;
+            }
+            try {
+                const validated = options.validator.validateSync(jsonResponse);
+                return options.validator.cast(validated);
+            } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error(jsonResponse, err);
+                throw new Error("Error: Invalid Response Type");
+            }
+        });
     }
 }
 export { API };
