@@ -1,9 +1,10 @@
 import type { QueryFunction, QueryOptions } from "@tanstack/vue-query";
 import type { RequireExactlyOne } from "type-fest";
 import type { Schema } from "yup";
+import { Artist } from "~/models/domain/artist";
 import { Package, type PackageSortingKeys } from "~/models/domain/package";
 import PaginatedResponse from "~/models/domain/page";
-import type { PageParameter, PaginatedQuery } from "~/models/queries";
+import type { PageParameter, PaginatedQuery, Query } from "~/models/queries";
 
 type Sort<T extends string> = {
     sortBy: T;
@@ -12,6 +13,16 @@ type Sort<T extends string> = {
 class API {
     public static readonly defaultPageSize = 25;
 
+    static getArtist(artistUuid: string): Query<Artist> {
+        const route = `/artists/${artistUuid}`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: () =>
+                this._fetch(route, {
+                    validator: Artist,
+                }),
+        };
+    }
     static getPackages(
         filter: { artistUuid?: string },
         sort: Sort<PackageSortingKeys>,
@@ -46,7 +57,7 @@ class API {
         options: {
             query?: Record<string, string | number>;
             body?: Object;
-            method?: string;
+            method?: "GET" | "POST";
             errorMessage?: string;
             pagination?: PageParameter;
         } & RequireExactlyOne<{
@@ -67,17 +78,14 @@ class API {
         if (!url.searchParams.get("take")) {
             url.searchParams.set("take", API.defaultPageSize.toString());
         }
-        const response = await fetch(url, {
+        const response = await $fetch.raw(url.toString(), {
             method: options.method ?? "GET",
+            parseResponse: (txt) =>
+                options.emptyResponse ? undefined : JSON.parse(txt),
             body: options.body ? JSON.stringify(options.body) : undefined,
             headers,
         });
-        const jsonResponse = options.emptyResponse
-            ? undefined
-            : await response.json().catch(() => {
-                  throw new Error("Error while parsing Server's response");
-              });
-
+        const jsonResponse = response._data as Record<string, string>;
         switch (response.status) {
             case 404:
                 throw new Error(
