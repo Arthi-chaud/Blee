@@ -17,7 +17,7 @@ const _ = useInfiniteScroll(
             await fetchNextPage();
         }
     },
-    { distance: 10, canLoadMore: () => hasNextPage.value },
+    { distance: 100, canLoadMore: () => hasNextPage.value },
 );
 </script>
 <template>

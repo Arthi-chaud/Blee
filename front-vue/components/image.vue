@@ -9,16 +9,18 @@ const { image } = defineProps<{
 }>();
 
 //todo blurhash
-// const blurashURL = computed(() =>
-//     isSSR() ? null : blurHashToDataURL(image?.blurhash),
-// );
+const blurashURL = computed(() => blurHashToDataURL(image?.blurhash));
 
-// If SSR, we wont receive event 'on loaded'.
-// In that case, we'll consider the image to be loaded already
-const imageIsLoaded = ref(isSSR() ? true : false);
+const imageIsLoaded = ref(false);
 </script>
 <template>
-    <div :class="{ [`aspect-[${expectedAspectRatio}]`]: true }" class="h-full w-full">
+    <div
+        :class="{
+            [`aspect-[${expectedAspectRatio}]`]: true,
+            'h-full': image === null,
+            'w-full': image === null,
+        }"
+    >
         <div
             class="poster-rounded flex align-end justify-center h-full w-full"
             :style="{
@@ -27,25 +29,27 @@ const imageIsLoaded = ref(isSSR() ? true : false);
         >
             <template v-if="image">
                 <img
-                    :class="{ opacity: imageIsLoaded ? 1 : 0 }"
                     :src="'/api/images/' + image.id"
                     :style="{
-                        transition: 'opacity 0.5s linear',
+                        opacity: isSSR() || imageIsLoaded ? 1 : 0,
+                        transition: 'opacity 0.2s ease-in',
                     }"
-                    @load="() => (imageIsLoaded = true)"
+                    @load="imageIsLoaded = true"
                 />
                 <!-- <img
                     v-if="blurashURL && !imageIsLoaded"
                     :src="blurashURL"
                     class="h-full w-full"
                 /> -->
-                <div
-                    class="h-full w-full"
-                    :style="{ backgroundColor: image?.colors?.at(0) }"
-                />
             </template>
-            <div v-else-if="image === undefined" class="poster-skeleton w-full h-full"></div>
-            <div v-else-if="image === null" class="w-full h-full bg-base-300"></div>
+            <div
+                v-else-if="image === undefined"
+                class="poster-skeleton w-full h-full"
+            ></div>
+            <div
+                v-else-if="image === null"
+                class="w-full h-full bg-base-300"
+            ></div>
         </div>
     </div>
 </template>
