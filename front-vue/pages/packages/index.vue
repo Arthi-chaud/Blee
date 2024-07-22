@@ -6,9 +6,10 @@ const { data, hasNextPage, fetchNextPage } = useInfiniteQuery(
     API.getPackages({}, { sortBy: "name", order: "asc" }),
 );
 
-const items = computed(() =>
+const items = computed(() => 
     data.value?.pages.map(({ items }) => items).flat(),
 );
+const skeletons = computed(() => hasNextPage ? [1, 2] : [])
 const _ = useInfiniteScroll(
     //TODO Make this cleaner
     document ? document.getElementById("el") : undefined,
@@ -27,6 +28,12 @@ const _ = useInfiniteScroll(
                 :package="item"
                 v-for="item in items"
                 :key="item.id"
+                class="h-full"
+            />
+            <PackageItem
+                :package="undefined"
+                v-if="hasNextPage"
+                v-for="_ in skeletons"
                 class="h-full"
             />
         </div>

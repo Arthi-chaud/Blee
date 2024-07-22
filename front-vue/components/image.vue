@@ -17,8 +17,8 @@ const imageIsLoaded = ref(false);
     <div
         :class="{
             [`aspect-[${expectedAspectRatio}]`]: true,
-            'h-full': image === null,
-            'w-full': image === null,
+            'h-full': !image,
+            'w-full': !image,
         }"
     >
         <div

@@ -31,4 +31,8 @@
         @apply skeleton;
         @apply poster-rounded;
     }
+
+    .w-half {
+        width: 50%;
+    }
 }
