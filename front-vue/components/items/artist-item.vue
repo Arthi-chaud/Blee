@@ -6,7 +6,7 @@ const { artist } = defineProps<{
     artist: Artist | undefined;
 }>();
 const artistLink = ref(
-    artist ? `/artists/${artist.id}` : undefined,
+    artist ? `/artists/${artist.id}` : null,
 );
 </script>
 <template>
@@ -15,5 +15,6 @@ const artistLink = ref(
         :href="artistLink"
         :image="artist?.poster"
         :secondaryTitle="null"
+        :secondaryHref="null"
     />
 </template>

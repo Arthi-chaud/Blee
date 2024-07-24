@@ -23,7 +23,9 @@ const imageIsLoaded = ref(false);
         <div
             class="poster-rounded flex align-end justify-center h-full w-full relative"
             :style="{
-                aspectRatio: image?.aspect_ratio,
+                aspectRatio: fitToExpectedAspectRatio
+                    ? undefined
+                    : image?.aspect_ratio,
             }"
         >
             <template v-if="image">

@@ -7,13 +7,13 @@ const props = defineProps<{
     formatSecondaryTitle?: (p: Package) => string;
 }>();
 const packageLink = ref(
-    props.package ? `/packages/${props.package?.id}` : undefined,
+    props.package ? `/packages/${props.package?.id}` : null,
 );
 const secondaryHref = computed(() =>
     props.secondaryHref === null
-        ? undefined
+        ? null
         : (props.secondaryHref ??
-          (props.package ? `/artists/${props.package?.artist_id}` : undefined)),
+          (props.package ? `/artists/${props.package?.artist_id}` : null)),
 );
 const secondaryTitle = computed(() =>
     props.package

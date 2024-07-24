@@ -91,10 +91,6 @@ class API {
         Object.entries(options.query ?? {}).forEach(([key, value]) =>
             url = url.concat(`${key}=${value}&`),
         );
-        // HotFix, as pageParams if null for first page
-        if (!options.query?.take) {
-            url = url.concat(`take=${API.defaultPageSize.toString()}`);
-        }
         return $fetch(url, {
             method: options.method ?? "GET",
             parseResponse: (txt) =>

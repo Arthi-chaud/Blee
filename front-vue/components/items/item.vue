@@ -3,10 +3,10 @@ import type { Image } from "~/models/domain/image";
 
 defineProps<{
     title: string | undefined;
-    href: string | undefined;
+    href: string | null;
     image: Image | null | undefined;
     secondaryTitle: string | undefined | null;
-    secondaryHref?: string | null;
+    secondaryHref: string | null;
 }>();
 </script>
 <template>
@@ -18,10 +18,10 @@ defineProps<{
             class="aspect-[2/3] flex items-end hover:scale-105 transition-transform duration-200"
         >
             <NuxtLink
-                :to="href"
+                :to="href ?? undefined"
                 class="h-full w-full flex items-end"
             >
-                <Image :image="image" :expectedAspectRatio="2 / 3" />
+                <Image :image="image" :expectedAspectRatio="2 / 3" fitToExpectedAspectRatio />
             </NuxtLink>
         </div>
         <div
@@ -29,9 +29,9 @@ defineProps<{
             :class="{ 'pl-2': title !== undefined }"
         >
             <Transition>
-                <NuxtLink v-if="title" :to="href ?? undefined">
+                <NuxtLink v-if="title" :to="href ?? undefined" class="w-full">
                     <p
-                        class="line-clamp-1 break-all hover:underline cursor-pointer"
+                        class="line-clamp-1 break-all hover:underline cursor-pointer w-full"
                     >
                         {{ title }}
                     </p>
@@ -40,11 +40,12 @@ defineProps<{
             </Transition>
             <Transition>
                 <NuxtLink
-                    v-if="secondaryTitle !== undefined"
+                    v-if="secondaryTitle"
                     :to="secondaryHref ?? undefined"
+                    class="w-full"
                 >
                     <p
-                        class="line-clamp-1 font-light break-all"
+                        class="line-clamp-1 font-light break-all w-full"
                         :class="{
                             'hover:underline': secondaryHref != undefined,
                         }"
@@ -52,7 +53,7 @@ defineProps<{
                         {{ secondaryTitle }}
                     </p>
                 </NuxtLink>
-                <p v-else class="skeleton h-3.5 w-half"></p>
+                <p v-else-if="secondaryTitle === undefined" class="skeleton h-3.5 w-half"></p>
             </Transition>
         </div>
     </div>
