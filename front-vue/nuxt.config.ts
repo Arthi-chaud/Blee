@@ -20,12 +20,9 @@ export default defineNuxtConfig({
             pathPrefix: false,
         },
     ],
-    routeRules:
-        process.env.NODE_ENV !== "production"
-            ? {
-                  "/api/**": { proxy: `${process.env.SSR_SERVER_URL!}/**` },
-              }
-            : {},
+    routeRules: {
+        "/api/**": { proxy: `${process.env.SSR_SERVER_URL!}/**` },
+    },
     fontawesome: {
         component: "fa",
         icons: {

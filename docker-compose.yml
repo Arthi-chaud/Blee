@@ -16,13 +16,13 @@ x-transcoder: &transcoder-base
 services:
   front:
     build:
-      context: ./front
+      context: ./front-vue
     restart: on-failure
     depends_on:
       api:
         condition: service_healthy
     environment:
-      - PORT=3000
+      - SSR_SERVER_URL=http://api:8000
     ports:
       - "3000:3000"
   api:

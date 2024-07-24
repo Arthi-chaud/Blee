@@ -30,8 +30,6 @@ ENV NODE_ENV production
 ENV NITRO_PORT 3000
 ENV NITRO_HOST "0.0.0.0"
 
-COPY --from=builder --chown=front:nodejs /app/.output ./output
-
-USER front
+COPY --from=builder /app/.output ./.output
 
 CMD node .output/server/index.mjs
