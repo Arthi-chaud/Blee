@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Image } from "~/models/domain/image";
-import { ref, type VNodeRef } from "vue";
+import type { Image, ImageType } from "~/models/domain/image";
+import { ref } from "vue";
 const { image } = defineProps<{
-    expectedAspectRatio: number;
     image: Image | undefined | null;
+    imageType: ImageType;
     disableBorderRadius?: boolean;
     fitToExpectedAspectRatio?: true;
 }>();
@@ -15,18 +15,20 @@ const imageIsLoaded = ref(false);
 <template>
     <div
         :class="{
-            [`aspect-[${expectedAspectRatio}]`]: true,
-            'h-full': !image,
-            'w-full': !image,
+            [imageType == 'poster' ? 'aspect-[2/3]' : 'aspect-video']: fitToExpectedAspectRatio,
+            'h-full': !image || !imageIsLoaded,
+            'w-full': !image || !imageIsLoaded,
         }"
     >
         <div
             class="poster-rounded flex align-end justify-center h-full w-full relative"
-            :style="{
-                aspectRatio: fitToExpectedAspectRatio
-                    ? undefined
-                    : image?.aspect_ratio,
-            }"
+            :style="
+                !fitToExpectedAspectRatio
+                    ? {
+                          aspectRatio: image?.aspect_ratio,
+                      }
+                    : {}
+            "
         >
             <template v-if="image">
                 <img

@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import type { Image } from "~/models/domain/image";
+import type { Image, ImageType } from "~/models/domain/image";
 
-defineProps<{
+const { imageType } = defineProps<{
     title: string | undefined;
     href: string | null;
     image: Image | null | undefined;
+    imageType: ImageType;
+    fitImageToPlaceholderRatio?: true;
     secondaryTitle: string | undefined | null;
     secondaryHref: string | null;
 }>();
+const aspectRatio = imageType == "poster" ? "2/3" : "1.55";
 </script>
 <template>
     <div
@@ -15,13 +18,18 @@ defineProps<{
         :style="{ justifyContent: image ? 'end' : 'start' }"
     >
         <div
-            class="aspect-[2/3] flex items-end hover:scale-105 transition-transform duration-200"
+            :class="{ [`aspect-[${aspectRatio}]`]: true }"
+            class="flex items-end hover:scale-105 transition-transform duration-200"
         >
             <NuxtLink
                 :to="href ?? undefined"
                 class="h-full w-full flex items-end"
             >
-                <Image :image="image" :expectedAspectRatio="2 / 3" fitToExpectedAspectRatio />
+                <Image
+                    :image="image"
+                    :imageType="imageType"
+                    :fitToExpectedAspectRatio="fitImageToPlaceholderRatio"
+                />
             </NuxtLink>
         </div>
         <div
@@ -36,7 +44,10 @@ defineProps<{
                         {{ title }}
                     </p>
                 </NuxtLink>
-                <p v-else-if="title === undefined" class="skeleton h-4 w-full mb-1.5 mt-0.5"></p>
+                <p
+                    v-else-if="title === undefined"
+                    class="skeleton h-4 w-full mb-1.5 mt-0.5"
+                ></p>
             </Transition>
             <Transition>
                 <NuxtLink
@@ -53,7 +64,10 @@ defineProps<{
                         {{ secondaryTitle }}
                     </p>
                 </NuxtLink>
-                <p v-else-if="secondaryTitle === undefined" class="skeleton h-3.5 w-half"></p>
+                <p
+                    v-else-if="secondaryTitle === undefined"
+                    class="skeleton h-3.5 w-half"
+                ></p>
             </Transition>
         </div>
     </div>

@@ -25,6 +25,7 @@ const secondaryTitle = computed(() =>
 </script>
 <template>
     <Item
+        imageType="poster"
         :title="package?.name"
         :href="packageLink"
         :image="package?.poster"

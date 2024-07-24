@@ -9,6 +9,8 @@ const Image = Resource.concat(
     }),
 );
 
+type ImageType = "poster" | "thumbnail";
+
 type Image = yup.InferType<typeof Image>;
 
-export { Image };
+export { Image, type ImageType };

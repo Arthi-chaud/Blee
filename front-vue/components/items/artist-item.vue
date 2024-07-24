@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import type { Artist } from "~/models/domain/artist";
-import type { Package } from "~/models/domain/package";
 
 const { artist } = defineProps<{
     artist: Artist | undefined;
 }>();
-const artistLink = ref(
-    artist ? `/artists/${artist.id}` : null,
-);
+const artistLink = ref(artist ? `/artists/${artist.id}` : null);
 </script>
 <template>
     <Item
+        fitImageToPlaceholderRatio
+        imageType="poster"
         :title="artist?.name"
         :href="artistLink"
         :image="artist?.poster"

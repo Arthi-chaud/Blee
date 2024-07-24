@@ -1,11 +1,12 @@
 <script setup lang="ts" generic="T extends Resource">
 import { API } from "~/api/api";
+import type { ImageType } from "~/models/domain/image";
 import type { Resource } from "~/models/domain/resource";
 import type { PaginatedQuery } from "~/models/queries";
 
 const { query } = defineProps<{
     query: PaginatedQuery<T>;
-    type: "poster";
+    type: ImageType;
 }>();
 const slots = defineSlots<{
     default(props: { item: T | undefined }): any;
@@ -38,11 +39,14 @@ const _ = useInfiniteScroll(
 </script>
 <template>
     <div class="w-full h-auto flex justify-center">
-        <div class="poster-grid w-full h-full max-w-screen-xl p-2">
-            <slot
-                v-bind="{ item: getItem(n - 1) }"
-                v-for="n in itemsCount"
-            />
+        <div
+            class="w-full h-full max-w-screen-xl p-2"
+            :class="{
+                'poster-grid': type === 'poster',
+                'thumbnail-grid': type === 'thumbnail',
+            }"
+        >
+            <slot v-bind="{ item: getItem(n - 1) }" v-for="n in itemsCount" />
             <slot
                 v-bind="{ item: undefined }"
                 v-if="hasNextPage"

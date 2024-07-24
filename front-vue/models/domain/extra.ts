@@ -32,6 +32,8 @@ const Extra = Resource.concat(
     }),
 );
 
+type Extra = yup.InferType<typeof Extra>;
+
 type ExtraSortingKeys =
     | "name"
     | "artistName"

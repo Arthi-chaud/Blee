@@ -2,6 +2,7 @@ import type { QueryFunction, QueryOptions } from "@tanstack/vue-query";
 import type { RequireExactlyOne } from "type-fest";
 import type { Schema } from "yup";
 import { Artist } from "~/models/domain/artist";
+import { Extra } from "~/models/domain/extra";
 import { Package, type PackageSortingKeys } from "~/models/domain/package";
 import PaginatedResponse from "~/models/domain/page";
 import type { PageParameter, PaginatedQuery, Query } from "~/models/queries";
@@ -39,9 +40,23 @@ class API {
         };
     }
 
-    static getArtists(
+    static getExtras(
+        filter: {},
         sort: Sort<PackageSortingKeys>,
-    ): PaginatedQuery<Artist> {
+    ): PaginatedQuery<Extra> {
+        const route = `/extras`;
+        const params = { ...sort, ...filter };
+        return {
+            queryKey: this.buildQueryKey(route, params),
+            queryFn: (pageParam) =>
+                this._fetch(route, {
+                    query: { ...params, ...pageParam },
+                    validator: PaginatedResponse(Extra),
+                }),
+        };
+    }
+
+    static getArtists(sort: Sort<PackageSortingKeys>): PaginatedQuery<Artist> {
         const route = `/artists`;
         const params = { ...sort };
         return {
@@ -86,10 +101,10 @@ class API {
         const host = `/api`;
         let url = `${host}${route}`;
         if (options.query) {
-            url = url.concat('?')
+            url = url.concat("?");
         }
-        Object.entries(options.query ?? {}).forEach(([key, value]) =>
-            url = url.concat(`${key}=${value}&`),
+        Object.entries(options.query ?? {}).forEach(
+            ([key, value]) => (url = url.concat(`${key}=${value}&`)),
         );
         return $fetch(url, {
             method: options.method ?? "GET",
