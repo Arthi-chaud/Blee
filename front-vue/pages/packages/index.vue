@@ -6,6 +6,6 @@ const query = API.getPackages({}, { sortBy: "name", order: "asc" });
 </script>
 <template>
     <InfiniteScroll :query="query" type="poster" v-slot="{ item }">
-        <PackageItem :package="item" class="h-full" />
+        <PackageItem :package="item"/>
     </InfiniteScroll>
 </template>

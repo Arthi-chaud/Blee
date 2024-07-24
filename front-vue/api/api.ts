@@ -39,6 +39,21 @@ class API {
         };
     }
 
+    static getArtists(
+        sort: Sort<PackageSortingKeys>,
+    ): PaginatedQuery<Artist> {
+        const route = `/artists`;
+        const params = { ...sort };
+        return {
+            queryKey: this.buildQueryKey(route, params),
+            queryFn: (pageParam) =>
+                this._fetch(route, {
+                    query: { ...params, ...pageParam },
+                    validator: PaginatedResponse(Artist),
+                }),
+        };
+    }
+
     // Builds a `queryKey` for tanstack's `useQuery`-type functions
     private static buildQueryKey(
         route: string,

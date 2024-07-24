@@ -38,7 +38,7 @@ const _ = useInfiniteScroll(
 </script>
 <template>
     <div class="w-full h-auto flex justify-center">
-        <div class="poster-grid h-auto max-w-screen-xl p-2">
+        <div class="poster-grid h-full max-w-screen-xl p-2">
             <slot
                 v-bind="{ item: getItem(n - 1) }"
                 v-for="n in itemsCount"
