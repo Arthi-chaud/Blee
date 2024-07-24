@@ -76,6 +76,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  front:
+    ports:
+      - "3000:3000"
+    build:
+      context: ./front-vue
+      dockerfile: Dockerfile.dev
+    environment:
+      - SSR_SERVER_URL=http://api:8000
+    volumes:
+      - ./front-vue:/app
   matcher:
     build:
       context: ./matcher

@@ -84,7 +84,7 @@ class API {
             "Content-Type": "application/json",
         };
         const host = `/api`;
-        let url = `${host}${route}?`;
+        let url = `${host}${route}`;
         if (options.query) {
             url = url.concat('?')
         }

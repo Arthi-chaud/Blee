@@ -1,0 +1,12 @@
+FROM node:18-alpine3.18
+WORKDIR /app
+COPY ./*.json ./
+COPY ./*.lock ./
+COPY ./.yarnrc.yml ./
+COPY ./.yarn /app/.yarn
+RUN yarn
+
+ENV PORT 3000
+ENV HOST "0.0.0.0"
+
+CMD yarn && yarn dev
