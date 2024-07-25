@@ -8,8 +8,8 @@ const { query } = defineProps<{
     query: PaginatedQuery<T>;
     type: ImageType;
 }>();
-const slots = defineSlots<{
-    default(props: { item: T | undefined }): any;
+defineSlots<{
+    default(props: { item: T | undefined }): unknown;
 }>();
 const { data, hasNextPage, fetchNextPage } = useInfiniteQuery(query);
 
@@ -26,7 +26,7 @@ const getItem = computed(() => (itemIndex: number) => {
     return item;
 });
 const skeletons = computed(() => (hasNextPage ? [1, 2] : []));
-const _ = useInfiniteScroll(
+useInfiniteScroll(
     //TODO Make this cleaner
     document ? document.getElementById("el") : undefined,
     async () => {
@@ -46,12 +46,10 @@ const _ = useInfiniteScroll(
                 'thumbnail-grid': type === 'thumbnail',
             }"
         >
-            <slot v-bind="{ item: getItem(n - 1) }" v-for="n in itemsCount" />
-            <slot
-                v-bind="{ item: undefined }"
-                v-if="hasNextPage"
-                v-for="_ in skeletons"
-            />
+            <slot v-for="n in itemsCount" v-bind="{ item: getItem(n - 1) }" />
+            <template v-if="hasNextPage">
+                <slot v-for="_ in skeletons" v-bind="{ item: undefined }" />
+            </template>
         </div>
     </div>
 </template>

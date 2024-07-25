@@ -8,12 +8,12 @@ const artistLink = ref(artist ? `/artists/${artist.id}` : null);
 </script>
 <template>
     <Item
-        fitImageToPlaceholderRatio
-        imageType="poster"
+        fit-image-to-placeholder-ratio
+        image-type="poster"
         :title="artist?.name"
         :href="artistLink"
         :image="artist?.poster"
-        :secondaryTitle="null"
-        :secondaryHref="null"
+        :secondary-title="null"
+        :secondary-href="null"
     />
 </template>

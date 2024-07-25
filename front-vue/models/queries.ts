@@ -1,4 +1,4 @@
-import * as tanstack from "@tanstack/vue-query";
+import type * as tanstack from "@tanstack/vue-query";
 import type PaginatedResponse from "./domain/page";
 
 type PageParameter = { take: number; skip: number };

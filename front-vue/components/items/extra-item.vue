@@ -25,12 +25,12 @@ const secondaryHref = computed(() =>
 </script>
 <template>
     <Item
-        fitImageToPlaceholderRatio
-        imageType="thumbnail"
+        fit-image-to-placeholder-ratio
+        image-type="thumbnail"
         :title="extra?.name"
         :href="playbackLink"
         :image="extra?.thumbnail"
-        :secondaryTitle="secondaryTitle"
-        :secondaryHref="secondaryHref"
+        :secondary-title="secondaryTitle"
+        :secondary-href="secondaryHref"
     />
 </template>

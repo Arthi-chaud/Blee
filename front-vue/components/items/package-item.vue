@@ -12,24 +12,24 @@ const packageLink = ref(
 const secondaryHref = computed(() =>
     props.secondaryHref === null
         ? null
-        : props.secondaryHref ??
-          (props.package ? `/artists/${props.package?.artist_id}` : null),
+        : (props.secondaryHref ??
+          (props.package ? `/artists/${props.package?.artist_id}` : null)),
 );
 const secondaryTitle = computed(() =>
     props.package
-        ? props.formatSecondaryTitle?.(props.package) ??
+        ? (props.formatSecondaryTitle?.(props.package) ??
           props.package?.artist_name ??
-          undefined
+          undefined)
         : undefined,
 );
 </script>
 <template>
     <Item
-        imageType="poster"
+        image-type="poster"
         :title="package?.name"
         :href="packageLink"
         :image="package?.poster"
-        :secondaryTitle="secondaryTitle"
-        :secondaryHref="secondaryHref"
+        :secondary-title="secondaryTitle"
+        :secondary-href="secondaryHref"
     />
 </template>

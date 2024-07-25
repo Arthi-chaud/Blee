@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import type { Image, ImageType } from "~/models/domain/image";
 import { ref } from "vue";
@@ -42,8 +43,8 @@ const imageIsLoaded = ref(false);
                 />
                 <img
                     v-if="blurashURL"
-                    :src="blurashURL"
                     id="blurhashElemId"
+                    :src="blurashURL"
                     :style="{ zIndex: -1 }"
                     class="h-full w-full absolute top-0"
                 />
@@ -51,11 +52,8 @@ const imageIsLoaded = ref(false);
             <div
                 v-else-if="image === undefined"
                 class="poster-skeleton w-full h-full"
-            ></div>
-            <div
-                v-else-if="image === null"
-                class="w-full h-full bg-base-300"
-            ></div>
+            />
+            <div v-else-if="image === null" class="w-full h-full bg-base-300" />
         </div>
     </div>
 </template>

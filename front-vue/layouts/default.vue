@@ -21,9 +21,10 @@ const path = computed(() => router.currentRoute.value.path);
             <div class="hidden sm:flex">
                 <nav class="sidenav px-2">
                     <NuxtLink
+                        v-for="item in routes"
+                        :key="item.path"
                         class="btn btn-ghost no-animation p-2 !h-auto flex flex-col mb-2"
                         :class="{ 'font-normal': item.path != path }"
-                        v-for="item in routes"
                         :to="item.path"
                     >
                         <fa :icon="item.icon" />
@@ -33,13 +34,14 @@ const path = computed(() => router.currentRoute.value.path);
                     </NuxtLink>
                 </nav>
             </div>
-            <div class="w-full h-auto overflow-scroll" id="el">
+            <div id="el" class="w-full h-auto overflow-scroll">
                 <slot />
             </div>
             <div class="btm-nav sm:hidden">
                 <NuxtLink
-                    :class="{ active: item.path == path }"
                     v-for="item in routes"
+                    :key="item.path"
+                    :class="{ active: item.path == path }"
                     :to="item.path"
                 >
                     <fa :icon="item.icon" />

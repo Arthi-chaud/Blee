@@ -27,8 +27,8 @@ const aspectRatio = imageType == "poster" ? "2/3" : "1.55";
             >
                 <Image
                     :image="image"
-                    :imageType="imageType"
-                    :fitToExpectedAspectRatio="fitImageToPlaceholderRatio"
+                    :image-type="imageType"
+                    :fit-to-expected-aspect-ratio="fitImageToPlaceholderRatio"
                 />
             </NuxtLink>
         </div>

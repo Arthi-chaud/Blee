@@ -88,7 +88,7 @@ function generatePng(width: number, height: number, rgbaString: string) {
     }
 
     function adler32(data: string) {
-        let MOD_ADLER = 65521;
+        const MOD_ADLER = 65521;
         let a = 1;
         let b = 0;
 

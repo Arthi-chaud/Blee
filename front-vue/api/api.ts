@@ -1,4 +1,6 @@
-import type { QueryFunction, QueryOptions } from "@tanstack/vue-query";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-extraneous-class */
+/* eslint-disable @typescript-eslint/ban-types */
 import type { RequireExactlyOne } from "type-fest";
 import type { Schema } from "yup";
 import { Artist } from "~/models/domain/artist";
@@ -141,7 +143,6 @@ class API {
                 const validated = options.validator.validateSync(jsonResponse);
                 return options.validator.cast(validated);
             } catch (err) {
-                // eslint-disable-next-line no-console
                 console.error(jsonResponse, err);
                 throw new Error("Error: Invalid Response Type");
             }
