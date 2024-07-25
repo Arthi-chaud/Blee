@@ -11,16 +11,16 @@ const playbackLink = ref(
 );
 const secondaryTitle = computed(() =>
     props.extra
-        ? (props.formatSecondaryTitle?.(props.extra) ??
+        ? props.formatSecondaryTitle?.(props.extra) ??
           props.extra?.artist_name ??
-          undefined)
+          undefined
         : undefined,
 );
 const secondaryHref = computed(() =>
     props.secondaryHref === null
         ? null
-        : (props.secondaryHref ??
-          (props.extra ? `/artists/${props.extra?.artist_id}` : null)),
+        : props.secondaryHref ??
+          (props.extra ? `/artists/${props.extra?.artist_id}` : null),
 );
 </script>
 <template>

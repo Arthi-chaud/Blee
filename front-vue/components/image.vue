@@ -15,7 +15,8 @@ const imageIsLoaded = ref(false);
 <template>
     <div
         :class="{
-            [imageType == 'poster' ? 'aspect-[2/3]' : 'aspect-video']: fitToExpectedAspectRatio,
+            [imageType == 'poster' ? 'aspect-[2/3]' : 'aspect-video']:
+                fitToExpectedAspectRatio,
             'h-full': !image || !imageIsLoaded,
             'w-full': !image || !imageIsLoaded,
         }"
