@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import type { Image, ImageType } from "~/models/domain/image";
 import { ref } from "vue";
-const { image } = defineProps<{
+const { image, imageType } = defineProps<{
     image: Image | undefined | null;
     imageType: ImageType;
     disableBorderRadius?: boolean;
@@ -10,14 +10,15 @@ const { image } = defineProps<{
 }>();
 
 const blurashURL = computed(() => blurHashToDataURL(image?.blurhash));
-
+const aspectRatioClass =
+    imageType == "poster" ? "aspect-[2/3]" : "aspect-video";
 const imageIsLoaded = ref(false);
 </script>
 <template>
     <div
         :class="{
-            [imageType == 'poster' ? 'aspect-[2/3]' : 'aspect-video']:
-                fitToExpectedAspectRatio,
+            [aspectRatioClass]: fitToExpectedAspectRatio,
+            // We set this to avoid shift while image is loading
             'h-full': !image || !imageIsLoaded,
             'w-full': !image || !imageIsLoaded,
         }"
@@ -32,28 +33,38 @@ const imageIsLoaded = ref(false);
                     : {}
             "
         >
-            <template v-if="image">
+            <div
+                v-if="image"
+                :style="{
+                    background: `url(${blurashURL})`,
+                    backgroundSize: 'cover',
+                }"
+                class="h-full w-full"
+            >
                 <img
                     :src="'/api/images/' + image.id"
                     :style="{
                         opacity: isSSR() || imageIsLoaded ? 1 : 0,
                         transition: 'opacity 0.2s ease-in',
                     }"
+                    class="h-full w-full object-cover"
                     @load="imageIsLoaded = true"
                 />
-                <img
-                    v-if="blurashURL"
-                    id="blurhashElemId"
-                    :src="blurashURL"
-                    :style="{ zIndex: -1 }"
-                    class="h-full w-full absolute top-0"
-                />
-            </template>
+            </div>
             <div
                 v-else-if="image === undefined"
+                :class="{
+                    [aspectRatioClass]: true,
+                }"
                 class="poster-skeleton w-full h-full"
             />
-            <div v-else-if="image === null" class="w-full h-full bg-base-300" />
+            <div
+                v-else-if="image === null"
+                :class="{
+                    [aspectRatioClass]: true,
+                }"
+                class="w-full h-full bg-base-300"
+            />
         </div>
     </div>
 </template>

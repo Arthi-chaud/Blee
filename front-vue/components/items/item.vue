@@ -10,7 +10,6 @@ const { imageType } = defineProps<{
     secondaryTitle: string | undefined | null;
     secondaryHref: string | null;
 }>();
-const aspectRatio = imageType == "poster" ? "2/3" : "1.55";
 </script>
 <template>
     <div
@@ -18,7 +17,6 @@ const aspectRatio = imageType == "poster" ? "2/3" : "1.55";
         :style="{ justifyContent: image ? 'end' : 'start' }"
     >
         <div
-            :class="{ [`aspect-[${aspectRatio}]`]: true }"
             class="flex items-end hover:scale-105 transition-transform duration-200"
         >
             <NuxtLink

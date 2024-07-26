@@ -11,7 +11,8 @@ const { query } = defineProps<{
 defineSlots<{
     default(props: { item: T | undefined }): unknown;
 }>();
-const { data, hasNextPage, fetchNextPage } = useInfiniteQuery(query);
+const { data, hasNextPage, fetchNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery(query);
 
 const itemsCount = computed(
     () =>
@@ -47,7 +48,7 @@ useInfiniteScroll(
             }"
         >
             <slot v-for="n in itemsCount" v-bind="{ item: getItem(n - 1) }" />
-            <template v-if="hasNextPage">
+            <template v-if="isFetchingNextPage || isFetching">
                 <slot v-for="_ in skeletons" v-bind="{ item: undefined }" />
             </template>
         </div>
