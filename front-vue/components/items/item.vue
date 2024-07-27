@@ -22,7 +22,7 @@ const aspectRatio = imageType == "poster" ? 2 / 3 : 16 / 9;
             :style="{
                 objectFit: 'contain',
                 overflow: 'hidden',
-                aspectRatio: aspectRatio
+                aspectRatio: aspectRatio,
             }"
         >
             <NuxtLink

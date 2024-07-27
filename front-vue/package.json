@@ -22,6 +22,7 @@
         "yup": "^1.4.0"
     },
     "devDependencies": {
+        "@fortawesome/free-regular-svg-icons": "^6.6.0",
         "@fortawesome/free-solid-svg-icons": "^6.6.0",
         "@nuxt/eslint": "^0.3.13",
         "@tailwindcss/typography": "^0.5.13",

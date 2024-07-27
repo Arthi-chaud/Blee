@@ -27,7 +27,8 @@ export default defineNuxtConfig({
     fontawesome: {
         component: "fa",
         icons: {
-            solid: ["cog", "user", "film", "tv"],
+            regular: ["star"],
+            solid: ["cog", "user", "film", "tv", "star", "star-half-stroke"],
         },
     },
 });

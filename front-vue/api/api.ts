@@ -4,6 +4,7 @@
 import type { RequireExactlyOne } from "type-fest";
 import type { Schema } from "yup";
 import { Artist } from "~/models/domain/artist";
+import { ExternalId } from "~/models/domain/external-id";
 import { Extra } from "~/models/domain/extra";
 import { Package, type PackageSortingKeys } from "~/models/domain/package";
 import PaginatedResponse from "~/models/domain/page";
@@ -48,6 +49,21 @@ class API {
                 this._fetch(route, {
                     query: { ...params, ...pageParam },
                     validator: PaginatedResponse(Package),
+                }),
+        };
+    }
+
+    static getExternalIds(filter: {
+        package?: string;
+    }): PaginatedQuery<ExternalId> {
+        const route = `/external_ids`;
+        const params = { ...filter };
+        return {
+            queryKey: this.buildQueryKey(route, params),
+            queryFn: (pageParam) =>
+                this._fetch(route, {
+                    query: { ...params, ...pageParam },
+                    validator: PaginatedResponse(ExternalId),
                 }),
         };
     }
