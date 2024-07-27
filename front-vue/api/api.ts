@@ -26,6 +26,16 @@ class API {
                 }),
         };
     }
+    static getPackage(packageUuid: string): Query<Package> {
+        const route = `/packages/${packageUuid}`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: () =>
+                this._fetch(route, {
+                    validator: Package,
+                }),
+        };
+    }
     static getPackages(
         filter: { artistUuid?: string },
         sort: Sort<PackageSortingKeys>,

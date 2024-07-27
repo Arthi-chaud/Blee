@@ -24,6 +24,7 @@
     "devDependencies": {
         "@fortawesome/free-solid-svg-icons": "^6.6.0",
         "@nuxt/eslint": "^0.3.13",
+        "@tailwindcss/typography": "^0.5.13",
         "@types/eslint": "^9",
         "@vueuse/nuxt": "^10.11.0",
         "daisyui": "^4.12.10",

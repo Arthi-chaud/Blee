@@ -10,17 +10,18 @@ const { image, imageType } = defineProps<{
 }>();
 
 const blurashURL = computed(() => blurHashToDataURL(image?.blurhash));
-const aspectRatioClass =
-    imageType == "poster" ? "aspect-[2/3]" : "aspect-video";
+const aspectRatio = imageType == "poster" ? 2 / 3 : 16 / 9;
 const imageIsLoaded = ref(false);
 </script>
 <template>
     <div
         :class="{
-            [aspectRatioClass]: fitToExpectedAspectRatio,
             // We set this to avoid shift while image is loading
             'h-full': !image || !imageIsLoaded,
             'w-full': !image || !imageIsLoaded,
+        }"
+        :style="{
+            aspectRatio,
         }"
     >
         <div
@@ -53,15 +54,15 @@ const imageIsLoaded = ref(false);
             </div>
             <div
                 v-else-if="image === undefined"
-                :class="{
-                    [aspectRatioClass]: true,
+                :style="{
+                    aspectRatio,
                 }"
                 class="poster-skeleton w-full h-full"
             />
             <div
                 v-else-if="image === null"
-                :class="{
-                    [aspectRatioClass]: true,
+                :style="{
+                    aspectRatio,
                 }"
                 class="w-full h-full bg-base-300"
             />

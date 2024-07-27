@@ -34,7 +34,7 @@ const path = computed(() => router.currentRoute.value.path);
                     </NuxtLink>
                 </nav>
             </div>
-            <div id="el" class="w-full h-auto overflow-scroll">
+            <div id="el" class="w-full h-auto flex justify-center overflow-scroll p-4 sm:p-0">
                 <slot />
             </div>
             <div class="btm-nav sm:hidden">

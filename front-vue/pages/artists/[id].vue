@@ -4,5 +4,8 @@ const route = useRoute();
 const { data: artist } = useQuery(API.getArtist(route.params.id.toString()));
 </script>
 <template>
-    <div>Artist {{ artist?.name }}</div>
+    <ResourcePageHeader
+        :poster="artist?.poster"
+        :resource-name="artist?.name"
+    />
 </template>
