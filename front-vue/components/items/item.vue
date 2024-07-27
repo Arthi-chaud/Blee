@@ -13,10 +13,7 @@ const { imageType } = defineProps<{
 const aspectRatio = imageType == "poster" ? 2 / 3 : 16 / 9;
 </script>
 <template>
-    <div
-        class="flex flex-col h-full justify-end"
-        :style="{ justifyContent: image ? 'end' : 'start' }"
-    >
+    <div class="flex flex-col h-full justify-start">
         <div
             class="flex items-end hover:scale-105 transition-transform duration-200"
             :style="{
@@ -55,7 +52,7 @@ const aspectRatio = imageType == "poster" ? 2 / 3 : 16 / 9;
             </Transition>
             <Transition>
                 <NuxtLink
-                    v-if="secondaryTitle"
+                    v-if="secondaryTitle !== undefined"
                     :to="secondaryHref ?? undefined"
                     class="w-full"
                 >

@@ -19,8 +19,6 @@
         @apply md:grid-cols-6;
         @apply lg:grid-cols-7;
         @apply xl:grid-cols-8;
-        /* hotfix, last row can overflow */
-        padding-bottom: 6rem;
     }
 
     .thumbnail-grid {
@@ -31,8 +29,6 @@
         @apply md:grid-cols-4;
         @apply lg:grid-cols-6;
         @apply xl:grid-cols-6;
-        /* hotfix, last row can overflow */
-        padding-bottom: 6rem;
     }
 
     .poster-rounded {

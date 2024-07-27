@@ -42,7 +42,7 @@ const rating = computed(() => {
             >
                 <p
                     v-if="packageData"
-                    class="prose-lg line-clamp-1 break-all w-full"
+                    class="prose-lg font-normal line-clamp-1 break-all w-full"
                 >
                     {{ packageData?.artist_name }}
                 </p>

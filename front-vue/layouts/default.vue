@@ -10,7 +10,7 @@ const router = useRouter();
 const path = computed(() => router.currentRoute.value.path);
 </script>
 <template>
-    <div class="h-screen w-screen overflow-clip">
+    <div class="w-screen h-screen">
         <div class="pl-4 navbar">
             <NuxtLink :to="homeRoute" class="navbar-start">
                 <img src="/icon.png" class="h-10" />
