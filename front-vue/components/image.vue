@@ -15,56 +15,47 @@ const imageIsLoaded = ref(false);
 </script>
 <template>
     <div
+        class="flex items-center justify-center w-auto object-contain overflow-hidden max-h-full poster-rounded"
         :class="{
-            // We set this to avoid shift while image is loading
-            'h-full': !image || !imageIsLoaded,
-            'w-full': !image || !imageIsLoaded,
+            'h-full': image === null,
         }"
         :style="{
-            aspectRatio,
+            aspectRatio: !fitToExpectedAspectRatio
+                ? (image?.aspect_ratio ?? aspectRatio)
+                : aspectRatio,
         }"
     >
         <div
-            class="poster-rounded flex align-end justify-center h-full w-full relative"
-            :style="
-                !fitToExpectedAspectRatio
-                    ? {
-                          aspectRatio: image?.aspect_ratio,
-                      }
-                    : {}
-            "
+            v-if="image === undefined"
+            :style="{
+                aspectRatio,
+            }"
+            class="poster-skeleton w-full h-full"
+        />
+        <div
+            v-else-if="image === null"
+            :style="{
+                aspectRatio,
+            }"
+            class="poster-rounded w-full h-full bg-base-300"
+        />
+        <div
+            v-else
+            class="poster-rounded"
+            :style="{
+                aspectRatio: image?.aspect_ratio,
+                background: `url(${blurashURL})`,
+                backgroundSize: 'cover',
+            }"
         >
-            <div
-                v-if="image"
+            <img
+                :src="'/api/images/' + image.id"
                 :style="{
-                    background: `url(${blurashURL})`,
-                    backgroundSize: 'cover',
+                    opacity: isSSR() || imageIsLoaded ? 1 : 0,
+                    transition: 'opacity 0.2s ease-in',
                 }"
-                class="h-full w-full"
-            >
-                <img
-                    :src="'/api/images/' + image.id"
-                    :style="{
-                        opacity: isSSR() || imageIsLoaded ? 1 : 0,
-                        transition: 'opacity 0.2s ease-in',
-                    }"
-                    class="h-full w-full object-cover"
-                    @load="imageIsLoaded = true"
-                />
-            </div>
-            <div
-                v-else-if="image === undefined"
-                :style="{
-                    aspectRatio,
-                }"
-                class="poster-skeleton w-full h-full"
-            />
-            <div
-                v-else-if="image === null"
-                :style="{
-                    aspectRatio,
-                }"
-                class="w-full h-full bg-base-300"
+                class="h-full w-full object-cover poster-rounded"
+                @load="imageIsLoaded = true"
             />
         </div>
     </div>

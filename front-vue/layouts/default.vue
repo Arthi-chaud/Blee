@@ -17,7 +17,13 @@ const path = computed(() => router.currentRoute.value.path);
                 <span class="ml-4 text-xl">Blee</span>
             </NuxtLink>
         </div>
-        <div class="w-full h-full flex flex-row">
+        <div
+            class="w-full flex flex-row"
+            :style="{
+                // Navbar somehow fucks the height
+                height: 'calc(100% - 4rem)',
+            }"
+        >
             <div class="hidden sm:flex">
                 <nav class="sidenav px-2">
                     <NuxtLink
@@ -34,7 +40,10 @@ const path = computed(() => router.currentRoute.value.path);
                     </NuxtLink>
                 </nav>
             </div>
-            <div id="el" class="w-full h-auto flex justify-center overflow-scroll p-4 sm:p-0">
+            <div
+                id="el"
+                class="w-full h-auto flex justify-center overflow-scroll p-3 xl:p-0"
+            >
                 <slot />
             </div>
             <div class="btm-nav sm:hidden">
