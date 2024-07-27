@@ -21,7 +21,7 @@ const path = computed(() => router.currentRoute.value.path);
             class="w-full flex flex-row"
             :style="{
                 // Navbar somehow fucks the height
-                height: 'calc(100% - 4rem)',
+                height: 'calc(100vh - 4rem)',
             }"
         >
             <div class="hidden sm:flex">

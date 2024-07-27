@@ -11,7 +11,7 @@ import PaginatedResponse from "~/models/domain/page";
 import type { PageParameter, PaginatedQuery, Query } from "~/models/queries";
 
 type Sort<T extends string> = {
-    sortBy: T;
+    sort: T;
     order: "asc" | "desc";
 };
 class API {
@@ -38,7 +38,7 @@ class API {
         };
     }
     static getPackages(
-        filter: { artistUuid?: string },
+        filter: { artist?: string },
         sort: Sort<PackageSortingKeys>,
     ): PaginatedQuery<Package> {
         const route = `/packages`;

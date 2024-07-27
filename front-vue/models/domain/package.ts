@@ -15,6 +15,6 @@ const Package = Resource.concat(
 
 type Package = yup.InferType<typeof Package>;
 
-type PackageSortingKeys = "name" | "addDate" | "artistName" | "releaseDate";
+type PackageSortingKeys = "name" | "addDate" | "artistName" | "release_date";
 
 export { Package, type PackageSortingKeys };

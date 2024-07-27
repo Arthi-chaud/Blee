@@ -19,7 +19,7 @@ const secondaryTitle = computed(() =>
     props.package
         ? (props.formatSecondaryTitle?.(props.package) ??
           props.package?.artist_name ??
-          undefined)
+          "")
         : undefined,
 );
 </script>
@@ -30,6 +30,6 @@ const secondaryTitle = computed(() =>
         :href="packageLink"
         :image="package?.poster"
         :secondary-title="secondaryTitle"
-        :secondary-href="secondaryHref"
+        :secondary-href="formatSecondaryTitle ? null : secondaryHref"
     />
 </template>
