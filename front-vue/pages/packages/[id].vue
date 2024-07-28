@@ -35,10 +35,7 @@ const rating = computed(() => {
         <template #secondary>
             <NuxtLink
                 :to="artistLink"
-                class="btn btn-ghost btn-sm no-animation"
-                :style="{
-                    marginLeft: '-0.75rem',
-                }"
+                class="btn btn-ghost btn-sm no-animation md:ml-[-0.75rem]"
             >
                 <p
                     v-if="packageData"
