@@ -22,6 +22,7 @@ export default defineNuxtConfig({
         },
     ],
     routeRules: {
+        '/player/**': { ssr: false },
         "/api/**": { proxy: `${process.env.SSR_SERVER_URL!}/**` },
         "/transcoder/**": { proxy: `${process.env.SSR_TRANSCODER_URL!}/**` },
         "/scanner/**": { proxy: `${process.env.SSR_SCANNER_URL!}/**` },

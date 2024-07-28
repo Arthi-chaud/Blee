@@ -9,7 +9,7 @@ type Query<ReturnType> = {
 };
 
 type QueryOptions<ReturnType> = Omit<
-    tanstack.QueryOptions<ReturnType, Error, ReturnType, tanstack.QueryKey>,
+    tanstack.UseQueryOptions<ReturnType, Error, ReturnType, tanstack.QueryKey>,
     "queryFn" | "queryKey" | "initialData"
 >;
 

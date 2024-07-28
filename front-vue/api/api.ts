@@ -7,6 +7,7 @@ import { Artist } from "~/models/domain/artist";
 import { Chapter } from "~/models/domain/chapter";
 import { ExternalId } from "~/models/domain/external-id";
 import { Extra } from "~/models/domain/extra";
+import { File } from "~/models/domain/file";
 import { Movie, type MovieSortingKeys } from "~/models/domain/movie";
 import { Package, type PackageSortingKeys } from "~/models/domain/package";
 import PaginatedResponse from "~/models/domain/page";
@@ -27,6 +28,36 @@ class API {
             queryFn: () =>
                 this._fetch(route, {
                     validator: Artist,
+                }),
+        };
+    }
+    static getFile(fileUUID: string): Query<File> {
+        const route = `/files/${fileUUID}`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: () =>
+                this._fetch(route, {
+                    validator: File,
+                }),
+        };
+    }
+    static getExtra(extraUuid: string): Query<Extra> {
+        const route = `/extras/${extraUuid}`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: () =>
+                this._fetch(route, {
+                    validator: Extra,
+                }),
+        };
+    }
+    static getMovie(movieUuid: string): Query<Movie> {
+        const route = `/movies/${movieUuid}`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: () =>
+                this._fetch(route, {
+                    validator: Movie,
                 }),
         };
     }
