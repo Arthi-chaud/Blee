@@ -10,6 +10,7 @@ import { Extra } from "~/models/domain/extra";
 import { Movie, type MovieSortingKeys } from "~/models/domain/movie";
 import { Package, type PackageSortingKeys } from "~/models/domain/package";
 import PaginatedResponse from "~/models/domain/page";
+import { ScannerStatusResponse } from "~/models/domain/scanner-status";
 import type { PageParameter, PaginatedQuery, Query } from "~/models/queries";
 
 type Sort<T extends string> = {
@@ -82,6 +83,34 @@ class API {
         };
     }
 
+    static getScannerStatus(): Query<ScannerStatusResponse> {
+        const route = `/status`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: () =>
+                this._fetch(route, {
+                    host: "scanner",
+                    validator: ScannerStatusResponse,
+                }),
+        };
+    }
+
+    static scanNewFiles() {
+        return this._fetch("/scan", {
+            host: "scanner",
+            method: "POST",
+            emptyResponse: true,
+        });
+    }
+
+    static cleanFiles() {
+        return this._fetch("/clean", {
+            host: "scanner",
+            method: "POST",
+            emptyResponse: true,
+        });
+    }
+
     static getExternalIds(filter: {
         package?: string;
         artist?: string;
@@ -148,6 +177,7 @@ class API {
             method?: "GET" | "POST";
             errorMessage?: string;
             pagination?: PageParameter;
+            host?: "api" | "transcoder" | "scanner";
         } & RequireExactlyOne<{
             emptyResponse: true;
             validator: Schema<ReturnType>;
@@ -156,7 +186,12 @@ class API {
         const headers = {
             "Content-Type": "application/json",
         };
-        const host = `/api`;
+        const host =
+            options.host === "transcoder"
+                ? `/transcoder`
+                : options.host === "scanner"
+                  ? "scanner"
+                  : `/api`;
         let url = `${host}${route}`;
         if (options.query) {
             url = url.concat("?");
