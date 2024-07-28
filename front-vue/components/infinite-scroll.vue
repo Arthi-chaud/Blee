@@ -28,9 +28,9 @@ const getItem = computed(() => (itemIndex: number) => {
     return item;
 });
 const skeletons = computed(() => (hasNextPage ? [1, 2] : []));
-const scrollableElementKey = computed(() => query.queryKey.join("-"));
+const scrollableRef = ref(null);
 useInfiniteScroll(
-    document ? document.getElementById(scrollableElementKey.value) : undefined,
+    scrollableRef,
     async () => {
         if (hasNextPage) {
             await fetchNextPage();
@@ -49,7 +49,7 @@ useInfiniteScroll(
         class="w-full h-auto flex justify-center"
     >
         <div
-            :id="scrollableElementKey"
+            ref="scrollableRef"
             class="w-full h-full max-w-screen-xl p-2 overflow-scroll"
             :class="{
                 'poster-grid': type === 'poster',
@@ -64,7 +64,7 @@ useInfiniteScroll(
     </div>
     <div v-else>
         <div
-            :id="scrollableElementKey"
+            ref="scrollableRef"
             class="w-full p-3 grid gap-3 grid-flow-col overflow-scroll"
             style="
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
