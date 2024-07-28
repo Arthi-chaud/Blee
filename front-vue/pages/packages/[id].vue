@@ -137,7 +137,10 @@ const packageDescription = computed(() => {
                 :format-secondary-title="(e) => formatDuration(e.duration)"
             />
         </InfiniteScroll>
-        <div v-if="externalIdList"  class="w-full overflow-x-scroll flex justify-start pb-5">
+        <div
+            v-if="(externalIdList ?? []).length > 0"
+            class="w-full overflow-x-scroll flex justify-start pb-5"
+        >
             <span class="prose-lg">More info on</span>
             <NuxtLink
                 v-for="externalLink in externalIdList"

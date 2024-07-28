@@ -20,6 +20,9 @@ const hasExtras = computed(() =>
         ? true
         : (extras.data.value.pages.at(0)?.items ?? []).length > 0,
 );
+const externalIdList = computed(() =>
+    artistExternalIds.value?.pages.at(0)?.items.slice(0, 3),
+);
 const artistDescription = computed(() => {
     const firstPage = artistExternalIds.value?.pages.at(0);
 
@@ -57,5 +60,19 @@ const artistDescription = computed(() => {
                 :format-secondary-title="(e) => formatDuration(e.duration)"
             />
         </InfiniteScroll>
+        <div
+            v-if="(externalIdList ?? []).length > 0 "
+            class="w-full overflow-x-scroll flex justify-start pb-5"
+        >
+            <span class="prose-lg">More info on</span>
+            <NuxtLink
+                v-for="externalLink in externalIdList"
+                :key="externalLink.value"
+                :to="externalLink.url"
+                class="badge badge-primary ml-2 mt-1.5"
+            >
+                {{ externalLink.provider_name }}
+            </NuxtLink>
+        </div>
     </div>
 </template>
