@@ -55,6 +55,7 @@ class API {
 
     static getExternalIds(filter: {
         package?: string;
+        artist?: string;
     }): PaginatedQuery<ExternalId> {
         const route = `/external_ids`;
         const params = { ...filter };

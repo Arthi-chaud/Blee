@@ -26,11 +26,20 @@ const rating = computed(() => {
     }
     return firstPage.items.find(({ rating }) => rating != null)?.rating ?? null;
 });
+const packageDescription = computed(() => {
+    const firstPage = externalIds.value?.pages.at(0);
+
+    if (firstPage === undefined) {
+        return undefined;
+    }
+    return firstPage.items.find((e) => e.description)?.description ?? null;
+});
 </script>
 <template>
     <ResourcePageHeader
         :poster="packageData?.poster"
         :resource-name="packageData?.name"
+        :brief="packageDescription"
     >
         <template #secondary>
             <NuxtLink
