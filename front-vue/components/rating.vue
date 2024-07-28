@@ -19,12 +19,14 @@ const getStarIconFromIndex = (starIndex: number) => {
 };
 </script>
 <template>
-    <div class="flex flex-row gap-x-0.5" :style="{ paddingTop: '0.2rem' }">
-        <fa
-            v-for="index in [1, 2, 3, 4, 5]"
-            :key="`start-${index}`"
-            :icon="getStarIconFromIndex(index)"
-            class="prose-sm"
-        />
+    <div class="tooltip tooltip-secondary" :data-tip="`${rating} / 100`">
+        <div class="flex flex-row gap-x-0.5" :style="{ paddingTop: '0.2rem' }">
+            <fa
+                v-for="index in [1, 2, 3, 4, 5]"
+                :key="`start-${index}`"
+                :icon="getStarIconFromIndex(index)"
+                class="prose-sm"
+            />
+        </div>
     </div>
 </template>

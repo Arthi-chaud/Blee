@@ -46,7 +46,12 @@ const artistDescription = computed(() => {
             type="poster"
             direction="horizontal"
         >
-            <PackageItem :package="item" />
+            <PackageItem
+                :package="item"
+                :format-secondary-title="
+                    (p) => p.release_year?.getFullYear().toString() ?? ''
+                "
+            />
         </InfiniteScroll>
         <p v-if="hasExtras" class="prose-lg">Extras</p>
         <InfiniteScroll
