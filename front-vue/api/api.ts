@@ -69,7 +69,7 @@ class API {
     }
 
     static getExtras(
-        filter: {},
+        filter: { artist?: string },
         sort: Sort<PackageSortingKeys>,
     ): PaginatedQuery<Extra> {
         const route = `/extras`;

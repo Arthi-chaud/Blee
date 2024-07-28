@@ -3,25 +3,13 @@ import { API } from "~/api/api";
 const route = useRoute();
 const artistId = route.params.id.toString();
 const { data: artist } = useQuery(API.getArtist(artistId));
-const {
-    data: packagesData,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage
-} = useInfiniteQuery(
-    API.getPackages(
-        { artist: artistId },
-        { sort: "release_date", order: "desc" },
-    ),
+const packagesQuery = API.getPackages(
+    { artist: artistId },
+    { sort: "release_date", order: "desc" },
 );
-useInfiniteScroll(
-    document ? document.getElementById("scroller") : undefined,
-    async () => {
-        if (hasNextPage) {
-            await fetchNextPage();
-        }
-    },
-    { distance: 100, canLoadMore: () => hasNextPage.value, direction: "right" },
+const extrasQuery = API.getExtras(
+    { artist: artistId },
+    { sort: "name", order: "asc" },
 );
 </script>
 <template>
@@ -31,23 +19,25 @@ useInfiniteScroll(
             :resource-name="artist?.name"
         />
         <p class="prose-lg">Movies</p>
-        <div
-            id="scroller"
-            class="w-full p-3 grid gap-3 grid-flow-col overflow-scroll"
-            style="
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                grid-auto-columns: minmax(160px, 1fr);
-            "
+        <InfiniteScroll
+            v-slot="{ item }"
+            :query="packagesQuery"
+            type="poster"
+            direction="horizontal"
         >
-            <PackageItem
-                v-for="item in packagesData?.pages.at(0)?.items"
-                :key="item.id"
-                :package="item"
-                :format-secondary-title="
-                    (p) => p.release_year?.getFullYear().toString() ?? ''
-                "
+            <PackageItem :package="item" />
+        </InfiniteScroll>
+        <p class="prose-lg">Extras</p>
+        <InfiniteScroll
+            v-slot="{ item }"
+            :query="extrasQuery"
+            type="thumbnail"
+            direction="horizontal"
+        >
+            <ExtraItem
+                :extra="item"
+                :format-secondary-title="(e) => formatDuration(e.duration)"
             />
-            <PackageItem v-if="isFetchingNextPage" :package="undefined" />
-        </div>
+        </InfiniteScroll>
     </div>
 </template>

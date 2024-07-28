@@ -41,7 +41,6 @@ const path = computed(() => router.currentRoute.value.path);
                 </nav>
             </div>
             <div
-                id="el"
                 class="w-full h-auto flex justify-center overflow-scroll p-3 xl:p-0"
             >
                 <slot />

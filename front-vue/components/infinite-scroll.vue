@@ -4,9 +4,10 @@ import type { ImageType } from "~/models/domain/image";
 import type { Resource } from "~/models/domain/resource";
 import type { PaginatedQuery } from "~/models/queries";
 
-const { query } = defineProps<{
+const { query, direction } = defineProps<{
     query: PaginatedQuery<T>;
     type: ImageType;
+    direction: "vertical" | "horizontal";
 }>();
 defineSlots<{
     default(props: { item: T | undefined }): unknown;
@@ -27,25 +28,48 @@ const getItem = computed(() => (itemIndex: number) => {
     return item;
 });
 const skeletons = computed(() => (hasNextPage ? [1, 2] : []));
+const scrollableElementKey = computed(() => query.queryKey.join("-"));
 useInfiniteScroll(
-    //TODO Make this cleaner
-    document ? document.getElementById("el") : undefined,
+    document ? document.getElementById(scrollableElementKey.value) : undefined,
     async () => {
         if (hasNextPage) {
             await fetchNextPage();
         }
     },
-    { distance: 100, canLoadMore: () => hasNextPage.value },
+    {
+        distance: 100,
+        canLoadMore: () => hasNextPage.value,
+        direction: direction === "vertical" ? "bottom" : "right",
+    },
 );
 </script>
 <template>
-    <div class="w-full h-auto flex justify-center">
+    <div
+        v-if="direction === 'vertical'"
+        class="w-full h-auto flex justify-center"
+    >
         <div
-            class="w-full h-full max-w-screen-xl p-2"
+            :id="scrollableElementKey"
+            class="w-full h-full max-w-screen-xl p-2 overflow-scroll"
             :class="{
                 'poster-grid': type === 'poster',
                 'thumbnail-grid': type === 'thumbnail',
             }"
+        >
+            <slot v-for="n in itemsCount" v-bind="{ item: getItem(n - 1) }" />
+            <template v-if="isFetchingNextPage || isFetching">
+                <slot v-for="_ in skeletons" v-bind="{ item: undefined }" />
+            </template>
+        </div>
+    </div>
+    <div v-else>
+        <div
+            :id="scrollableElementKey"
+            class="w-full p-3 grid gap-3 grid-flow-col overflow-scroll"
+            style="
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-auto-columns: minmax(160px, 1fr);
+            "
         >
             <slot v-for="n in itemsCount" v-bind="{ item: getItem(n - 1) }" />
             <template v-if="isFetchingNextPage || isFetching">
