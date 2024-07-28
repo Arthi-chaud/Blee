@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { API } from "~/api/api";
+import ExternalIdList from "~/components/external-id-list.vue";
 
 const route = useRoute();
 const packageUuid = route.params.id.toString();
@@ -137,19 +138,6 @@ const packageDescription = computed(() => {
                 :format-secondary-title="(e) => formatDuration(e.duration)"
             />
         </InfiniteScroll>
-        <div
-            v-if="(externalIdList ?? []).length > 0"
-            class="w-full overflow-x-scroll flex justify-start pb-5"
-        >
-            <span class="prose-lg">More info on</span>
-            <NuxtLink
-                v-for="externalLink in externalIdList"
-                :key="externalLink.value"
-                :to="externalLink.url"
-                class="badge badge-primary ml-2 mt-1.5"
-            >
-                {{ externalLink.provider_name }}
-            </NuxtLink>
-        </div>
+        <ExternalIdList :external-ids="externalIdList" />
     </div>
 </template>
