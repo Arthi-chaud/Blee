@@ -65,7 +65,7 @@ useInfiniteScroll(
     <div v-else>
         <div
             ref="scrollableRef"
-            class="w-full p-3 grid gap-3 grid-flow-col overflow-scroll"
+            class="w-full pl-2 py-2 grid gap-3 grid-flow-col overflow-scroll"
             style="
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
                 grid-auto-columns: minmax(160px, 1fr);

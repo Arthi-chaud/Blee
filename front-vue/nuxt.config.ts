@@ -28,7 +28,15 @@ export default defineNuxtConfig({
         component: "fa",
         icons: {
             regular: ["star"],
-            solid: ["cog", "user", "film", "tv", "star", "star-half-stroke"],
+            solid: [
+                "play",
+                "cog",
+                "user",
+                "film",
+                "tv",
+                "star",
+                "star-half-stroke",
+            ],
         },
     },
 });

@@ -12,7 +12,7 @@ defineProps<{
     <div class="max-w-screen-md w-full">
         <div
             class="gap-x-6 xs:grid grid-cols-1 md:flex flex-col md:flex-row"
-            :style="{ aspectRatio: 16 / 9, height: 'fit-content' }"
+            :style="{ aspectRatio: 2, height: 'fit-content' }"
         >
             <div class="md:flex-1 aspect-video md:aspect-auto flex">
                 <div class="h-full w-full flex items-center justify-center">
@@ -35,6 +35,7 @@ defineProps<{
                 <div />
             </div>
         </div>
+        <div class="divider"/>
         <div class="mt-4 mb-4">
             <p
                 v-if="brief"

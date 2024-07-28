@@ -98,22 +98,31 @@ const packageDescription = computed(() => {
                 <div v-else class="skeleton h-6 w-20" />
             </template>
         </ResourcePageHeader>
-
-        <!-- <div v-if="movies === undefined">
-            <p class="prose-lg skeleton w-20 h-4"></p>
-            <Item
-                :image="undefined"
-                :href="null"
-                image-type="thumbnail"
-                :title="undefined"
-                :secondary-href="null"
-                :secondary-title="undefined"
-            />
-        </div> -->
+        <div v-if="movies?.length === 1">
+            <NuxtLink
+                :to="`/player/movie:${movies.at(0)!.id}`"
+                class="btn btn-primary btn-sm btn-block mb-3"
+            >
+                <fa icon="play" />
+                Play
+            </NuxtLink>
+        </div>
         <div v-for="movie in movies" :key="movie.slug">
-            <p class="prose-lg">
-                {{ (movies ?? [])?.length > 1 ? movie.name : "Chapters" }}
-            </p>
+            <div class="w-full flex justify-between">
+                <p class="prose-lg">
+                    {{ (movies ?? [])?.length > 1 ? movie.name : "Chapters" }}
+                </p>
+                <div>
+                    <NuxtLink
+                        v-if="(movies?.length ?? 0) > 1"
+                        :to="`/player/movie:${movie.id}`"
+                        class="btn btn-primary btn-xs"
+                    >
+                        <fa icon="play" />
+                        Play
+                    </NuxtLink>
+                </div>
+            </div>
             <InfiniteScroll
                 v-slot="{ item }"
                 :query="API.getChapters(movie.id)"
