@@ -17,7 +17,7 @@ const imageIsLoaded = ref(false);
     <div
         class="flex items-center justify-center w-auto object-contain overflow-hidden max-h-full poster-rounded"
         :class="{
-            'h-full': image === null,
+            'h-full': image === null || image === undefined,
         }"
         :style="{
             aspectRatio: !fitToExpectedAspectRatio

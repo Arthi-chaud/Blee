@@ -3,11 +3,25 @@ import { API } from "~/api/api";
 const route = useRoute();
 const artistId = route.params.id.toString();
 const { data: artist } = useQuery(API.getArtist(artistId));
-const { data: packagesData } = useInfiniteQuery(
+const {
+    data: packagesData,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+} = useInfiniteQuery(
     API.getPackages(
         { artist: artistId },
         { sort: "release_date", order: "desc" },
     ),
+);
+useInfiniteScroll(
+    document ? document.getElementById("scroller") : undefined,
+    async () => {
+        if (hasNextPage) {
+            await fetchNextPage();
+        }
+    },
+    { distance: 100, canLoadMore: () => hasNextPage.value, direction: "right" },
 );
 </script>
 <template>
@@ -18,15 +32,11 @@ const { data: packagesData } = useInfiniteQuery(
         />
         <p class="prose-lg">Movies</p>
         <div
-            class="w-full"
+            id="scroller"
+            class="w-full p-3 grid gap-3 grid-flow-col overflow-scroll"
             style="
-                padding: 10px;
-                display: grid;
-                gap: 16px;
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                grid-auto-flow: column;
                 grid-auto-columns: minmax(160px, 1fr);
-                overflow-x: auto;
             "
         >
             <PackageItem
@@ -37,6 +47,7 @@ const { data: packagesData } = useInfiniteQuery(
                     (p) => p.release_year?.getFullYear().toString() ?? ''
                 "
             />
+            <PackageItem v-if="isFetchingNextPage" :package="undefined" />
         </div>
     </div>
 </template>
