@@ -4,8 +4,10 @@
 import type { RequireExactlyOne } from "type-fest";
 import type { Schema } from "yup";
 import { Artist } from "~/models/domain/artist";
+import { Chapter } from "~/models/domain/chapter";
 import { ExternalId } from "~/models/domain/external-id";
 import { Extra } from "~/models/domain/extra";
+import { Movie, type MovieSortingKeys } from "~/models/domain/movie";
 import { Package, type PackageSortingKeys } from "~/models/domain/package";
 import PaginatedResponse from "~/models/domain/page";
 import type { PageParameter, PaginatedQuery, Query } from "~/models/queries";
@@ -37,6 +39,21 @@ class API {
                 }),
         };
     }
+    static getMovies(
+        filter: { package: string },
+        sort: Sort<MovieSortingKeys>,
+    ): PaginatedQuery<Movie> {
+        const route = `/movies`;
+        const params = { ...sort, ...filter };
+        return {
+            queryKey: this.buildQueryKey(route, params),
+            queryFn: (pageParam) =>
+                this._fetch(route, {
+                    query: { ...params, ...pageParam },
+                    validator: PaginatedResponse(Movie),
+                }),
+        };
+    }
     static getPackages(
         filter: { artist?: string },
         sort: Sort<PackageSortingKeys>,
@@ -49,6 +66,18 @@ class API {
                 this._fetch(route, {
                     query: { ...params, ...pageParam },
                     validator: PaginatedResponse(Package),
+                }),
+        };
+    }
+
+    static getChapters(movieUuid: string): PaginatedQuery<Chapter> {
+        const route = `/movies/${movieUuid}/chapters`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: (pageParam) =>
+                this._fetch(route, {
+                    query: { ...pageParam },
+                    validator: PaginatedResponse(Chapter),
                 }),
         };
     }
@@ -70,7 +99,7 @@ class API {
     }
 
     static getExtras(
-        filter: { artist?: string },
+        filter: { artist?: string; package?: string },
         sort: Sort<PackageSortingKeys>,
     ): PaginatedQuery<Extra> {
         const route = `/extras`;

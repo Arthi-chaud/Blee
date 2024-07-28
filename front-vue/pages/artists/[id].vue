@@ -14,6 +14,12 @@ const extrasQuery = API.getExtras(
     { artist: artistId },
     { sort: "name", order: "asc" },
 );
+const extras = useInfiniteQuery(extrasQuery);
+const hasExtras = computed(() =>
+    !extras.data.value
+        ? true
+        : (extras.data.value.pages.at(0)?.items ?? []).length > 0,
+);
 const artistDescription = computed(() => {
     const firstPage = artistExternalIds.value?.pages.at(0);
 
@@ -39,7 +45,7 @@ const artistDescription = computed(() => {
         >
             <PackageItem :package="item" />
         </InfiniteScroll>
-        <p class="prose-lg">Extras</p>
+        <p v-if="hasExtras" class="prose-lg">Extras</p>
         <InfiniteScroll
             v-slot="{ item }"
             :query="extrasQuery"
