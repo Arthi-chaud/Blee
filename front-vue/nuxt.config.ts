@@ -40,6 +40,8 @@ export default defineNuxtConfig({
                 "tv",
                 "star",
                 "star-half-stroke",
+                "home",
+                "arrow-left"
             ],
         },
     },

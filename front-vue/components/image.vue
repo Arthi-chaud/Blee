@@ -5,7 +5,6 @@ import { ref } from "vue";
 const { image, imageType } = defineProps<{
     image: Image | undefined | null;
     imageType: ImageType;
-    disableBorderRadius?: boolean;
     fitToExpectedAspectRatio?: true;
 }>();
 

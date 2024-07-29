@@ -62,6 +62,8 @@ const fileQueryProps = computed(() => ({
 }));
 const packageData = useTanQuery(packageQueryProps);
 const fileData = useTanQuery(fileQueryProps);
+const r = useRouter();
+const canGoBack = r.options.history.state["back"] != null;
 </script>
 <template>
     <div class="w-full h-full relative">
@@ -75,9 +77,11 @@ const fileData = useTanQuery(fileQueryProps);
         <div
             class="absolute w-full h-top flex justify-center top-0 bottom-0 z-10"
         >
-            <span
-                class="loading loading-spinner loading-lg text-primary"
-            ></span>
+            <span class="loading loading-spinner loading-lg text-primary" />
         </div>
+        <PlayerControls
+            :can-go-back="canGoBack"
+            :on-back-button-tap="() => (canGoBack ? r.go(-1) : r.replace('/'))"
+        />
     </div>
 </template>
