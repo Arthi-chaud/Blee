@@ -79,7 +79,11 @@ const canGoBack = r.options.history.state["back"] != null;
         >
             <span class="loading loading-spinner loading-lg text-primary" />
         </div>
+        <!-- TODO Subtitle should include chapter if resouce is movie -->
         <PlayerControls
+            :poster="packageData.data.value?.poster"
+            :title="(movieData.data.value ?? extraData.data.value)?.name"
+            :subtitle="(movieData.data.value ?? extraData.data.value)?.artist_name"
             :can-go-back="canGoBack"
             :on-back-button-tap="() => (canGoBack ? r.go(-1) : r.replace('/'))"
         />
