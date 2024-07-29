@@ -1,3 +1,3 @@
 <script setup lang="ts">
-await navigateTo('/packages')
+await navigateTo("/packages");
 </script>

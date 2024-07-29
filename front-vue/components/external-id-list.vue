@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { ExternalId } from '~/models/domain/external-id';
+import type { ExternalId } from "~/models/domain/external-id";
 
 defineProps<{
-	externalIds: ExternalId[] | undefined
+    externalIds: ExternalId[] | undefined;
 }>();
 </script>
 <template>

@@ -10,7 +10,7 @@ defineProps<{
             <button class="btn btn-ghost" @click="onBackButtonTap()">
                 <fa
                     :icon="canGoBack ? 'arrow-left' : 'home'"
-					class="prose-lg text-white"
+                    class="prose-lg text-white"
                 />
             </button>
         </div>

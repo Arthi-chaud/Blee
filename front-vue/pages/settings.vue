@@ -27,7 +27,10 @@ const clean = () => API.cleanFiles().then(() => scannerStatus.refetch());
             <button class="btn btn-sm font-medium btn-primary" @click="scan()">
                 Scan New Files
             </button>
-            <button class="btn btn-sm font-medium btn-secondary" @click="clean()">
+            <button
+                class="btn btn-sm font-medium btn-secondary"
+                @click="clean()"
+            >
                 Clean Library
             </button>
         </div>
