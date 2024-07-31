@@ -33,6 +33,7 @@ const { resourceType, resourceId, startTimestamp } = (() => {
 const movieData = useQuery(API.getMovie(resourceId), {
     enabled: resourceType == "movie",
 });
+
 const extraData = useQuery(API.getExtra(resourceId), {
     enabled: resourceType == "extra",
 });
@@ -64,6 +65,7 @@ const packageData = useTanQuery(packageQueryProps);
 const fileData = useTanQuery(fileQueryProps);
 const r = useRouter();
 const canGoBack = r.options.history.state["back"] != null;
+const progress = ref(startTimestamp);
 </script>
 <template>
     <div class="w-full h-full relative">
@@ -80,10 +82,16 @@ const canGoBack = r.options.history.state["back"] != null;
             <span class="loading loading-spinner loading-lg text-primary" />
         </div>
         <!-- TODO Subtitle should include chapter if resouce is movie -->
+        <!-- TODO Handle Progress -->
         <PlayerControls
             :poster="packageData.data.value?.poster"
+            :total-duration="fileData.data.value?.duration"
+            :on-slide="(p) => (progress = p)"
+            :progress="progress"
             :title="(movieData.data.value ?? extraData.data.value)?.name"
-            :subtitle="(movieData.data.value ?? extraData.data.value)?.artist_name"
+            :subtitle="
+                (movieData.data.value ?? extraData.data.value)?.artist_name
+            "
             :can-go-back="canGoBack"
             :on-back-button-tap="() => (canGoBack ? r.go(-1) : r.replace('/'))"
         />
