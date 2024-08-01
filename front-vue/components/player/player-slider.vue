@@ -1,18 +1,28 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
     progress: number;
+    chapterMarks: { start: number; end: number; name: string }[];
     totalDuration: number | undefined;
     onClick: (requestedProgress: number) => void;
 }>();
+const computeChapterMarkwidth = computed(
+    () => (chapter: { start: number; end: number }) => {
+        if (props.totalDuration === undefined) {
+            return 0;
+        }
+        return (100 * (chapter.end - chapter.start)) / props.totalDuration;
+    },
+);
+//TODO: Make chapter mark use actual position of the range, not progress
 </script>
 <template>
-    <div class="flex items-center">
+    <div class="flex items-center relative">
         <input
             type="range"
             min="0"
             :max="totalDuration ?? 1"
             :value="progress ?? 0"
-            class="player-slider"
+            class="player-slider absolute w-full"
             @change="
                 (e) => {
                     if (totalDuration !== undefined) {
@@ -24,9 +34,28 @@ defineProps<{
                 }
             "
         />
+        <div
+            v-if="totalDuration !== undefined"
+            class="absolute slider-height w-full flex flex-row rounded-box overflow-hidden pointer-events-none"
+        >
+            <div
+                v-for="(chapter, chapterIndex) in chapterMarks"
+                :key="chapter.start"
+                :style="{ width: `${computeChapterMarkwidth(chapter)}%` }"
+                :class="{
+                    ['border-l-2']: chapterIndex != 0,
+                    ['border-l-primary']: chapter.start > progress,
+                    ['border-l-white']: chapter.start <= progress,
+                }"
+                class="w-1 slider-height"
+            />
+        </div>
     </div>
 </template>
 <style scoped>
+.slider-height {
+    @apply h-1.5;
+}
 /* Stolen from DaisyUI + changed to our needs */
 .player-slider {
     cursor: pointer;
@@ -43,10 +72,10 @@ defineProps<{
             0 0 0 2rem var(--range-shdw) inset;
     }
     &::-webkit-slider-runnable-track {
-        @apply rounded-box bg-base-content/10 h-1.5 w-full;
+        @apply rounded-box bg-base-content/10 slider-height w-full;
     }
     &::-moz-range-track {
-        @apply rounded-box bg-base-content/10 h-1.5 w-full;
+        @apply rounded-box bg-base-content/10 slider-height w-full;
     }
     &::-webkit-slider-thumb {
         @apply rounded-box bg-base-100 relative h-0 w-0 border-none;

@@ -6,6 +6,7 @@ import type { Package } from "~/models/domain/package";
 import type { File } from "~/models/domain/file";
 import type { Image as ImageModel } from "~/models/domain/image";
 import Image from "~/components/image.vue";
+import type { Chapter } from "~/models/domain/chapter";
 
 const ParamSeparator = ":";
 type ValidParamPrefix = "extra" | "movie";
@@ -37,9 +38,18 @@ const movieData = useQuery(API.getMovie(resourceId), {
 const extraData = useQuery(API.getExtra(resourceId), {
     enabled: resourceType == "extra",
 });
+const {
+    data: chaptersData,
+    hasNextPage: hasNextChapterPage,
+    fetchNextPage: fetchNextChapterPage,
+} = useInfiniteQuery(API.getChapters(resourceId), {
+    enabled: resourceType == "movie",
+});
+
 const packageQuery = ref<Query<Package>>();
 const thumbnail = ref<ImageModel | null>();
 const fileQuery = ref<Query<File>>();
+const chapters = ref<Chapter[] | undefined>([]);
 watch([movieData.data, extraData.data], ([m, e]) => {
     const packageId = (m ?? e)?.package_id;
     const fileId = (m ?? e)?.file_id;
@@ -50,6 +60,19 @@ watch([movieData.data, extraData.data], ([m, e]) => {
     if (fileId) {
         fileQuery.value = API.getFile(fileId);
     }
+});
+watch(hasNextChapterPage, (hasNextPage) => {
+    // Fetch all chapters
+    if (hasNextPage) {
+        fetchNextChapterPage();
+    }
+});
+watch(chaptersData, (c) => {
+    console.log(c);
+    chapters.value = c?.pages
+        .map(toRaw)
+        .map(({ items }) => toRaw(items.map(toRaw)))
+        .flat();
 });
 const packageQueryProps = computed(() => ({
     queryKey: packageQuery.value?.queryKey ?? [],
@@ -84,6 +107,7 @@ const progress = ref(startTimestamp);
         <!-- TODO Subtitle should include chapter if resouce is movie -->
         <!-- TODO Handle Progress -->
         <PlayerControls
+            :chapters="chapters"
             :poster="packageData.data.value?.poster"
             :total-duration="fileData.data.value?.duration"
             :on-slide="(p) => (progress = p)"

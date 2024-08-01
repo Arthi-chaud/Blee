@@ -19,14 +19,19 @@ type PaginatedQuery<ReturnType> = {
 };
 
 type PaginatedQueryOptions<ReturnType> = Omit<
-    tanstack.QueryOptions<
+    tanstack.UseInfiniteQueryOptions<
         PaginatedResponse<ReturnType>,
         Error,
         tanstack.InfiniteData<PaginatedResponse<ReturnType>, PageParameter>,
+        PaginatedResponse<ReturnType>,
         tanstack.QueryKey,
         PageParameter
     >,
-    "queryFn" | "queryKey" | "initialData"
+    | "queryFn"
+    | "queryKey"
+    | "initialData"
+    | "getNextPageParam"
+    | "initialPageParam"
 >;
 
 export {
