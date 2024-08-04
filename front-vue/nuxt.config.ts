@@ -34,6 +34,7 @@ export default defineNuxtConfig({
             solid: [
                 "arrows-rotate",
                 "play",
+                "pause",
                 "cog",
                 "user",
                 "film",

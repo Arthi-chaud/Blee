@@ -12,6 +12,8 @@ const props = defineProps<{
     chapters: Chapter[] | undefined;
     totalDuration: number | undefined;
     onSlide: (newProgess: number) => void;
+    isPlaying: boolean;
+    onPlay: (isPlaying: boolean) => void;
     onBackButtonTap: () => void;
 }>();
 const chapterMarks = computed(
@@ -47,14 +49,24 @@ const chapterMarks = computed(
                     </p>
                     <div v-else class="skeleton h-4 w-20 my-2" />
                 </div>
-                <div class="pb-2">
+                <div class="pb-2 flex flex-row w-full relative">
                     <p
                         v-if="subtitle !== undefined"
-                        class="controls-text prose-md"
+                        class="controls-text prose-md flex-1"
                     >
                         {{ subtitle }}
                     </p>
-                    <div v-else class="skeleton h-3 w-20" />
+                    <div v-else class="skeleton h-3 w-20 flex-1" />
+                    <button
+                        class="btn btn-circle btn-ghost p-0 btn-xs"
+                        @click="onPlay(!isPlaying)"
+                    >
+                        <fa
+                            :icon="isPlaying ? 'pause' : 'play'"
+                            class="flex-none prose-xl text-white"
+                        />
+                    </button>
+                    <div class="flex-1" />
                 </div>
                 <div class="flex flex-row w-full items-center">
                     <p class="flex-none controls-text prose-sm">

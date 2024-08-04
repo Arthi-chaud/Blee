@@ -2,6 +2,7 @@
 import { API } from "~/api/api";
 import Image from "~/components/image.vue";
 import { useResourceMetadata } from "~/composables/player/resource-metadata";
+import type { Chapter } from "~/models/domain/chapter";
 
 const ParamSeparator = ":";
 type ValidParamPrefix = "extra" | "movie";
@@ -34,10 +35,13 @@ const videoRef = ref<HTMLVideoElement>();
 const progress = ref(videoRef.value?.currentTime ?? startTimestamp);
 const bufferedTime = ref(0);
 const bufferClock = ref<NodeJS.Timeout>();
+const chapterClock = ref<NodeJS.Timeout>();
 const dataIsLoaded = ref(false);
 const goBack = () => {
     canGoBack ? r.go(-1) : r.replace("/");
 };
+const currentChapter = ref<Chapter | null>();
+const isPlaying = ref(false);
 const updateBufferedTime = () => {
     if (videoRef.value) {
         const lastBufferedSegment = videoRef.value.buffered.length - 1;
@@ -47,7 +51,14 @@ const updateBufferedTime = () => {
         bufferedTime.value = videoRef.value.buffered.end(lastBufferedSegment);
     }
 };
-2;
+const updateCurrentChapter = () => {
+    if (!progress.value) {
+        return;
+    }
+    currentChapter.value = chapters.value?.find(
+        (c) => c.start_time <= progress.value && progress.value < c.end_time,
+    );
+};
 watch(
     [file, videoRef],
     ([f, player]) => {
@@ -56,14 +67,24 @@ watch(
             const transcoderUrl = API.buildDirectPlaybackUrl(f);
             player.src = transcoderUrl;
             player.currentTime = startTimestamp;
+            isPlaying.value = true;
             player.play().then(() => {
                 dataIsLoaded.value = true;
                 player.ontimeupdate = () => {
                     progress.value = Math.floor(player.currentTime);
                 };
+                player.onpause = () => {
+                    isPlaying.value = false;
+                };
+                player.onplay = () => {
+                    isPlaying.value = true;
+                };
                 player.onended = goBack;
             });
             bufferClock.value = setInterval(updateBufferedTime, 300);
+            if (resourceType === "movie") {
+                chapterClock.value = setInterval(updateCurrentChapter, 1000);
+            }
         }
     },
     { immediate: true },
@@ -71,42 +92,55 @@ watch(
 onBeforeUnmount(() => {
     videoRef?.value?.pause();
     clearTimeout(bufferClock.value);
+    if (resourceType === "movie") {
+        clearTimeout(chapterClock.value);
+    }
 });
 </script>
 <template>
     <div class="w-full h-full relative">
-        <!--TODO: Fade out when data is ready-->
+        <video
+            ref="videoRef"
+            class="w-full h-full absolute opacity-0 fading-content"
+            :class="{ 'opacity-100': dataIsLoaded }"
+        />
         <div
-            class="w-full h-full flex justify-center absolute loading-state-content"
-            :style="{
-                opacity: dataIsLoaded ? 0 : 1,
-            }"
+            class="w-full h-full flex justify-center absolute fading-content"
+            :class="{ 'opacity-0': dataIsLoaded }"
         >
-            <!--Rework placement-->
             <Image :image="thumbnail" image-type="thumbnail" />
+            <!--Rework placement-->
         </div>
         <div
-            class="absolute w-full h-full top-0 bottom-0 z-10 bg-black opacity-60 loading-state-content"
-            :style="{
-                opacity: dataIsLoaded ? 0 : 1,
-            }"
+            class="absolute w-full h-full top-0 bottom-0 z-10 bg-black opacity-60 fading-content"
+            :class="{ '!opacity-0': dataIsLoaded }"
         ></div>
         <div
-            class="absolute w-full h-top flex justify-center top-0 bottom-0 z-10 loading-state-content"
-            :style="{
-                opacity: dataIsLoaded ? 0 : 1,
-            }"
+            class="absolute w-full h-top flex justify-center top-0 bottom-0 z-10 fading-content"
+            :class="{ 'opacity-0': dataIsLoaded }"
         >
             <span class="loading loading-spinner loading-lg text-primary" />
         </div>
-        <video ref="videoRef" class="w-full h-full absolute" />
+
         <!-- TODO Subtitle should include chapter if resouce is movie -->
-        <!-- TODO Handle Progress -->
         <PlayerControls
             :buffered="bufferedTime"
             :chapters="chapters"
             :poster="parentPackage?.poster"
             :total-duration="file?.duration"
+            :is-playing="isPlaying"
+            :on-play="
+                (wantToPlay) => {
+                    if (!videoRef) {
+                        return;
+                    }
+                    if (wantToPlay) {
+                        videoRef.play();
+                    } else {
+                        videoRef.pause();
+                    }
+                }
+            "
             :on-slide="
                 (p) => {
                     if (videoRef) {
@@ -116,14 +150,14 @@ onBeforeUnmount(() => {
             "
             :progress="progress"
             :title="(movie ?? extra)?.name"
-            :subtitle="(movie ?? extra)?.artist_name"
+            :subtitle="currentChapter ? `${currentChapter.name} - ${(movie ?? extra)?.artist_name}` : (movie ?? extra)?.artist_name"
             :can-go-back="canGoBack"
             :on-back-button-tap="goBack"
         />
     </div>
 </template>
-<style>
-.loading-state-content {
-    transition: "opacity 0.2s ease-in";
+<style scoped>
+.fading-content {
+    transition: opacity 0.2s ease-in;
 }
 </style>
