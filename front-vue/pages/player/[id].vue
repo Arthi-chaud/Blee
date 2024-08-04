@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { API } from "~/api/api";
 import Image from "~/components/image.vue";
+import { useBrowserMetadata } from "~/composables/player/browser-metadata";
 import { usePlayerContext } from "~/composables/player/context";
 import { useCurrentChapter } from "~/composables/player/current-chapter";
 import { useResourceMetadata } from "~/composables/player/resource-metadata";
@@ -9,7 +9,7 @@ const ParamSeparator = ":";
 type ValidParamPrefix = "extra" | "movie";
 definePageMeta({
     layout: "empty",
-    validate: async (route) => {
+    validate: (route) => {
         const param = route.params.id;
         if (typeof param !== "string") {
             return false;
@@ -35,27 +35,6 @@ const canGoBack = r.options.history.state["back"] != null;
 const goBack = () => {
     canGoBack ? r.go(-1) : r.replace("/");
 };
-const setMediaMetadata = () => {
-    if (typeof navigator.mediaSession !== "undefined") {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title:
-                extra.value?.name ??
-                currentChapter.value?.name ??
-                movie.value?.name,
-            album: extra.value ? parentPackage.value?.name : movie.value?.name,
-            artist:
-                (movie.value ?? extra.value ?? parentPackage.value)
-                    ?.artist_name ?? undefined,
-            artwork: parentPackage.value?.poster
-                ? [
-                      {
-                          src: API.buildImageUrl(parentPackage.value.poster.id),
-                      },
-                  ]
-                : undefined,
-        });
-    }
-};
 const setupControls = () => {
     if (typeof navigator.mediaSession !== "undefined") {
         navigator.mediaSession.setActionHandler("play", () =>
@@ -78,8 +57,14 @@ const { isReady, buffered, isPlaying, playerRef, progress } = usePlayerContext({
 });
 const { currentChapter } = useCurrentChapter({
     chapters: chapters,
-    onChapterChange: setMediaMetadata,
+    onChapterChange: () => setMediaMetadata(),
     progress: progress,
+});
+const { setMediaMetadata } = useBrowserMetadata({
+    currentChapter,
+    movie,
+    extra,
+    parentPackage,
 });
 </script>
 <template>
