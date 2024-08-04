@@ -1,5 +1,5 @@
 x-transcoder: &transcoder-base
-  image: ghcr.io/zoriya/kyoo_transcoder:4.5.0
+  image: ghcr.io/zoriya/kyoo_transcoder:4.6.0
   networks:
     default:
       aliases:
