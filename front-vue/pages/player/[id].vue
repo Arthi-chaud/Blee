@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { API } from "~/api/api";
-import { useQuery as useTanQuery } from "@tanstack/vue-query";
-import type { Query } from "~/models/queries";
-import type { Package } from "~/models/domain/package";
-import type { File } from "~/models/domain/file";
-import type { Image as ImageModel } from "~/models/domain/image";
 import Image from "~/components/image.vue";
-import type { Chapter } from "~/models/domain/chapter";
+import { useResourceMetadata } from "~/composables/player/resource-metadata";
 
 const ParamSeparator = ":";
 type ValidParamPrefix = "extra" | "movie";
@@ -31,67 +26,29 @@ const { resourceType, resourceId, startTimestamp } = (() => {
     const startTimestamp = rawStartTimestamp ? parseInt(rawStartTimestamp) : 0;
     return { resourceType, resourceId, startTimestamp };
 })();
-const movieData = useQuery(API.getMovie(resourceId), {
-    enabled: resourceType == "movie",
-});
-
-const extraData = useQuery(API.getExtra(resourceId), {
-    enabled: resourceType == "extra",
-});
-const {
-    data: chaptersData,
-    hasNextPage: hasNextChapterPage,
-    fetchNextPage: fetchNextChapterPage,
-} = useInfiniteQuery(API.getChapters(resourceId), {
-    enabled: resourceType == "movie",
-});
-
-const packageQuery = ref<Query<Package>>();
-const thumbnail = ref<ImageModel | null>();
-const fileQuery = ref<Query<File>>();
-const chapters = ref<Chapter[] | undefined>([]);
-watch([movieData.data, extraData.data], ([m, e]) => {
-    const packageId = (m ?? e)?.package_id;
-    const fileId = (m ?? e)?.file_id;
-    thumbnail.value = (m ?? e)?.thumbnail;
-    if (packageId) {
-        packageQuery.value = API.getPackage(packageId);
-    }
-    if (fileId) {
-        fileQuery.value = API.getFile(fileId);
-    }
-});
-watch(hasNextChapterPage, (hasNextPage) => {
-    // Fetch all chapters
-    if (hasNextPage) {
-        fetchNextChapterPage();
-    }
-});
-watch(chaptersData, (c) => {
-    console.log(c);
-    chapters.value = c?.pages
-        .map(toRaw)
-        .map(({ items }) => toRaw(items.map(toRaw)))
-        .flat();
-});
-const packageQueryProps = computed(() => ({
-    queryKey: packageQuery.value?.queryKey ?? [],
-    queryFn: packageQuery.value?.queryFn,
-    enabled: !!packageQuery.value,
-}));
-const fileQueryProps = computed(() => ({
-    queryKey: fileQuery.value?.queryKey ?? [],
-    queryFn: fileQuery.value?.queryFn,
-    enabled: !!fileQuery.value,
-}));
-const packageData = useTanQuery(packageQueryProps);
-const fileData = useTanQuery(fileQueryProps);
+const { file, parentPackage, movie, extra, thumbnail, chapters } =
+    useResourceMetadata(resourceType, resourceId);
 const r = useRouter();
 const canGoBack = r.options.history.state["back"] != null;
 const progress = ref(startTimestamp);
+const videoRef = ref<HTMLVideoElement>();
+const dataIsLoaded = ref(false);
+watch([file, videoRef], ([f, player]) => {
+    console.log('A')
+    if (f && player && !player.src) {
+        console.log('B')
+        // player.src = "/transcoder/L3ZpZGVvcy9Db25jZXJ0cy9Nb2xva28gLSAxMSwwMDAgQ2xpY2tzL01vbG9rbyAtIDExLDAwMCBDbGlja3MubXA0/direct"
+        // // const b64Path = Buffer.from(f.path).toString("base64url");
+        // // streamUrl.value = `/transcoder/${b64Path}/direct`;
+        // player.play().then(() => {
+        //     dataIsLoaded.value = true;
+        // });
+    }
+});
 </script>
 <template>
     <div class="w-full h-full relative">
+        <!--TODO: Fade out when data is ready-->
         <div class="w-full h-full flex justify-center absolute">
             <!--Rework placement-->
             <Image :image="thumbnail" image-type="thumbnail" />
@@ -104,18 +61,17 @@ const progress = ref(startTimestamp);
         >
             <span class="loading loading-spinner loading-lg text-primary" />
         </div>
+        <video ref="videoRef" class="w-full h-full absolute" />
         <!-- TODO Subtitle should include chapter if resouce is movie -->
         <!-- TODO Handle Progress -->
         <PlayerControls
             :chapters="chapters"
-            :poster="packageData.data.value?.poster"
-            :total-duration="fileData.data.value?.duration"
+            :poster="parentPackage?.poster"
+            :total-duration="file?.duration"
             :on-slide="(p) => (progress = p)"
             :progress="progress"
-            :title="(movieData.data.value ?? extraData.data.value)?.name"
-            :subtitle="
-                (movieData.data.value ?? extraData.data.value)?.artist_name
-            "
+            :title="(movie ?? extra)?.name"
+            :subtitle="(movie ?? extra)?.artist_name"
             :can-go-back="canGoBack"
             :on-back-button-tap="() => (canGoBack ? r.go(-1) : r.replace('/'))"
         />

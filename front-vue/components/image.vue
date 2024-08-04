@@ -2,14 +2,17 @@
 <script setup lang="ts">
 import type { Image, ImageType } from "~/models/domain/image";
 import { ref } from "vue";
-const { image, imageType } = defineProps<{
+const props = defineProps<{
     image: Image | undefined | null;
     imageType: ImageType;
     fitToExpectedAspectRatio?: true;
+    //TODO for skeleton
+    disableAspectRatio?: true
 }>();
 
-const blurashURL = computed(() => blurHashToDataURL(image?.blurhash));
-const aspectRatio = imageType == "poster" ? 2 / 3 : 16 / 9;
+//TODO Blurhahs is undefined?
+const blurashURL = computed(() => blurHashToDataURL(props.image?.blurhash));
+const aspectRatio = props.imageType == "poster" ? 2 / 3 : 16 / 9;
 const imageIsLoaded = ref(false);
 </script>
 <template>
