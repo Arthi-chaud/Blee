@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { API } from "~/api/api";
 import Image from "~/components/image.vue";
+import { usePlayerContext } from "~/composables/player/context";
+import { useCurrentChapter } from "~/composables/player/current-chapter";
 import { useResourceMetadata } from "~/composables/player/resource-metadata";
-import type { Chapter } from "~/models/domain/chapter";
 
 const ParamSeparator = ":";
 type ValidParamPrefix = "extra" | "movie";
@@ -31,25 +32,8 @@ const { file, parentPackage, movie, extra, thumbnail, chapters } =
     useResourceMetadata(resourceType, resourceId);
 const r = useRouter();
 const canGoBack = r.options.history.state["back"] != null;
-const videoRef = ref<HTMLVideoElement>();
-const progress = ref(videoRef.value?.currentTime ?? startTimestamp);
-const bufferedTime = ref(0);
-const bufferClock = ref<NodeJS.Timeout>();
-const chapterClock = ref<NodeJS.Timeout>();
-const dataIsLoaded = ref(false);
 const goBack = () => {
     canGoBack ? r.go(-1) : r.replace("/");
-};
-const currentChapter = ref<Chapter | null>();
-const isPlaying = ref(false);
-const updateBufferedTime = () => {
-    if (videoRef.value) {
-        const lastBufferedSegment = videoRef.value.buffered.length - 1;
-        if (lastBufferedSegment < 1) {
-            return;
-        }
-        bufferedTime.value = videoRef.value.buffered.end(lastBufferedSegment);
-    }
 };
 const setMediaMetadata = () => {
     if (typeof navigator.mediaSession !== "undefined") {
@@ -74,112 +58,73 @@ const setMediaMetadata = () => {
 };
 const setupControls = () => {
     if (typeof navigator.mediaSession !== "undefined") {
-        navigator.mediaSession.setActionHandler("play", () => videoRef.value?.play());
-        navigator.mediaSession.setActionHandler("pause", () => videoRef.value?.pause());
+        navigator.mediaSession.setActionHandler("play", () =>
+            playerRef.value?.play(),
+        );
+        navigator.mediaSession.setActionHandler("pause", () =>
+            playerRef.value?.pause(),
+        );
         // TODO: use back + forward button to change chapter
     }
 };
-const updateCurrentChapter = () => {
-    if (!progress.value) {
-        return;
-    }
-    const oldChapterId = currentChapter.value?.id;
-    const newChapter = chapters.value?.find(
-        (c) => c.start_time <= progress.value && progress.value < c.end_time,
-    );
-    currentChapter.value = newChapter;
-    if (newChapter?.id !== oldChapterId) {
+const { isReady, buffered, isPlaying, playerRef, progress } = usePlayerContext({
+    startTimestamp,
+    fileData: file,
+    onEnd: goBack,
+    onReady: () => {
+        setupControls();
         setMediaMetadata();
-    }
-};
-watch(
-    [file, videoRef],
-    ([f, player]) => {
-        if (f && player && !player.src) {
-            player.playsInline = true;
-            const transcoderUrl = API.buildDirectPlaybackUrl(f);
-            player.src = transcoderUrl;
-            player.currentTime = startTimestamp;
-            isPlaying.value = true;
-            player.play().then(() => {
-                setMediaMetadata();
-                setupControls();
-                dataIsLoaded.value = true;
-                player.ontimeupdate = () => {
-                    progress.value = Math.floor(player.currentTime);
-                };
-                player.onpause = () => {
-                    isPlaying.value = false;
-                };
-                player.onplay = () => {
-                    isPlaying.value = true;
-                };
-                player.onended = goBack;
-            });
-            bufferClock.value = setInterval(updateBufferedTime, 300);
-            if (resourceType === "movie") {
-                chapterClock.value = setInterval(updateCurrentChapter, 1000);
-            }
-        }
     },
-    { immediate: true },
-);
-onBeforeUnmount(() => {
-    videoRef?.value?.pause();
-    clearTimeout(bufferClock.value);
-    if (resourceType === "movie") {
-        clearTimeout(chapterClock.value);
-    }
+});
+const { currentChapter } = useCurrentChapter({
+    chapters: chapters,
+    onChapterChange: setMediaMetadata,
+    progress: progress,
 });
 </script>
 <template>
     <div class="w-full h-full relative">
         <video
-            ref="videoRef"
+            ref="playerRef"
             class="w-full h-full absolute opacity-0 fading-content"
-            :class="{ 'opacity-100': dataIsLoaded }"
+            :class="{ 'opacity-100': isReady }"
         />
         <div
             class="w-full h-full flex justify-center absolute fading-content"
-            :class="{ 'opacity-0': dataIsLoaded }"
+            :class="{ 'opacity-0': isReady }"
         >
             <Image :image="thumbnail" image-type="thumbnail" />
             <!--Rework placement-->
         </div>
         <div
             class="absolute w-full h-full top-0 bottom-0 z-10 bg-black opacity-60 fading-content"
-            :class="{ '!opacity-0': dataIsLoaded }"
+            :class="{ '!opacity-0': isReady }"
         ></div>
         <div
             class="absolute w-full h-top flex justify-center top-0 bottom-0 z-10 fading-content"
-            :class="{ 'opacity-0': dataIsLoaded }"
+            :class="{ 'opacity-0': isReady }"
         >
             <span class="loading loading-spinner loading-lg text-primary" />
         </div>
-
-        <!-- TODO Subtitle should include chapter if resouce is movie -->
         <PlayerControls
-            :buffered="bufferedTime"
+            :buffered="buffered"
             :chapters="chapters"
             :poster="parentPackage?.poster"
             :total-duration="file?.duration"
             :is-playing="isPlaying"
             :on-play="
                 (wantToPlay) => {
-                    if (!videoRef) {
-                        return;
-                    }
                     if (wantToPlay) {
-                        videoRef.play();
+                        playerRef?.play();
                     } else {
-                        videoRef.pause();
+                        playerRef?.pause();
                     }
                 }
             "
             :on-slide="
                 (p) => {
-                    if (videoRef) {
-                        videoRef.currentTime = Math.floor(p);
+                    if (playerRef) {
+                        playerRef.currentTime = Math.floor(p);
                     }
                 }
             "

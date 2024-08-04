@@ -6,12 +6,18 @@ const props = defineProps<{
     totalDuration: number | undefined;
     onClick: (requestedProgress: number) => void;
 }>();
+const bufferedWidth = ref(0);
+watch(props, ({ totalDuration, buffered }) => {
+    bufferedWidth.value = totalDuration ? (100 * buffered) / totalDuration : 0;
+});
 const computeChapterMarkwidth = computed(
     () => (chapter: { start: number; end: number }) => {
         if (props.totalDuration === undefined) {
             return 0;
         }
-        return (100 * (chapter.end - chapter.start)) / props.totalDuration;
+        return Math.floor(
+            (100 * (chapter.end - chapter.start)) / props.totalDuration,
+        );
     },
 );
 //TODO: Make chapter mark use actual position of the range, not progress
@@ -38,13 +44,14 @@ const computeChapterMarkwidth = computed(
         <div
             class="absolute slider-height w-full rounded-box overflow-hidden pointer-events-none"
         >
+            <!--Buffer is broken??-->
             <div
                 class="bg-primary"
                 :style="{
                     borderTopRightRadius: 0,
                     borderBottomRightRadius: 0,
                     opacity: 0.5,
-                    width: `${totalDuration ? (100 * buffered) / totalDuration : 0}%`,
+                    width: `${bufferedWidth}%`,
                 }"
             />
         </div>

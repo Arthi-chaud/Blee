@@ -59,8 +59,7 @@ export const useResourceMetadata = (
         (c) => {
             chapters.value = c?.pages
                 .map(toRaw)
-                .map(({ items }) => toRaw(items.map(toRaw)))
-                .flat();
+                .flatMap(({ items }) => toRaw(items.map(toRaw)));
             // We use immediate to force running the callback even when data is already loaded
         },
         { immediate: true },
@@ -79,10 +78,10 @@ export const useResourceMetadata = (
     const { data: fileData } = useTanQuery(fileQueryProps);
 
     return {
-		thumbnail: thumbnail,
-		chapters: chapters,
-		movie: movieData.data,
-		extra: extraData.data,
+        thumbnail: thumbnail,
+        chapters: chapters,
+        movie: movieData.data,
+        extra: extraData.data,
         file: fileData,
         parentPackage: packageData,
     };
