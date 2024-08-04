@@ -51,13 +51,46 @@ const updateBufferedTime = () => {
         bufferedTime.value = videoRef.value.buffered.end(lastBufferedSegment);
     }
 };
+const setMediaMetadata = () => {
+    if (typeof navigator.mediaSession !== "undefined") {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title:
+                extra.value?.name ??
+                currentChapter.value?.name ??
+                movie.value?.name,
+            album: extra.value ? parentPackage.value?.name : movie.value?.name,
+            artist:
+                (movie.value ?? extra.value ?? parentPackage.value)
+                    ?.artist_name ?? undefined,
+            artwork: parentPackage.value?.poster
+                ? [
+                      {
+                          src: API.buildImageUrl(parentPackage.value.poster.id),
+                      },
+                  ]
+                : undefined,
+        });
+    }
+};
+const setupControls = () => {
+    if (typeof navigator.mediaSession !== "undefined") {
+        navigator.mediaSession.setActionHandler("play", () => videoRef.value?.play());
+        navigator.mediaSession.setActionHandler("pause", () => videoRef.value?.pause());
+        // TODO: use back + forward button to change chapter
+    }
+};
 const updateCurrentChapter = () => {
     if (!progress.value) {
         return;
     }
-    currentChapter.value = chapters.value?.find(
+    const oldChapterId = currentChapter.value?.id;
+    const newChapter = chapters.value?.find(
         (c) => c.start_time <= progress.value && progress.value < c.end_time,
     );
+    currentChapter.value = newChapter;
+    if (newChapter?.id !== oldChapterId) {
+        setMediaMetadata();
+    }
 };
 watch(
     [file, videoRef],
@@ -69,6 +102,8 @@ watch(
             player.currentTime = startTimestamp;
             isPlaying.value = true;
             player.play().then(() => {
+                setMediaMetadata();
+                setupControls();
                 dataIsLoaded.value = true;
                 player.ontimeupdate = () => {
                     progress.value = Math.floor(player.currentTime);
@@ -150,7 +185,11 @@ onBeforeUnmount(() => {
             "
             :progress="progress"
             :title="(movie ?? extra)?.name"
-            :subtitle="currentChapter ? `${currentChapter.name} - ${(movie ?? extra)?.artist_name}` : (movie ?? extra)?.artist_name"
+            :subtitle="
+                currentChapter
+                    ? `${currentChapter.name} - ${(movie ?? extra)?.artist_name}`
+                    : (movie ?? extra)?.artist_name
+            "
             :can-go-back="canGoBack"
             :on-back-button-tap="goBack"
         />
