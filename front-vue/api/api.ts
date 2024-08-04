@@ -13,6 +13,7 @@ import { Package, type PackageSortingKeys } from "~/models/domain/package";
 import PaginatedResponse from "~/models/domain/page";
 import { ScannerStatusResponse } from "~/models/domain/scanner-status";
 import type { PageParameter, PaginatedQuery, Query } from "~/models/queries";
+import { Base64 } from "js-base64";
 
 type Sort<T extends string> = {
     sort: T;
@@ -20,6 +21,18 @@ type Sort<T extends string> = {
 };
 class API {
     public static readonly defaultPageSize = 25;
+
+    static buildImageUrl(imageId: string) {
+        return "/api/images/" + imageId;
+    }
+
+    private static b64encodeFilePath(filePath: string) {
+        return Base64.encode(filePath);
+    }
+
+    static buildDirectPlaybackUrl(file: File) {
+        return `/transcoder/${this.b64encodeFilePath(file.path)}/direct`;
+    }
 
     static getArtist(artistUuid: string): Query<Artist> {
         const route = `/artists/${artistUuid}`;

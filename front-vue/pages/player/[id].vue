@@ -30,34 +30,72 @@ const { file, parentPackage, movie, extra, thumbnail, chapters } =
     useResourceMetadata(resourceType, resourceId);
 const r = useRouter();
 const canGoBack = r.options.history.state["back"] != null;
-const progress = ref(startTimestamp);
 const videoRef = ref<HTMLVideoElement>();
+const progress = ref(videoRef.value?.currentTime ?? startTimestamp);
+const bufferedTime = ref(0);
+const bufferClock = ref<NodeJS.Timeout>();
 const dataIsLoaded = ref(false);
-watch([file, videoRef], ([f, player]) => {
-    console.log('A')
-    if (f && player && !player.src) {
-        console.log('B')
-        // player.src = "/transcoder/L3ZpZGVvcy9Db25jZXJ0cy9Nb2xva28gLSAxMSwwMDAgQ2xpY2tzL01vbG9rbyAtIDExLDAwMCBDbGlja3MubXA0/direct"
-        // // const b64Path = Buffer.from(f.path).toString("base64url");
-        // // streamUrl.value = `/transcoder/${b64Path}/direct`;
-        // player.play().then(() => {
-        //     dataIsLoaded.value = true;
-        // });
+const goBack = () => {
+    canGoBack ? r.go(-1) : r.replace("/");
+};
+const updateBufferedTime = () => {
+    if (videoRef.value) {
+        const lastBufferedSegment = videoRef.value.buffered.length - 1;
+        if (lastBufferedSegment < 1) {
+            return;
+        }
+        bufferedTime.value = videoRef.value.buffered.end(lastBufferedSegment);
     }
+};
+2;
+watch(
+    [file, videoRef],
+    ([f, player]) => {
+        if (f && player && !player.src) {
+            player.playsInline = true;
+            const transcoderUrl = API.buildDirectPlaybackUrl(f);
+            player.src = transcoderUrl;
+            player.currentTime = startTimestamp;
+            player.play().then(() => {
+                dataIsLoaded.value = true;
+                player.ontimeupdate = () => {
+                    progress.value = Math.floor(player.currentTime);
+                };
+                player.onended = goBack;
+            });
+            bufferClock.value = setInterval(updateBufferedTime, 300);
+        }
+    },
+    { immediate: true },
+);
+onBeforeUnmount(() => {
+    videoRef?.value?.pause();
+    clearTimeout(bufferClock.value);
 });
 </script>
 <template>
     <div class="w-full h-full relative">
         <!--TODO: Fade out when data is ready-->
-        <div class="w-full h-full flex justify-center absolute">
+        <div
+            class="w-full h-full flex justify-center absolute loading-state-content"
+            :style="{
+                opacity: dataIsLoaded ? 0 : 1,
+            }"
+        >
             <!--Rework placement-->
             <Image :image="thumbnail" image-type="thumbnail" />
         </div>
         <div
-            class="absolute w-full h-full top-0 bottom-0 z-10 bg-black opacity-60"
+            class="absolute w-full h-full top-0 bottom-0 z-10 bg-black opacity-60 loading-state-content"
+            :style="{
+                opacity: dataIsLoaded ? 0 : 1,
+            }"
         ></div>
         <div
-            class="absolute w-full h-top flex justify-center top-0 bottom-0 z-10"
+            class="absolute w-full h-top flex justify-center top-0 bottom-0 z-10 loading-state-content"
+            :style="{
+                opacity: dataIsLoaded ? 0 : 1,
+            }"
         >
             <span class="loading loading-spinner loading-lg text-primary" />
         </div>
@@ -65,15 +103,27 @@ watch([file, videoRef], ([f, player]) => {
         <!-- TODO Subtitle should include chapter if resouce is movie -->
         <!-- TODO Handle Progress -->
         <PlayerControls
+            :buffered="bufferedTime"
             :chapters="chapters"
             :poster="parentPackage?.poster"
             :total-duration="file?.duration"
-            :on-slide="(p) => (progress = p)"
+            :on-slide="
+                (p) => {
+                    if (videoRef) {
+                        videoRef.currentTime = Math.floor(p);
+                    }
+                }
+            "
             :progress="progress"
             :title="(movie ?? extra)?.name"
             :subtitle="(movie ?? extra)?.artist_name"
             :can-go-back="canGoBack"
-            :on-back-button-tap="() => (canGoBack ? r.go(-1) : r.replace('/'))"
+            :on-back-button-tap="goBack"
         />
     </div>
 </template>
+<style>
+.loading-state-content {
+    transition: "opacity 0.2s ease-in";
+}
+</style>

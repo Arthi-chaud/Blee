@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
     progress: number;
+    buffered: number;
     chapterMarks: { start: number; end: number; name: string }[];
     totalDuration: number | undefined;
     onClick: (requestedProgress: number) => void;
@@ -34,6 +35,19 @@ const computeChapterMarkwidth = computed(
                 }
             "
         />
+        <div
+            class="absolute slider-height w-full rounded-box overflow-hidden pointer-events-none"
+        >
+            <div
+                class="bg-primary"
+                :style="{
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                    opacity: 0.5,
+                    width: `${totalDuration ? (100 * buffered) / totalDuration : 0}%`,
+                }"
+            />
+        </div>
         <div
             v-if="totalDuration !== undefined"
             class="absolute slider-height w-full flex flex-row rounded-box overflow-hidden pointer-events-none"

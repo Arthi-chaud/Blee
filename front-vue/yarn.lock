@@ -6101,6 +6101,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-base64@npm:^3.7.7":
+  version: 3.7.7
+  resolution: "js-base64@npm:3.7.7"
+  checksum: 10c0/3c905a7e78b601e4751b5e710edd0d6d045ce2d23eb84c9df03515371e1b291edc72808dc91e081cb9855aef6758292a2407006f4608ec3705373dd8baf2f80f
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -7231,6 +7238,7 @@ __metadata:
     blurhash: "npm:^2.0.5"
     daisyui: "npm:^4.12.10"
     eslint: "npm:^9.7.0"
+    js-base64: "npm:^3.7.7"
     nuxt: "npm:^3.12.3"
     prettier: "npm:^3.3.3"
     type-fest: "npm:^4.21.0"

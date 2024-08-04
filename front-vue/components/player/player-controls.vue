@@ -4,6 +4,7 @@ import type { Image as ImageModel } from "~/models/domain/image";
 
 const props = defineProps<{
     canGoBack: boolean;
+    buffered: number;
     poster: ImageModel | undefined | null;
     title: string | undefined;
     subtitle: string | undefined | null;
@@ -70,6 +71,7 @@ const chapterMarks = computed(
                     </p>
                     <div class="w-full flex-1 mx-2">
                         <PlayerSlider
+                            :buffered="buffered"
                             :chapter-marks="chapterMarks"
                             :progress="progress ?? 0"
                             :total-duration="totalDuration"

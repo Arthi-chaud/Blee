@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import type { Image, ImageType } from "~/models/domain/image";
 import { ref } from "vue";
+import { API } from "~/api/api";
 const props = defineProps<{
     image: Image | undefined | null;
     imageType: ImageType;
@@ -51,7 +52,7 @@ const imageIsLoaded = ref(false);
             }"
         >
             <img
-                :src="'/api/images/' + image.id"
+                :src="API.buildImageUrl(image.id)"
                 :style="{
                     opacity: isSSR() || imageIsLoaded ? 1 : 0,
                     transition: 'opacity 0.2s ease-in',
