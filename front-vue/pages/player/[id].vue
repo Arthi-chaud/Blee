@@ -66,9 +66,40 @@ const { setMediaMetadata } = useBrowserMetadata({
     extra,
     parentPackage,
 });
+const controlsIntervalIsGoingOn = ref(false);
+const controlsRef = ref<HTMLElement>();
+const showControls = ref(true);
+watch(
+    [isReady, controlsRef],
+    ([ready, ref]) => {
+        if (!ready || !ref) {
+            return;
+        }
+        const startTimer = (after?: number) => {
+            if (controlsIntervalIsGoingOn.value) return;
+            controlsIntervalIsGoingOn.value = true;
+
+            setTimeout(function () {
+                showControls.value = false;
+                controlsIntervalIsGoingOn.value = false;
+            }, after ?? 3000);
+        };
+        startTimer();
+        ref.onmousemove = () => {
+            showControls.value = true;
+            startTimer();
+        };
+        ref.onmousedown = () => {
+            showControls.value = true;
+        };
+        ref.onmouseup = () => startTimer();
+        ref.onmouseout = () => startTimer();
+    },
+    { immediate: true },
+);
 </script>
 <template>
-    <div class="w-full h-full relative">
+    <div ref="controlsRef" class="w-full h-full relative">
         <video
             ref="playerRef"
             class="w-full h-full absolute opacity-0 fading-content"
@@ -92,6 +123,7 @@ const { setMediaMetadata } = useBrowserMetadata({
             <span class="loading loading-spinner loading-lg text-primary" />
         </div>
         <PlayerControls
+            :show="showControls"
             :buffered="buffered"
             :chapters="chapters"
             :poster="parentPackage?.poster"

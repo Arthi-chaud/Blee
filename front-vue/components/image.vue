@@ -8,7 +8,7 @@ const props = defineProps<{
     imageType: ImageType;
     fitToExpectedAspectRatio?: true;
     //TODO for skeleton
-    disableAspectRatio?: true
+    disableAspectRatio?: true;
 }>();
 
 //TODO Blurhahs is undefined?

@@ -3,6 +3,7 @@ import type { Chapter } from "~/models/domain/chapter";
 import type { Image as ImageModel } from "~/models/domain/image";
 
 const props = defineProps<{
+    show: boolean;
     canGoBack: boolean;
     buffered: number;
     poster: ImageModel | undefined | null;
@@ -26,7 +27,10 @@ const chapterMarks = computed(
 );
 </script>
 <template>
-    <div class="w-full h-full z-20 fixed">
+    <div
+        class="w-full h-full z-20 fixed transition-opacity duration-200"
+        :class="{ 'opacity-0': !show, 'pointer-events-none': !show }"
+    >
         <div class="top-0 h-20 flex justify-start m-1">
             <button class="btn btn-ghost btn-circle" @click="onBackButtonTap()">
                 <fa

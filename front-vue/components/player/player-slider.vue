@@ -6,7 +6,7 @@ const props = defineProps<{
     totalDuration: number | undefined;
     onClick: (requestedProgress: number) => void;
 }>();
-const bufferedWidth = ref(50);
+const bufferedWidth = ref(0);
 watch(props, ({ totalDuration, buffered }) => {
     bufferedWidth.value = Math.floor(
         totalDuration ? (100 * buffered) / totalDuration : 0,
