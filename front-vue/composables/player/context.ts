@@ -26,7 +26,6 @@ export const usePlayerContext = (props: {
     watch(
         [props.fileData, videoRef],
         ([f, player]) => {
-			console.log(f, player)
             if (!f || !player || player.src) {
                 return;
             }

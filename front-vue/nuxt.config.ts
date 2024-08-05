@@ -32,6 +32,7 @@ export default defineNuxtConfig({
         icons: {
             regular: ["star"],
             solid: [
+                "face-sad-tear",
                 "arrows-rotate",
                 "play",
                 "pause",

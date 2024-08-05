@@ -28,7 +28,7 @@ const { resourceType, resourceId, startTimestamp } = (() => {
     const startTimestamp = rawStartTimestamp ? parseInt(rawStartTimestamp) : 0;
     return { resourceType, resourceId, startTimestamp };
 })();
-const { file, parentPackage, movie, extra, thumbnail, chapters } =
+const { file, parentPackage, movie, extra, thumbnail, chapters, isError } =
     useResourceMetadata(resourceType, resourceId);
 const r = useRouter();
 const canGoBack = r.options.history.state["back"] != null;
@@ -123,6 +123,13 @@ const { setMediaMetadata } = useBrowserMetadata({
             :can-go-back="canGoBack"
             :on-back-button-tap="goBack"
         />
+        <div v-if="isError" class="toast z-50 toast-top toast-end">
+            <div class="alert py-0">
+                <fa icon="face-sad-tear" />
+                <span>An error occured while loading data.</span>
+                <button class="btn btn-ghost" @click="goBack()">Go Back</button>
+            </div>
+        </div>
     </div>
 </template>
 <style scoped>

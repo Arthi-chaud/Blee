@@ -65,10 +65,8 @@ const computeChapterMarkwidth = computed(
                 :style="{ width: `${computeChapterMarkwidth(chapter)}%` }"
                 :class="{
                     ['border-l-2']: chapterIndex != 0,
-                    ['border-l-primary']: chapter.start > progress,
-                    ['border-l-white']: chapter.start <= progress,
                 }"
-                class="w-1 slider-height"
+                class="w-1 slider-height border-l-gray-400"
             />
         </div>
     </div>

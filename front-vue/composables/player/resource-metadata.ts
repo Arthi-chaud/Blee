@@ -18,6 +18,7 @@ export const useResourceMetadata = (
         enabled: resourceType == "extra",
     });
     const {
+        isError: chapterError,
         data: chaptersData,
         hasNextPage: hasNextChapterPage,
         fetchNextPage: fetchNextChapterPage,
@@ -74,8 +75,23 @@ export const useResourceMetadata = (
         queryFn: fileQuery.value?.queryFn,
         enabled: !!fileQuery.value,
     }));
-    const { data: packageData } = useTanQuery(packageQueryProps);
-    const { data: fileData } = useTanQuery(fileQueryProps);
+    const { data: packageData, isError: packageError } =
+        useTanQuery(packageQueryProps);
+    const { data: fileData, isError: fileError } = useTanQuery(fileQueryProps);
+    const loadingError = ref(false);
+    watch(
+        [
+            movieData.isError,
+            extraData.isError,
+            chapterError,
+            fileError,
+            packageError,
+        ],
+        (errors) => {
+            loadingError.value = errors.find((e) => e) !== undefined;
+        },
+        { immediate: true },
+    );
 
     return {
         thumbnail: thumbnail,
@@ -84,5 +100,6 @@ export const useResourceMetadata = (
         extra: extraData.data,
         file: fileData,
         parentPackage: packageData,
+        isError: loadingError,
     };
 };
