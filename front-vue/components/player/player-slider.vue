@@ -6,9 +6,11 @@ const props = defineProps<{
     totalDuration: number | undefined;
     onClick: (requestedProgress: number) => void;
 }>();
-const bufferedWidth = ref(0);
+const bufferedWidth = ref(50);
 watch(props, ({ totalDuration, buffered }) => {
-    bufferedWidth.value = totalDuration ? (100 * buffered) / totalDuration : 0;
+    bufferedWidth.value = Math.floor(
+        totalDuration ? (100 * buffered) / totalDuration : 0,
+    );
 });
 const computeChapterMarkwidth = computed(
     () => (chapter: { start: number; end: number }) => {
@@ -46,7 +48,7 @@ const computeChapterMarkwidth = computed(
         >
             <!--Buffer is broken??-->
             <div
-                class="bg-primary"
+                class="bg-primary h-full"
                 :style="{
                     borderTopRightRadius: 0,
                     borderBottomRightRadius: 0,
