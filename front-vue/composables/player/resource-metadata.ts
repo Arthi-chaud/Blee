@@ -5,6 +5,7 @@ import type { Package } from "~/models/domain/package";
 import type { Chapter } from "~/models/domain/chapter";
 import type { Query } from "~/models/queries";
 import type { File } from "~/models/domain/file";
+import type { FileInfo } from "~/models/domain/file-info";
 
 export const useResourceMetadata = (
     resourceType: "movie" | "extra",
@@ -28,6 +29,7 @@ export const useResourceMetadata = (
     const packageQuery = ref<Query<Package>>();
     const thumbnail = ref<ImageModel | null>();
     const fileQuery = ref<Query<File>>();
+    const fileInfoQuery = ref<Query<FileInfo>>();
     const chapters = ref<Chapter[] | undefined>([]);
     watch(
         [movieData.data, extraData.data],
@@ -75,9 +77,25 @@ export const useResourceMetadata = (
         queryFn: fileQuery.value?.queryFn,
         enabled: !!fileQuery.value,
     }));
+    const fileInfoQueryProps = computed(() => ({
+        queryKey: fileInfoQuery.value?.queryKey ?? [],
+        queryFn: fileInfoQuery.value?.queryFn,
+        enabled: !!fileInfoQuery.value,
+    }));
     const { data: packageData, isError: packageError } =
         useTanQuery(packageQueryProps);
     const { data: fileData, isError: fileError } = useTanQuery(fileQueryProps);
+    const { data: fileInfoData, isError: fileInfoError } =
+        useTanQuery(fileInfoQueryProps);
+    watch(
+        [fileData],
+        ([f]) => {
+            if (f) {
+                fileInfoQuery.value = API.getFileInfo(f);
+            }
+        },
+        { immediate: true },
+    );
     const loadingError = ref(false);
     watch(
         [
@@ -86,6 +104,7 @@ export const useResourceMetadata = (
             chapterError,
             fileError,
             packageError,
+            fileInfoError,
         ],
         (errors) => {
             loadingError.value = errors.find((e) => e) !== undefined;
@@ -99,6 +118,7 @@ export const useResourceMetadata = (
         movie: movieData.data,
         extra: extraData.data,
         file: fileData,
+        info: fileInfoData,
         parentPackage: packageData,
         isError: loadingError,
     };

@@ -14,6 +14,7 @@ import PaginatedResponse from "~/models/domain/page";
 import { ScannerStatusResponse } from "~/models/domain/scanner-status";
 import type { PageParameter, PaginatedQuery, Query } from "~/models/queries";
 import { Base64 } from "js-base64";
+import { FileInfo } from "~/models/domain/file-info";
 
 type Sort<T extends string> = {
     sort: T;
@@ -27,11 +28,14 @@ class API {
     }
 
     private static b64encodeFilePath(filePath: string) {
-        return Base64.encode(filePath);
+        return Base64.encodeURI(filePath);
     }
 
     static buildDirectPlaybackUrl(file: File) {
         return `/transcoder/${this.b64encodeFilePath(file.path)}/direct`;
+    }
+    static buildTranscodedPlaybackUrl(file: File) {
+        return `/transcoder/${this.b64encodeFilePath(file.path)}/master.m3u8`;
     }
 
     static getArtist(artistUuid: string): Query<Artist> {
@@ -183,6 +187,18 @@ class API {
                 this._fetch(route, {
                     query: { ...params, ...pageParam },
                     validator: PaginatedResponse(Extra),
+                }),
+        };
+    }
+
+    static getFileInfo(file: File): Query<FileInfo> {
+        const route = `/${this.b64encodeFilePath(file.path)}/info`;
+        return {
+            queryKey: this.buildQueryKey(route),
+            queryFn: () =>
+                this._fetch(route, {
+                    host: "transcoder",
+                    validator: FileInfo,
                 }),
         };
     }

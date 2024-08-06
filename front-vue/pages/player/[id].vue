@@ -28,8 +28,16 @@ const { resourceType, resourceId, startTimestamp } = (() => {
     const startTimestamp = rawStartTimestamp ? parseInt(rawStartTimestamp) : 0;
     return { resourceType, resourceId, startTimestamp };
 })();
-const { file, parentPackage, movie, extra, thumbnail, chapters, isError } =
-    useResourceMetadata(resourceType, resourceId);
+const {
+    file,
+    parentPackage,
+    movie,
+    extra,
+    thumbnail,
+    chapters,
+    isError,
+    info,
+} = useResourceMetadata(resourceType, resourceId);
 const r = useRouter();
 const canGoBack = r.options.history.state["back"] != null;
 const goBack = () => {
@@ -49,6 +57,7 @@ const setupControls = () => {
 const { isReady, buffered, isPlaying, playerRef, progress } = usePlayerContext({
     startTimestamp,
     fileData: file,
+    fileInfoData: info,
     onEnd: goBack,
     onReady: () => {
         setupControls();
