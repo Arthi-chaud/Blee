@@ -101,7 +101,7 @@ const packageDescription = computed(() => {
         <div v-if="movies?.length === 1">
             <NuxtLink
                 :to="`/player/movie:${movies.at(0)!.id}`"
-                class="btn btn-primary btn-sm btn-block mb-3"
+                class="btn btn-primary btn-sm btn-block mb-3 no-animation"
             >
                 <fa icon="play" />
                 Play

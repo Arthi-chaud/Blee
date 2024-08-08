@@ -47,7 +47,7 @@ const chapterMarks = computed(
                 <div class="pb-2">
                     <p
                         v-if="title !== undefined"
-                        class="controls-text prose-lg"
+                        class="controls-text prose-lg line-clamp-1"
                     >
                         {{ title }}
                     </p>
@@ -56,7 +56,7 @@ const chapterMarks = computed(
                 <div class="pb-2 flex flex-row w-full relative">
                     <p
                         v-if="subtitle !== undefined"
-                        class="controls-text prose-md flex-1"
+                        class="controls-text prose-md flex-1 line-clamp-1"
                     >
                         {{ subtitle }}
                     </p>

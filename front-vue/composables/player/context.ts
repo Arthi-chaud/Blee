@@ -2,27 +2,15 @@ import Hls from "hls.js";
 import { API } from "~/api/api";
 import type { File } from "~/models/domain/file";
 import type { FileInfo } from "~/models/domain/file-info";
+import { v4 as uuidv4 } from 'uuid';
 
-// Stolen from Kyoo
 const canBePlayedNatively = (info: FileInfo, videoRef: HTMLVideoElement) => {
-    let codec = info.mimeCodec;
+    const codec = info.mimeCodec;
     if (!codec) {
         return false;
     }
-    if (navigator.userAgent.search("Firefox") === -1)
-        codec = codec.replace("video/x-matroska", "video/mp4");
     return !!videoRef.canPlayType(codec);
 };
-
-function uuidv4(): string {
-    // @ts-expect-error I have no clue how this works, thanks https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-        (
-            c ^
-            (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-        ).toString(16),
-    );
-}
 
 const transcoderClientId = isSSR() ? "" : uuidv4();
 

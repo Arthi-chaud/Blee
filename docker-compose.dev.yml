@@ -18,25 +18,25 @@ x-transcoder: &transcoder-base
     - metadata:/metadata
 
 services:
-  scanner:
-    build:
-      context: ./scanner
-      dockerfile: Dockerfile.dev
-    restart: on-failure
-    ports:
-      - "8133:8133"
-    depends_on:
-      api:
-        condition: service_healthy
-    volumes:
-      - ./scanner:/app
-      - ./scanner.example.json:/config/scanner.json
-      - ${DATA_DIR}:/videos
-    environment:
-      - API_URL=http://api:8000
-      - WATCH_DIR=/videos
-      - SCANNER_API_KEY=${SCANNER_API_KEY}
-      - CONFIG_DIR=/config
+  # scanner:
+  #   build:
+  #     context: ./scanner
+  #     dockerfile: Dockerfile.dev
+  #   restart: on-failure
+  #   ports:
+  #     - "8133:8133"
+  #   depends_on:
+  #     api:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./scanner:/app
+  #     - ./scanner.example.json:/config/scanner.json
+  #     - ${DATA_DIR}:/videos
+  #   environment:
+  #     - API_URL=http://api:8000
+  #     - WATCH_DIR=/videos
+  #     - SCANNER_API_KEY=${SCANNER_API_KEY}
+  #     - CONFIG_DIR=/config
   api:
     build:
       context: ./api
@@ -88,23 +88,23 @@ services:
       - SSR_SCANNER_URL=http://scanner:8133
     volumes:
       - ./front-vue:/app
-  matcher:
-    build:
-      context: ./matcher
-      dockerfile: Dockerfile.dev
-    restart: on-failure
-    depends_on:
-      api:
-        condition: service_healthy
-    volumes:
-      - ./matcher:/app
-    environment:
-      - RABBIT_HOST=mq
-      - RABBIT_PORT=5672
-      - API_URL=http://api:8000
-      - MATCHER_API_KEY=${MATCHER_API_KEY}
-    env_file:
-      - .env
+  # matcher:
+  #   build:
+  #     context: ./matcher
+  #     dockerfile: Dockerfile.dev
+  #   restart: on-failure
+  #   depends_on:
+  #     api:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./matcher:/app
+  #   environment:
+  #     - RABBIT_HOST=mq
+  #     - RABBIT_PORT=5672
+  #     - API_URL=http://api:8000
+  #     - MATCHER_API_KEY=${MATCHER_API_KEY}
+  #   env_file:
+  #     - .env
   db:
     image: postgres:alpine3.16
     healthcheck:
