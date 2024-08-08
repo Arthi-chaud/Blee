@@ -16,7 +16,7 @@ x-transcoder: &transcoder-base
 services:
   front:
     build:
-      context: ./front-vue
+      context: ./front
     restart: on-failure
     depends_on:
       api:
