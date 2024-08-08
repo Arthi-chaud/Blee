@@ -80,14 +80,14 @@ services:
     ports:
       - "3000:3000"
     build:
-      context: ./front-vue
+      context: ./front
       dockerfile: Dockerfile.dev
     environment:
       - SSR_SERVER_URL=http://api:8000
       - SSR_TRANSCODER_URL=http://transcoder:7666
       - SSR_SCANNER_URL=http://scanner:8133
     volumes:
-      - ./front-vue:/app
+      - ./front:/app
   matcher:
     build:
       context: ./matcher

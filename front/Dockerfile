@@ -1,27 +1,35 @@
-# SRC: https://github.com/edwardinubuntu/flutter-web-dockerfile/blob/master/Dockerfile
-FROM debian:latest AS build-env
+FROM node:18-alpine3.18 AS base
+FROM base AS builder
+WORKDIR /app
+# Dependencies
+COPY ./*.json ./.yarnrc.yml ./*.lock  ./
+COPY ./.yarn ./.yarn
+RUN yarn workspaces focus
 
-RUN apt-get update && apt-get install -y curl git unzip
+# Build
+COPY ./app.vue ./
+COPY ./nuxt.config.ts ./
+COPY ./tailwind.config.js ./
+COPY ./tsconfig.json ./
+COPY ./api ./api
+COPY ./assets ./assets
+COPY ./components ./components
+COPY ./composables ./composables 
+COPY ./layouts ./layouts
+COPY ./models ./models
+COPY ./pages ./pages 
+COPY ./plugins ./plugins
+COPY ./public ./public
+COPY ./utils ./utils
+RUN yarn run nuxt build
 
-ARG FLUTTER_SDK=/usr/local/flutter
-ARG FLUTTER_VERSION=stable
-ARG APP=/app/
+FROM base as runner
+WORKDIR /app
 
-RUN git clone https://github.com/flutter/flutter.git $FLUTTER_SDK
-RUN cd $FLUTTER_SDK && git fetch && git checkout $FLUTTER_VERSION
+ENV NODE_ENV production
+ENV NITRO_PORT 3000
+ENV NITRO_HOST "0.0.0.0"
 
-ENV PATH="$FLUTTER_SDK/bin:$FLUTTER_SDK/bin/cache/dart-sdk/bin:${PATH}"
+COPY --from=builder /app/.output ./.output
 
-RUN mkdir $APP
-COPY . $APP
-WORKDIR $APP
-
-RUN flutter clean
-RUN flutter pub get
-RUN dart run build_runner build --delete-conflicting-outputs
-RUN flutter build web --release --source-maps
-
-FROM nginx:1.25.2-alpine
-COPY --from=build-env /app/build/web /etc/nginx/html
-COPY ./nginx.conf.template /etc/nginx/templates/front.conf.template
-CMD ["nginx", "-g", "daemon off;"]
+CMD node .output/server/index.mjs

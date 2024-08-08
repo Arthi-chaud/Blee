@@ -1,9 +1,75 @@
-# Front App
+# Nuxt 3 Minimal Starter
 
-## Dev Environment
+Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
-Start the root `docker-compose.dev.yml` and run:
+## Setup
+
+Make sure to install the dependencies:
 
 ```bash
-flutter run -d chrome --web-port 3000 --web-hostname 0.0.0.0 --dart-define=API_URL=http://localhost:8000 --dart-define=SCANNER_URL=http://localhost:8133 --dart-define=TRANSCODER_URL=http://localhost:7666 --web-browser-flag "--disable-web-security"
+# npm
+npm install
+
+# pnpm
+pnpm install
+
+# yarn
+yarn install
+
+# bun
+bun install
 ```
+
+## Development Server
+
+Start the development server on `http://localhost:3000`:
+
+```bash
+# npm
+npm run dev
+
+# pnpm
+pnpm run dev
+
+# yarn
+yarn dev
+
+# bun
+bun run dev
+```
+
+## Production
+
+Build the application for production:
+
+```bash
+# npm
+npm run build
+
+# pnpm
+pnpm run build
+
+# yarn
+yarn build
+
+# bun
+bun run build
+```
+
+Locally preview production build:
+
+```bash
+# npm
+npm run preview
+
+# pnpm
+pnpm run preview
+
+# yarn
+yarn preview
+
+# bun
+bun run preview
+```
+
+Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
