@@ -40,7 +40,7 @@ defineProps<{
             <p
                 v-if="brief"
                 onclick="brief_modal.showModal()"
-                class="line-clamp-4 font-light break-all w-full cursor-pointer"
+                class="line-clamp-4 font-light break-word w-full cursor-pointer"
             >
                 {{ brief }}
             </p>

@@ -15,7 +15,7 @@ const aspectRatio = imageType == "poster" ? 2 / 3 : 16 / 9;
 <template>
     <div class="flex flex-col h-full justify-start">
         <div
-            class="flex items-end hover:scale-105 transition-transform duration-200"
+            class="flex items-end hover:scale-[1.03] transition-transform duration-200"
             :style="{
                 objectFit: 'contain',
                 overflow: 'hidden',

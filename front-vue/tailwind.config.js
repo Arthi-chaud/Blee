@@ -18,7 +18,16 @@ export default {
                 },
                 dark: {
                     ...require("daisyui/src/theming/themes")["dark"],
-                    //todo: copy values from https://github.com/Arthi-chaud/Blee/blob/40565299ac7e7ecadad94c71b409db44849c336e/front/lib/theme.dart
+                    primary: "#81D3DF",
+                    secondary: "#b1cbcf",
+                    accent: "#b9c6ea",
+                    neutral: "#f4ffff",
+                    "base-100": "#0e1415",
+                    info: "#41ffff",
+                    success: "#9affdc",
+                    warning: "#fff129",
+                    error: "#ba1a1a",
+                    background: "#0e1415",
                 },
             },
         ],
