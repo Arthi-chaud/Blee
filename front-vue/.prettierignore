@@ -1,0 +1,4 @@
+.yarn/
+.nuxt/
+.output/
+.node_modules/

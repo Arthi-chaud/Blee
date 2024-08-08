@@ -1,0 +1,14 @@
+name: 'Cache (Front Vue)'
+description: 'Cache for Front (Vue)'
+runs:
+  using: "composite"
+  steps:
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+          path: |
+            ./front-vue/node_modules
+            ./front-vue/.output
+            ./front-vue/.nuxt
+          key: front-vue
+          restore-keys: front-vue

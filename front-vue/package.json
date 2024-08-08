@@ -1,0 +1,42 @@
+{
+    "name": "nuxt-app",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "nuxt build",
+        "dev": "nuxt dev",
+        "lint": "eslint .",
+        "generate": "nuxt generate",
+        "preview": "nuxt preview",
+        "postinstall": "nuxt prepare"
+    },
+    "dependencies": {
+        "@nuxtjs/tailwindcss": "^6.12.1",
+        "@tanstack/vue-query": "^5.51.1",
+        "@vesp/nuxt-fontawesome": "^1.0.4",
+        "@vueuse/core": "^10.11.0",
+        "blurhash": "^2.0.5",
+        "hls.js": "^1.5.14",
+        "js-base64": "^3.7.7",
+        "nuxt": "^3.12.3",
+        "type-fest": "^4.21.0",
+        "uuid": "^10.0.0",
+        "vue": "latest",
+        "yup": "^1.4.0"
+    },
+    "devDependencies": {
+        "@fortawesome/free-regular-svg-icons": "^6.6.0",
+        "@fortawesome/free-solid-svg-icons": "^6.6.0",
+        "@nuxt/eslint": "^0.3.13",
+        "@tailwindcss/typography": "^0.5.13",
+        "@types/eslint": "^9",
+        "@types/uuid": "^10",
+        "@vueuse/nuxt": "^10.11.0",
+        "daisyui": "^4.12.10",
+        "eslint": "^9.7.0",
+        "prettier": "^3.3.3",
+        "typescript": "^5.5.3",
+        "vue-tsc": "^1"
+    },
+    "packageManager": "yarn@4.3.1"
+}

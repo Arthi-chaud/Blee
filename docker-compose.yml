@@ -1,5 +1,5 @@
 x-transcoder: &transcoder-base
-  image: ghcr.io/zoriya/kyoo_transcoder:4.5.0
+  image: ghcr.io/zoriya/kyoo_transcoder:edge
   networks:
     default:
       aliases:
@@ -16,13 +16,15 @@ x-transcoder: &transcoder-base
 services:
   front:
     build:
-      context: ./front
+      context: ./front-vue
     restart: on-failure
     depends_on:
       api:
         condition: service_healthy
     environment:
-      - PORT=3000
+      - SSR_SERVER_URL=http://api:8000
+      - SSR_TRANSCODER_URL=http://transcoder:7666
+      - SSR_SCANNER_URL=http://scanner:8133
     ports:
       - "3000:3000"
   api:
