@@ -2,7 +2,7 @@ import Hls from "hls.js";
 import { API } from "~/api/api";
 import type { File } from "~/models/domain/file";
 import type { FileInfo } from "~/models/domain/file-info";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 const canBePlayedNatively = (info: FileInfo, videoRef: HTMLVideoElement) => {
     const codec = info.mimeCodec;
@@ -69,8 +69,8 @@ export const usePlayerContext = (props: {
                         player.error?.code ==
                         MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
                     ) {
-                        console.log("Moving to transcoding");
                         playMode.value = "hls";
+                        playHls();
                     }
                     console.error(error);
                 };
@@ -86,7 +86,6 @@ export const usePlayerContext = (props: {
                 player.onended = props.onEnd;
             };
             const playDirectVideo = () => {
-                console.log(canBePlayedNatively(i, player))
                 if (!canBePlayedNatively(i, player)) {
                     playMode.value = "hls";
                     playHls();

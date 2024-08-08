@@ -1,4 +1,4 @@
-name: "Front (Vue)"
+name: "Front"
 on:
   pull_request:
     branches: [ main ]
@@ -54,7 +54,7 @@ jobs:
       - uses: ./.github/actions/cache-front
       - run: yarn
       - name: Check format
-        run: yarn run prettier --check
+        run: yarn run prettier --check .
   Lint:
     if: ${{ needs.changes.outputs.front == 'true' && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
