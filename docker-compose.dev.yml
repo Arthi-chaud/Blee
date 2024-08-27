@@ -12,10 +12,16 @@ x-transcoder: &transcoder-base
     - ./.env
   environment:
     - GOCODER_PREFIX=/videos
+    
   volumes:
     - ${DATA_DIR}:/videos:ro
     - ${CACHE_ROOT}:/cache
     - metadata:/metadata
+    - POSTGRES_USER=${POSTGRES_USER}
+    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    - POSTGRES_DB=${POSTGRES_DB}
+    - POSTGRES_SCHEMA=gocoder
+    - POSTGRES_SERVER=db
 
 services:
   scanner:
