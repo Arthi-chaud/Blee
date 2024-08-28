@@ -21,7 +21,7 @@ COPY ./pages ./pages
 COPY ./plugins ./plugins
 COPY ./public ./public
 COPY ./utils ./utils
-RUN yarn run nuxt build
+RUN yarn run nuxt prepare && yarn run nuxt build
 
 FROM base as runner
 WORKDIR /app
