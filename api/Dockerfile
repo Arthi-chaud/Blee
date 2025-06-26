@@ -1,4 +1,4 @@
-FROM rust:1.79-slim-buster as builder
+FROM rust:1.87.0-bullseye as builder
 RUN apt update -y && apt install curl -y
 WORKDIR /usr/src/api
 COPY . .
