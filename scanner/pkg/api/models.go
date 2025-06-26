@@ -16,7 +16,7 @@ type File struct {
 }
 
 type Package struct {
-	PosterId string `json:"psoter_id"`
+	PosterId string `json:"poster_id"`
 }
 
 type NewExtraResponse struct {
